@@ -320,6 +320,126 @@ function App() {
     setUserEditDialogOpen(true);
   };
 
+  const exportToPDF = async () => {
+    try {
+      setLoading(true);
+      
+      // Yıllık tüm verileri al
+      const response = await axios.get(`${API}/nakliye`);
+      const currentYear = new Date().getFullYear();
+      const yearlyData = response.data.filter(item => {
+        const itemDate = new Date(item.tarih);
+        return itemDate.getFullYear() === currentYear;
+      });
+
+      if (yearlyData.length === 0) {
+        toast({
+          title: "Uyarı",
+          description: `${currentYear} yılında kayıt bulunamadı`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const doc = new jsPDF();
+      
+      // PDF başlığı
+      doc.setFontSize(16);
+      doc.text(`ARKAS LOJİSTİK - ${currentYear} YILI NAKLİYE RAPORU`, 105, 20, { align: 'center' });
+      
+      // Tablo verilerini hazırla
+      const tableData = yearlyData.map(item => {
+        const toplam = item.toplam || 0;
+        const sistem = item.sistem || 0;
+        const fark = sistem - toplam;
+        const turu = [];
+        if (item.ithalat) turu.push('İthalat');
+        if (item.ihracat) turu.push('İhracat');
+        if (item.bos) turu.push('Boş');
+        
+        return [
+          formatDate(item.tarih),
+          item.sira_no || '',
+          item.kod || '-',
+          item.musteri || '',
+          item.irsaliye_no || '',
+          turu.join(', ') || '-',
+          formatCurrency(toplam),
+          formatCurrency(sistem),
+          fark === 0 ? 'Eşit' : (fark > 0 ? `+${formatCurrency(Math.abs(fark))}` : `-${formatCurrency(Math.abs(fark))}`)
+        ];
+      });
+
+      // Tablo başlıkları
+      const headers = [
+        'Tarih', 'Sıra No', 'Kod', 'Müşteri', 'İrsaliye No', 
+        'Tür', 'Toplam', 'Sistem', 'Karşılaştırma'
+      ];
+
+      // AutoTable ile tablo oluştur
+      doc.autoTable({
+        head: [headers],
+        body: tableData,
+        startY: 30,
+        styles: {
+          fontSize: 8,
+          cellPadding: 2,
+        },
+        headStyles: {
+          fillColor: [59, 130, 246], // Blue
+          textColor: [255, 255, 255],
+          fontStyle: 'bold'
+        },
+        columnStyles: {
+          6: { halign: 'right' }, // Toplam
+          7: { halign: 'right', textColor: [34, 197, 94] }, // Sistem - yeşil
+          8: { halign: 'center' }, // Karşılaştırma
+        },
+        didParseCell: function(data) {
+          // Karşılaştırma sütunu renklendirme
+          if (data.column.index === 8 && data.section === 'body') {
+            const value = data.cell.text[0];
+            if (value.startsWith('+')) {
+              data.cell.styles.textColor = [34, 197, 94]; // Yeşil
+            } else if (value.startsWith('-')) {
+              data.cell.styles.textColor = [239, 68, 68]; // Kırmızı
+            }
+          }
+        }
+      });
+
+      // Özet bilgileri
+      const totalRecords = yearlyData.length;
+      const totalAmount = yearlyData.reduce((sum, item) => sum + (item.toplam || 0), 0);
+      const totalSistem = yearlyData.reduce((sum, item) => sum + (item.sistem || 0), 0);
+      
+      const finalY = doc.lastAutoTable.finalY + 10;
+      doc.setFontSize(10);
+      doc.text(`Toplam Kayıt: ${totalRecords}`, 20, finalY);
+      doc.text(`Toplam Tutar: ${formatCurrency(totalAmount)}`, 20, finalY + 6);
+      doc.text(`Toplam Sistem: ${formatCurrency(totalSistem)}`, 20, finalY + 12);
+      doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, finalY + 18);
+
+      // PDF'i indir
+      doc.save(`Arkas_Lojistik_${currentYear}_Raporu.pdf`);
+      
+      toast({
+        title: "Başarılı",
+        description: `${currentYear} yılı raporu PDF olarak indirildi (${totalRecords} kayıt)`
+      });
+
+    } catch (error) {
+      console.error("PDF export hatası:", error);
+      toast({
+        title: "Hata",
+        description: "PDF oluşturulurken bir hata oluştu",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const showDetails = (type) => {
     let data = [];
     let title = "";
