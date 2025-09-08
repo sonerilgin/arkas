@@ -315,7 +315,7 @@ function App() {
         showMonthSelector();
         return;
       case 'amount':
-        data = filteredNakliyeList.map(item => ({
+        data = nakliyeList.map(item => ({
           ...item,
           breakdown: {
             bosTaskima: item.bos_tasima || 0,
