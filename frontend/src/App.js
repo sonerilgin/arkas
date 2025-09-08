@@ -274,7 +274,19 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <div className="container mx-auto px-4 py-8">
+      {/* User Info - Top Right */}
+      <div className="fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg px-3 py-2 flex items-center gap-2 text-sm">
+        <User className="h-4 w-4 text-slate-600" />
+        <div className="hidden sm:block">
+          <div className="font-medium text-slate-800">Mehmet Yılmaz</div>
+          <div className="text-xs text-slate-500">Sicil: 12345</div>
+        </div>
+        <div className="sm:hidden">
+          <div className="font-medium text-slate-800 text-xs">M. Yılmaz</div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 lg:py-8 pr-32 sm:pr-40">
         {/* Header */}
         <div className="mb-6 lg:mb-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 lg:gap-4 mb-2">
@@ -297,39 +309,148 @@ function App() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
-          <Card className="bg-white shadow-lg border-0 hover:shadow-xl transition-shadow">
+          <Card 
+            className="bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-200 cursor-pointer hover:scale-105" 
+            onClick={() => showDetails('total')}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">Toplam Kayıt</CardTitle>
-              <Package className="h-4 w-4 text-blue-600" />
+              <div className="flex items-center gap-1">
+                <Package className="h-4 w-4 text-blue-600" />
+                <ChevronRight className="h-3 w-3 text-slate-400" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-800">{nakliyeList.length}</div>
-              <p className="text-xs text-slate-500">Toplam nakliye kaydı</p>
+              <p className="text-xs text-slate-500">Toplam nakliye kaydı • Detay için tıklayın</p>
             </CardContent>
           </Card>
           
-          <Card className="bg-white shadow-lg border-0 hover:shadow-xl transition-shadow">
+          <Card 
+            className="bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-200 cursor-pointer hover:scale-105" 
+            onClick={() => showDetails('month')}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">Bu Ay</CardTitle>
-              <Calendar className="h-4 w-4 text-green-600" />
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4 text-green-600" />
+                <ChevronRight className="h-3 w-3 text-slate-400" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">{thisMonthRecords}</div>
-              <p className="text-xs text-slate-500">Bu ayki kayıt sayısı</p>
+              <div className="text-2xl font-bold text-slate-800">{thisMonthRecords.length}</div>
+              <p className="text-xs text-slate-500">Bu ayki kayıt • {formatCurrency(thisMonthTotal)}</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-lg border-0 hover:shadow-xl transition-shadow">
+          <Card 
+            className="bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-200 cursor-pointer hover:scale-105 sm:col-span-2 lg:col-span-1" 
+            onClick={() => showDetails('amount')}
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">Toplam Tutar</CardTitle>
-              <TrendingUp className="h-4 w-4 text-emerald-600" />
+              <div className="flex items-center gap-1">
+                <TrendingUp className="h-4 w-4 text-emerald-600" />
+                <ChevronRight className="h-3 w-3 text-slate-400" />
+              </div>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-800">{formatCurrency(totalAmount)}</div>
-              <p className="text-xs text-slate-500">Toplam nakliye tutarı</p>
+              <p className="text-xs text-slate-500">Toplam nakliye tutarı • Detay için tıklayın</p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Detail Dialog */}
+        <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                <span>
+                  {detailType === 'total' && "Tüm Nakliye Kayıtları"}
+                  {detailType === 'month' && "Bu Ayki Nakliye Kayıtları"}
+                  {detailType === 'amount' && "Tutar Detayları"}
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setDetailDialogOpen(false)}
+                  className="h-6 w-6"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="mt-4">
+              {detailType === 'amount' ? (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Müşteri</TableHead>
+                        <TableHead>Boş Taşıma</TableHead>
+                        <TableHead>Reefer</TableHead>
+                        <TableHead>Bekleme</TableHead>
+                        <TableHead>Geceleme</TableHead>
+                        <TableHead>Pazar</TableHead>
+                        <TableHead>Harcirah</TableHead>
+                        <TableHead className="text-right">Toplam</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {detailData.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-medium">{item.musteri}</TableCell>
+                          <TableCell>{formatCurrency(item.breakdown.bosTaskima)}</TableCell>
+                          <TableCell>{formatCurrency(item.breakdown.reefer)}</TableCell>
+                          <TableCell>{formatCurrency(item.breakdown.bekleme)}</TableCell>
+                          <TableCell>{formatCurrency(item.breakdown.geceleme)}</TableCell>
+                          <TableCell>{formatCurrency(item.breakdown.pazar)}</TableCell>
+                          <TableCell>{formatCurrency(item.breakdown.harcirah)}</TableCell>
+                          <TableCell className="text-right font-bold">{formatCurrency(item.toplam)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tarih</TableHead>
+                        <TableHead>Sıra No</TableHead>
+                        <TableHead>Müşteri</TableHead>
+                        <TableHead>İrsaliye No</TableHead>
+                        <TableHead>Tür</TableHead>
+                        <TableHead className="text-right">Toplam</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {detailData.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>{formatDate(item.tarih)}</TableCell>
+                          <TableCell>{item.sira_no}</TableCell>
+                          <TableCell>{item.musteri}</TableCell>
+                          <TableCell>{item.irsaliye_no}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-1 flex-wrap">
+                              {item.ithalat && <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">İthalat</Badge>}
+                              {item.ihracat && <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">İhracat</Badge>}
+                              {!item.ithalat && !item.ihracat && <Badge variant="outline" className="text-xs">-</Badge>}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-bold">{formatCurrency(item.toplam)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Search and Add Section */}
         <Card className="mb-6 lg:mb-8 bg-white shadow-lg border-0">
