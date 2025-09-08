@@ -247,8 +247,11 @@ function App() {
               />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-slate-800">Arkas Lojistik</h1>
-              <p className="text-slate-600 text-lg">Nakliye Takip ve Yönetim Sistemi</p>
+              <h1 className="text-4xl font-black text-slate-800 arkas-brand-text">
+                <span className="text-slate-800" style={{color: '#1e2563'}}>ARKAS</span>{' '}
+                <span className="text-blue-500" style={{color: '#3b82f6'}}>LOJİSTİK</span>
+              </h1>
+              <p className="text-slate-600 text-lg font-medium">Nakliye Takip ve Yönetim Sistemi</p>
             </div>
           </div>
         </div>
