@@ -454,10 +454,7 @@ function App() {
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">
-                {currentFilter.type === 'month' 
-                  ? `${monthNames[currentFilter.month]} ${currentFilter.year}`
-                  : `${monthNames[new Date().getMonth()]} ${new Date().getFullYear()}`
-                }
+                {monthNames[displayMonth]} {displayYear}
               </CardTitle>
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4 text-green-600" />
@@ -466,12 +463,7 @@ function App() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-800">{thisMonthRecords.length}</div>
-              <p className="text-xs text-slate-500">
-                {currentFilter.type === 'month' 
-                  ? `${monthNames[currentFilter.month]} ${currentFilter.year} kayıt • ${formatCurrency(thisMonthTotal)}`
-                  : `Bu ayki kayıt • ${formatCurrency(thisMonthTotal)}`
-                }
-              </p>
+              <p className="text-xs text-slate-500">Bu ayki kayıt • {formatCurrency(thisMonthTotal)}</p>
             </CardContent>
           </Card>
 
@@ -482,12 +474,7 @@ function App() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-800">{totalAmount > 0 ? formatCurrency(totalAmount) : formatCurrency(0)}</div>
-              <p className="text-xs text-slate-500">
-                {currentFilter.type === 'month' 
-                  ? `${monthNames[currentFilter.month]} ${currentFilter.year} tutarı`
-                  : 'Toplam nakliye tutarı'
-                }
-              </p>
+              <p className="text-xs text-slate-500">Toplam nakliye tutarı</p>
             </CardContent>
           </Card>
         </div>
