@@ -893,6 +893,8 @@ function App() {
                     <TableHead className="font-semibold text-slate-700">İrsaliye No</TableHead>
                     <TableHead className="font-semibold text-slate-700">Tür</TableHead>
                     <TableHead className="font-semibold text-slate-700 text-right">Toplam</TableHead>
+                    <TableHead className="font-semibold text-green-600 text-right">Sistem</TableHead>
+                    <TableHead className="font-semibold text-slate-700 text-center">Karşılaştırma</TableHead>
                     <TableHead className="font-semibold text-slate-700 text-center">İşlemler</TableHead>
                   </TableRow>
                 </TableHeader>
