@@ -282,10 +282,38 @@ function App() {
     }
   };
 
-  const monthNames = [
-    "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
-    "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
-  ];
+  const showDetails = (type) => {
+    let data = [];
+    let title = "";
+    
+    switch(type) {
+      case 'total':
+        data = nakliyeList;
+        title = "Tüm Nakliye Kayıtları";
+        break;
+      case 'month':
+        showMonthSelector();
+        return;
+      case 'amount':
+        data = nakliyeList.map(item => ({
+          ...item,
+          breakdown: {
+            bosTaskima: item.bos_tasima || 0,
+            reefer: item.reefer || 0,
+            bekleme: item.bekleme || 0,
+            geceleme: item.geceleme || 0,
+            pazar: item.pazar || 0,
+            harcirah: item.harcirah || 0
+          }
+        }));
+        title = "Tutar Detayları";
+        break;
+    }
+    
+    setDetailData(data);
+    setDetailType(type);
+    setDetailDialogOpen(true);
+  };
     let data = [];
     let title = "";
     
