@@ -27,7 +27,18 @@ const formatCurrency = (amount) => {
 };
 
 const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('tr-TR');
+  const date = new Date(dateString);
+  const options = { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric',
+    weekday: 'long'
+  };
+  const formatted = date.toLocaleDateString('tr-TR', options);
+  const parts = formatted.split(' ');
+  const datePart = parts[0]; // DD.MM.YYYY
+  const dayName = parts[1]; // Gün ismi
+  return `${datePart} ${dayName}`;
 };
 
 function App() {
