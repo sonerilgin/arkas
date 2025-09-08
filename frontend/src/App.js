@@ -457,7 +457,7 @@ function App() {
                       <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                         İptal
                       </Button>
-                      <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
+                      <Button type="submit" className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200">
                         {editingItem ? "Güncelle" : "Kaydet"}
                       </Button>
                     </DialogFooter>
