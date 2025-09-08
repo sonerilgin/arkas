@@ -116,14 +116,14 @@ function App() {
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
-      setFilteredNakliyeList(nakliyeList);
+      fetchNakliyeList();
       return;
     }
 
     try {
       setLoading(true);
       const response = await axios.get(`${API}/nakliye/search/${searchTerm}`);
-      setFilteredNakliyeList(response.data);
+      setNakliyeList(response.data);
     } catch (error) {
       console.error("Arama yapılırken hata:", error);
       toast({
