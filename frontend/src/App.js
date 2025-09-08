@@ -318,15 +318,11 @@ function App() {
     let title = "";
     
     switch(type) {
-      case 'total':
-        data = nakliyeList;
-        title = "Tüm Nakliye Kayıtları";
-        break;
       case 'month':
         showMonthSelector();
         return;
       case 'amount':
-        data = nakliyeList.map(item => ({
+        data = filteredNakliyeList.map(item => ({
           ...item,
           breakdown: {
             bosTaskima: item.bos_tasima || 0,
