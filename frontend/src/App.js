@@ -634,7 +634,8 @@ function App() {
         {/* Data Table */}
         <Card className="bg-white shadow-lg border-0">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            {/* Desktop Table */}
+            <div className="hidden lg:block overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50">
@@ -700,6 +701,63 @@ function App() {
                   )}
                 </TableBody>
               </Table>
+            </div>
+            
+            {/* Mobile Card View */}
+            <div className="lg:hidden space-y-3 p-4">
+              {loading ? (
+                <div className="text-center py-8 text-slate-500">
+                  Yükleniyor...
+                </div>
+              ) : nakliyeList.length === 0 ? (
+                <div className="text-center py-8 text-slate-500">
+                  Nakliye kaydı bulunamadı
+                </div>
+              ) : (
+                nakliyeList.map((item) => (
+                  <Card key={item.id} className="border shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <div className="font-semibold text-slate-800">{item.musteri}</div>
+                          <div className="text-sm text-slate-500">Sıra: {item.sira_no} • İrsaliye: {item.irsaliye_no}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-lg text-slate-800">{formatCurrency(item.toplam)}</div>
+                          <div className="text-xs text-slate-500">{formatDate(item.tarih)}</div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <div className="flex gap-1">
+                          {item.ithalat && <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">İthalat</Badge>}
+                          {item.ihracat && <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">İhracat</Badge>}
+                          {!item.ithalat && !item.ihracat && <Badge variant="outline" className="text-xs">-</Badge>}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEdit(item)}
+                            className="h-8 w-8 p-0 hover:bg-blue-100"
+                          >
+                            <Edit3 className="h-4 w-4 text-blue-600" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDelete(item.id)}
+                            className="h-8 w-8 p-0 hover:bg-red-100"
+                          >
+                            <Trash2 className="h-4 w-4 text-red-600" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </CardContent>
         </Card>
