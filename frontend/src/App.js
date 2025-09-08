@@ -270,6 +270,11 @@ function App() {
     return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
   });
 
+  const displayedRecords = nakliyeList.filter(item => {
+    const itemDate = new Date(item.tarih);
+    return itemDate.getMonth() === displayMonth && itemDate.getFullYear() === displayYear;
+  });
+
   const thisMonthTotal = thisMonthRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
   const totalAmount = nakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
 
