@@ -1007,6 +1007,7 @@ function App() {
                   </form>
                 </DialogContent>
               </Dialog>
+              </div>
             </div>
           </CardContent>
         </Card>
