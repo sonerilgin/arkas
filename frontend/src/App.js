@@ -1011,7 +1011,7 @@ function App() {
                             {item.bos && <Badge variant="secondary" className="bg-gray-100 text-gray-800 text-xs">Boş</Badge>}
                             {!item.ithalat && !item.ihracat && !item.bos && <Badge variant="outline" className="text-xs">-</Badge>}
                             
-                            <Badge variant="outline" className={`text-xs ml-2 ${fark === 0 ? 'text-gray-500' : fark > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                            <Badge variant="outline" className={`text-xs ml-2 ${fark === 0 ? 'text-gray-500' : fark > 0 ? 'text-green-600' : 'text-red-600'}`}>
                               {fark === 0 ? 'Eşit' : fark > 0 ? `+${formatCurrency(Math.abs(fark))}` : `-${formatCurrency(Math.abs(fark))}`}
                             </Badge>
                           </div>
