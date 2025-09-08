@@ -264,14 +264,14 @@ function App() {
     setFormData(prev => ({ ...prev, toplam: total, sistem: total }));
   };
 
-  const thisMonthRecords = filteredNakliyeList.filter(item => {
+  const thisMonthRecords = nakliyeList.filter(item => {
     const itemDate = new Date(item.tarih);
     const now = new Date();
     return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
   });
 
   const thisMonthTotal = thisMonthRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
-  const totalAmount = filteredNakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
+  const totalAmount = nakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
 
   const showMonthSelector = () => {
     setMonthDialogOpen(true);
