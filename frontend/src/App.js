@@ -915,8 +915,8 @@ function App() {
                     displayedRecords.map((item) => {
                       const toplam = item.toplam || 0;
                       const sistem = item.sistem || 0;
-                      const fark = toplam - sistem;
-                      const farkYuzdesi = toplam > 0 ? ((fark / toplam) * 100).toFixed(1) : 0;
+                      const fark = sistem - toplam; // Sistem referanslı hesaplama
+                      const farkYuzdesi = toplam > 0 ? ((Math.abs(fark) / toplam) * 100).toFixed(1) : 0;
                       
                       return (
                         <TableRow key={item.id} className="hover:bg-slate-50 transition-colors">
