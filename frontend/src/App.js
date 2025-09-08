@@ -492,7 +492,7 @@ function App() {
               <CardTitle className="text-sm font-medium text-slate-600">
                 {currentFilter.type === 'month' 
                   ? `${monthNames[currentFilter.month]} ${currentFilter.year}`
-                  : 'Bu Ay'
+                  : `${monthNames[new Date().getMonth()]} ${new Date().getFullYear()}`
                 }
               </CardTitle>
               <div className="flex items-center gap-1">
