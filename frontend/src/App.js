@@ -254,7 +254,38 @@ function App() {
 
   const thisMonthTotal = thisMonthRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
 
-  const showDetails = (type) => {
+  const showMonthSelector = () => {
+    setMonthDialogOpen(true);
+  };
+
+  const handleMonthFilter = async (month, year) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/nakliye`);
+      const filteredData = response.data.filter(item => {
+        const itemDate = new Date(item.tarih);
+        return itemDate.getMonth() === month && itemDate.getFullYear() === year;
+      });
+      setDetailData(filteredData);
+      setDetailType('month');
+      setDetailDialogOpen(true);
+      setMonthDialogOpen(false);
+    } catch (error) {
+      console.error("Ay filtresi uygulanırken hata:", error);
+      toast({
+        title: "Hata",
+        description: "Ay filtresi uygulanırken bir hata oluştu",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const monthNames = [
+    "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+    "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+  ];
     let data = [];
     let title = "";
     
