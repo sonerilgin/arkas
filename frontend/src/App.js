@@ -62,13 +62,19 @@ function App() {
   const [detailType, setDetailType] = useState("");
   const [detailData, setDetailData] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
-  const [userInfo, setUserInfo] = useState({
-    name: "Mehmet Yılmaz",
-    sicil: "12345"
+  const [userInfo, setUserInfo] = useState(() => {
+    const savedUserInfo = localStorage.getItem('arkas_user_info');
+    return savedUserInfo ? JSON.parse(savedUserInfo) : {
+      name: "Mehmet Yılmaz",
+      sicil: "12345"
+    };
   });
-  const [tempUserInfo, setTempUserInfo] = useState({
-    name: "Mehmet Yılmaz",
-    sicil: "12345"
+  const [tempUserInfo, setTempUserInfo] = useState(() => {
+    const savedUserInfo = localStorage.getItem('arkas_user_info');
+    return savedUserInfo ? JSON.parse(savedUserInfo) : {
+      name: "Mehmet Yılmaz",
+      sicil: "12345"
+    };
   });
   const [formData, setFormData] = useState({
     tarih: new Date().toISOString().split('T')[0],
