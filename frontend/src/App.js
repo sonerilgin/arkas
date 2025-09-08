@@ -856,7 +856,7 @@ function App() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredNakliyeList.map((item) => (
+                    nakliyeList.map((item) => (
                       <TableRow key={item.id} className="hover:bg-slate-50 transition-colors">
                         <TableCell className="font-medium">{formatDate(item.tarih)}</TableCell>
                         <TableCell>{item.sira_no}</TableCell>
