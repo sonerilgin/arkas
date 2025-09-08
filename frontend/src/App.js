@@ -287,9 +287,14 @@ function App() {
     setDisplayYear(year);
     setMonthDialogOpen(false);
     
+    const filteredCount = nakliyeList.filter(item => {
+      const itemDate = new Date(item.tarih);
+      return itemDate.getMonth() === month && itemDate.getFullYear() === year;
+    }).length;
+    
     toast({
       title: "Ay Seçildi",
-      description: `${monthNames[month]} ${year} seçildi - filtreleme yapılmadı`
+      description: `${monthNames[month]} ${year} - ${filteredCount} kayıt tabloda gösteriliyor`
     });
   };
 
