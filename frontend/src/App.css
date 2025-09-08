@@ -183,8 +183,8 @@ body {
 /* Responsive improvements */
 @media (max-width: 768px) {
   .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
   
   .stats-grid {
@@ -199,6 +199,35 @@ body {
   .dialog-content {
     margin: 1rem;
     max-height: 90vh;
+  }
+
+  /* Mobile card optimization */
+  .mobile-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .mobile-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Mobile-first responsive breakpoints */
+@media (max-width: 640px) {
+  .arkas-brand-text {
+    font-size: 1.5rem;
+    line-height: 1.2;
+  }
+  
+  .user-info {
+    padding: 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
