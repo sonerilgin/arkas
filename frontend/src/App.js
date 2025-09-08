@@ -322,22 +322,21 @@ function App() {
     setUserEditDialogOpen(true);
   };
 
-  const exportToPDF = async () => {
+  const exportToPDF = async (selectedYear) => {
     try {
       setLoading(true);
       
-      // Yıllık tüm verileri al
+      // Seçilen yıla göre verileri al
       const response = await axios.get(`${API}/nakliye`);
-      const currentYear = new Date().getFullYear();
       const yearlyData = response.data.filter(item => {
         const itemDate = new Date(item.tarih);
-        return itemDate.getFullYear() === currentYear;
+        return itemDate.getFullYear() === selectedYear;
       });
 
       if (yearlyData.length === 0) {
         toast({
           title: "Uyarı",
-          description: `${currentYear} yılında kayıt bulunamadı`,
+          description: `${selectedYear} yılında kayıt bulunamadı`,
           variant: "destructive"
         });
         return;
@@ -347,7 +346,7 @@ function App() {
       
       // PDF başlığı
       doc.setFontSize(16);
-      doc.text(`ARKAS LOJİSTİK - ${currentYear} YILI NAKLİYE RAPORU`, 105, 20, { align: 'center' });
+      doc.text(`ARKAS LOJİSTİK - ${selectedYear} YILI NAKLİYE RAPORU`, 105, 20, { align: 'center' });
       
       // Tablo verilerini hazırla
       const tableData = yearlyData.map(item => {
@@ -423,11 +422,11 @@ function App() {
       doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, finalY + 18);
 
       // PDF'i indir
-      doc.save(`Arkas_Lojistik_${currentYear}_Raporu.pdf`);
+      doc.save(`Arkas_Lojistik_${selectedYear}_Raporu.pdf`);
       
       toast({
         title: "Başarılı",
-        description: `${currentYear} yılı raporu PDF olarak indirildi (${totalRecords} kayıt)`
+        description: `${selectedYear} yılı raporu PDF olarak indirildi (${totalRecords} kayıt)`
       });
 
     } catch (error) {
@@ -440,6 +439,15 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePdfExport = () => {
+    setPdfYearDialogOpen(true);
+  };
+
+  const confirmPdfExport = () => {
+    exportToPDF(selectedPdfYear);
+    setPdfYearDialogOpen(false);
   };
 
   const showDetails = (type) => {
