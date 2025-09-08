@@ -527,8 +527,8 @@ function App() {
               <Button variant="outline" onClick={() => setMonthDialogOpen(false)}>
                 İptal
               </Button>
-              <Button onClick={() => handleMonthFilter(selectedMonth, selectedYear)}>
-                Filtrele
+              <Button onClick={() => handleMonthSelect(selectedMonth, selectedYear)}>
+                Seç
               </Button>
             </DialogFooter>
           </DialogContent>
