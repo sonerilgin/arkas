@@ -843,7 +843,7 @@ function App() {
                       Yeni Kayıt
                     </Button>
                   </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl text-slate-800">
                       {editingItem ? "Nakliye Kaydını Düzenle" : "Yeni Nakliye Kaydı"}
