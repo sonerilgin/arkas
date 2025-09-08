@@ -32,10 +32,12 @@ class NakliyeKayit(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     tarih: datetime
     sira_no: str
+    kod: Optional[str] = ""
     musteri: str
     irsaliye_no: str
     ithalat: bool = False
     ihracat: bool = False
+    bos: bool = False
     bos_tasima: Optional[float] = 0.0
     reefer: Optional[float] = 0.0
     bekleme: Optional[float] = 0.0
@@ -50,10 +52,12 @@ class NakliyeKayit(BaseModel):
 class NakliyeKayitCreate(BaseModel):
     tarih: datetime
     sira_no: str
+    kod: Optional[str] = ""
     musteri: str
     irsaliye_no: str
     ithalat: bool = False
     ihracat: bool = False
+    bos: bool = False
     bos_tasima: Optional[float] = 0.0
     reefer: Optional[float] = 0.0
     bekleme: Optional[float] = 0.0
@@ -67,10 +71,12 @@ class NakliyeKayitCreate(BaseModel):
 class NakliyeKayitUpdate(BaseModel):
     tarih: Optional[datetime] = None
     sira_no: Optional[str] = None
+    kod: Optional[str] = None
     musteri: Optional[str] = None
     irsaliye_no: Optional[str] = None
     ithalat: Optional[bool] = None
     ihracat: Optional[bool] = None
+    bos: Optional[bool] = None
     bos_tasima: Optional[float] = None
     reefer: Optional[float] = None
     bekleme: Optional[float] = None
