@@ -509,8 +509,13 @@ function App() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">{formatCurrency(totalAmount)}</div>
-              <p className="text-xs text-slate-500">Toplam nakliye tutarı • Detay için tıklayın</p>
+              <div className="text-2xl font-bold text-slate-800">{totalAmount > 0 ? formatCurrency(totalAmount) : formatCurrency(0)}</div>
+              <p className="text-xs text-slate-500">
+                {currentFilter.type === 'month' 
+                  ? `${monthNames[currentFilter.month]} ${currentFilter.year} tutarı • Detay için tıklayın`
+                  : 'Toplam nakliye tutarı • Detay için tıklayın'
+                }
+              </p>
             </CardContent>
           </Card>
         </div>
