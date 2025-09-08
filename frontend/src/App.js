@@ -353,17 +353,73 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* User Info - Top Right */}
-      <div className="fixed top-4 right-4 z-50 bg-white rounded-lg shadow-lg px-3 py-2 flex items-center gap-2 text-sm">
-        <User className="h-4 w-4 text-slate-600" />
-        <div className="hidden sm:block">
-          <div className="font-medium text-slate-800">Mehmet Yılmaz</div>
-          <div className="text-xs text-slate-500">Sicil: 12345</div>
-        </div>
-        <div className="sm:hidden">
-          <div className="font-medium text-slate-800 text-xs">M. Yılmaz</div>
+      {/* User Info - Repositioned */}
+      <div className="fixed top-20 right-8 z-50 bg-white rounded-lg shadow-lg px-4 py-3 cursor-pointer hover:shadow-xl transition-all duration-200" onClick={() => setUserEditDialogOpen(true)}>
+        <div className="flex items-center gap-2 text-sm">
+          <User className="h-4 w-4 text-slate-600" />
+          <div className="hidden sm:block">
+            <div className="font-medium text-slate-800">{userInfo.name}</div>
+            <div className="text-xs text-slate-500">Sicil: {userInfo.sicil}</div>
+          </div>
+          <div className="sm:hidden">
+            <div className="font-medium text-slate-800 text-xs">
+              {userInfo.name.split(' ').map(n => n[0]).join('. ')}
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* User Edit Dialog */}
+      <Dialog open={userEditDialogOpen} onOpenChange={setUserEditDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Kullanıcı Bilgilerini Düzenle</DialogTitle>
+            <DialogDescription>
+              Adınızı ve sicil numaranızı güncelleyin
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            handleUserEdit({
+              name: formData.get('name'),
+              sicil: formData.get('sicil')
+            });
+          }} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Ad Soyad</Label>
+              <Input
+                id="name"
+                name="name"
+                defaultValue={userInfo.name}
+                placeholder="Ad Soyad"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="sicil">Sicil Numarası</Label>
+              <Input
+                id="sicil"
+                name="sicil"
+                defaultValue={userInfo.sicil}
+                placeholder="Sicil numarası"
+                required
+              />
+            </div>
+            
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setUserEditDialogOpen(false)}>
+                İptal
+              </Button>
+              <Button type="submit">
+                Güncelle
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 lg:py-8 pr-32 sm:pr-40">
         {/* Header */}
