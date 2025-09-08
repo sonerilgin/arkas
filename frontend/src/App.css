@@ -1,4 +1,30 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+/* Arkas Lojistik Brand Colors */
+:root {
+  --arkas-blue: #1e3a8a;
+  --arkas-light-blue: #3b82f6;
+  --arkas-navy: #1e2563;
+  --arkas-gray: #64748b;
+}
+
+/* Logo and branding styles */
+.arkas-logo {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+  transition: all 0.3s ease;
+}
+
+.arkas-logo:hover {
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));
+  transform: scale(1.02);
+}
+
+/* Brand gradient */
+.arkas-gradient {
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+}
+
+.arkas-gradient-light {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
 
 * {
   margin: 0;
