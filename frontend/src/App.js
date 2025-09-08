@@ -351,8 +351,6 @@ function App() {
     calculateTotal();
   }, [formData.bos_tasima, formData.reefer, formData.bekleme, formData.geceleme, formData.pazar, formData.harcirah]);
 
-  const totalAmount = nakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* User Info - Top Right */}
