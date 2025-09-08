@@ -105,7 +105,7 @@ def parse_from_mongo(item):
 # Add your routes to the router instead of directly to app
 @api_router.get("/")
 async def root():
-    return {"message": "Nakliye Kontrol Sistemi API"}
+    return {"message": "Arkas Lojistik - Nakliye Takip Sistemi API"}
 
 
 # Nakliye CRUD endpoints
