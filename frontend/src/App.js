@@ -455,8 +455,8 @@ function App() {
               <Package className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">{nakliyeList.length}</div>
-              <p className="text-xs text-slate-500">Toplam nakliye kaydı</p>
+              <div className="text-2xl font-bold text-slate-800">{displayedRecords.length}</div>
+              <p className="text-xs text-slate-500">{monthNames[displayMonth]} {displayYear} kayıt sayısı</p>
             </CardContent>
           </Card>
           
