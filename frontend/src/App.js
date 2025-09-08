@@ -987,7 +987,7 @@ function App() {
                 displayedRecords.map((item) => {
                   const toplam = item.toplam || 0;
                   const sistem = item.sistem || 0;
-                  const fark = toplam - sistem;
+                  const fark = sistem - toplam; // Sistem referanslı hesaplama
                   
                   return (
                     <Card key={item.id} className="border shadow-sm">
