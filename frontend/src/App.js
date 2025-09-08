@@ -940,12 +940,12 @@ function App() {
                 <div className="text-center py-8 text-slate-500">
                   Yükleniyor...
                 </div>
-              ) : nakliyeList.length === 0 ? (
+              ) : displayedRecords.length === 0 ? (
                 <div className="text-center py-8 text-slate-500">
-                  Nakliye kaydı bulunamadı
+                  {monthNames[displayMonth]} {displayYear} ayında nakliye kaydı bulunamadı
                 </div>
               ) : (
-                nakliyeList.map((item) => (
+                displayedRecords.map((item) => (
                   <Card key={item.id} className="border shadow-sm">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
