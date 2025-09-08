@@ -658,7 +658,7 @@ function App() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {[2023, 2024, 2025, 2026].map((year) => (
+                    {Array.from({ length: 28 }, (_, i) => 2023 + i).map((year) => (
                       <SelectItem key={year} value={year.toString()}>
                         {year}
                       </SelectItem>
