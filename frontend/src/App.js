@@ -638,6 +638,31 @@ function App() {
           </DialogContent>
         </Dialog>
 
+        {/* Month Filter Status */}
+        <div className="mb-4 flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center gap-2">
+            <Calendar className="h-4 w-4 text-blue-600" />
+            <span className="text-sm text-blue-800 font-medium">
+              Tabloda {monthNames[displayMonth]} {displayYear} kayıtları gösteriliyor ({displayedRecords.length} kayıt)
+            </span>
+          </div>
+          <Button 
+            onClick={() => {
+              setDisplayMonth(new Date().getMonth());
+              setDisplayYear(new Date().getFullYear());
+              toast({
+                title: "Geçerli Ay",
+                description: "Bu ay kayıtları gösteriliyor"
+              });
+            }} 
+            variant="outline" 
+            size="sm" 
+            className="text-blue-600 border-blue-300 hover:bg-blue-100"
+          >
+            Bu Aya Dön
+          </Button>
+        </div>
+
         {/* Search and Add Section */}
         <Card className="mb-6 lg:mb-8 bg-white shadow-lg border-0">
           <CardHeader className="pb-4">
