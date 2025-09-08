@@ -312,7 +312,7 @@ function App() {
               
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button onClick={handleNewRecord} className="bg-blue-600 hover:bg-blue-700 text-white shadow-md">
+                  <Button onClick={handleNewRecord} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200">
                     <Plus className="mr-2 h-4 w-4" />
                     Yeni Kayıt
                   </Button>
