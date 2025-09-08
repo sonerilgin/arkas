@@ -275,6 +275,8 @@ function App() {
     return itemDate.getMonth() === displayMonth && itemDate.getFullYear() === displayYear;
   });
 
+  const displayedTotal = displayedRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
+
   const thisMonthTotal = thisMonthRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
   const totalAmount = nakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
 
