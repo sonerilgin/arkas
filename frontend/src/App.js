@@ -277,39 +277,14 @@ function App() {
     setMonthDialogOpen(true);
   };
 
-  const handleMonthFilter = async (month, year) => {
-    try {
-      setLoading(true);
-      const filteredData = nakliyeList.filter(item => {
-        const itemDate = new Date(item.tarih);
-        return itemDate.getMonth() === month && itemDate.getFullYear() === year;
-      });
-      setFilteredNakliyeList(filteredData);
-      setCurrentFilter({ type: 'month', month, year });
-      setMonthDialogOpen(false);
-      
-      toast({
-        title: "Filtre Uygulandı",
-        description: `${monthNames[month]} ${year} ayına göre ${filteredData.length} kayıt gösteriliyor`
-      });
-    } catch (error) {
-      console.error("Ay filtresi uygulanırken hata:", error);
-      toast({
-        title: "Hata",
-        description: "Ay filtresi uygulanırken bir hata oluştu",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const clearFilter = () => {
-    setFilteredNakliyeList(nakliyeList);
-    setCurrentFilter({ type: 'all', month: null, year: null });
+  const handleMonthSelect = (month, year) => {
+    setDisplayMonth(month);
+    setDisplayYear(year);
+    setMonthDialogOpen(false);
+    
     toast({
-      title: "Filtre Temizlendi",
-      description: "Tüm kayıtlar gösteriliyor"
+      title: "Ay Seçildi",
+      description: `${monthNames[month]} ${year} seçildi - filtreleme yapılmadı`
     });
   };
 
