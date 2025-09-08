@@ -475,7 +475,6 @@ function App() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-800">{thisMonthRecords.length}</div>
-              <p className="text-xs text-slate-500">Bu ayki kayıt • {formatCurrency(thisMonthTotal)}</p>
             </CardContent>
           </Card>
 
