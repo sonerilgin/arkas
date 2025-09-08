@@ -937,10 +937,10 @@ function App() {
                           <TableCell className="text-right font-semibold text-green-600">{formatCurrency(sistem)}</TableCell>
                           <TableCell className="text-center">
                             <div className="flex flex-col items-center gap-1">
-                              <span className={`text-xs font-medium ${fark === 0 ? 'text-gray-500' : fark > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                              <span className={`text-xs font-medium ${fark === 0 ? 'text-gray-500' : fark > 0 ? 'text-green-600' : 'text-red-600'}`}>
                                 {fark === 0 ? 'Eşit' : fark > 0 ? `+${formatCurrency(Math.abs(fark))}` : `-${formatCurrency(Math.abs(fark))}`}
                               </span>
-                              <span className={`text-xs ${fark === 0 ? 'text-gray-400' : fark > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                              <span className={`text-xs ${fark === 0 ? 'text-gray-400' : fark > 0 ? 'text-green-500' : 'text-red-500'}`}>
                                 {farkYuzdesi}%
                               </span>
                             </div>
