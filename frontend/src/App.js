@@ -901,55 +901,73 @@ function App() {
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={10} className="text-center py-8 text-slate-500">
                         Yükleniyor...
                       </TableCell>
                     </TableRow>
                   ) : displayedRecords.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={10} className="text-center py-8 text-slate-500">
                         {monthNames[displayMonth]} {displayYear} ayında nakliye kaydı bulunamadı
                       </TableCell>
                     </TableRow>
                   ) : (
-                    displayedRecords.map((item) => (
-                      <TableRow key={item.id} className="hover:bg-slate-50 transition-colors">
-                        <TableCell className="font-medium">{formatDate(item.tarih)}</TableCell>
-                        <TableCell>{item.sira_no}</TableCell>
-                        <TableCell>{item.kod || '-'}</TableCell>
-                        <TableCell>{item.musteri}</TableCell>
-                        <TableCell>{item.irsaliye_no}</TableCell>
-                        <TableCell>
-                          <div className="flex gap-1">
-                            {item.ithalat && <Badge variant="secondary" className="bg-blue-100 text-blue-800">İthalat</Badge>}
-                            {item.ihracat && <Badge variant="secondary" className="bg-green-100 text-green-800">İhracat</Badge>}
-                            {item.bos && <Badge variant="secondary" className="bg-gray-100 text-gray-800">Boş</Badge>}
-                            {!item.ithalat && !item.ihracat && !item.bos && <Badge variant="outline">-</Badge>}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right font-semibold">{formatCurrency(item.toplam)}</TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex gap-1 justify-center">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleEdit(item)}
-                              className="h-8 w-8 p-0 hover:bg-blue-100"
-                            >
-                              <Edit3 className="h-4 w-4 text-blue-600" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleDelete(item.id)}
-                              className="h-8 w-8 p-0 hover:bg-red-100"
-                            >
-                              <Trash2 className="h-4 w-4 text-red-600" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    displayedRecords.map((item) => {
+                      const toplam = item.toplam || 0;
+                      const sistem = item.sistem || 0;
+                      const fark = toplam - sistem;
+                      const farkYuzdesi = toplam > 0 ? ((fark / toplam) * 100).toFixed(1) : 0;
+                      
+                      return (
+                        <TableRow key={item.id} className="hover:bg-slate-50 transition-colors">
+                          <TableCell className="font-medium">{formatDate(item.tarih)}</TableCell>
+                          <TableCell>{item.sira_no}</TableCell>
+                          <TableCell>{item.kod || '-'}</TableCell>
+                          <TableCell>{item.musteri}</TableCell>
+                          <TableCell>{item.irsaliye_no}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              {item.ithalat && <Badge variant="secondary" className="bg-blue-100 text-blue-800">İthalat</Badge>}
+                              {item.ihracat && <Badge variant="secondary" className="bg-green-100 text-green-800">İhracat</Badge>}
+                              {item.bos && <Badge variant="secondary" className="bg-gray-100 text-gray-800">Boş</Badge>}
+                              {!item.ithalat && !item.ihracat && !item.bos && <Badge variant="outline">-</Badge>}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-semibold">{formatCurrency(toplam)}</TableCell>
+                          <TableCell className="text-right font-semibold text-green-600">{formatCurrency(sistem)}</TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex flex-col items-center gap-1">
+                              <span className={`text-xs font-medium ${fark === 0 ? 'text-gray-500' : fark > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                {fark === 0 ? 'Eşit' : fark > 0 ? `+${formatCurrency(Math.abs(fark))}` : `-${formatCurrency(Math.abs(fark))}`}
+                              </span>
+                              <span className={`text-xs ${fark === 0 ? 'text-gray-400' : fark > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                                {farkYuzdesi}%
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex gap-1 justify-center">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleEdit(item)}
+                                className="h-8 w-8 p-0 hover:bg-blue-100"
+                              >
+                                <Edit3 className="h-4 w-4 text-blue-600" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleDelete(item.id)}
+                                className="h-8 w-8 p-0 hover:bg-red-100"
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
