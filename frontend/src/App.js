@@ -241,9 +241,9 @@ function App() {
           <div className="flex items-center gap-4 mb-2">
             <div className="flex-shrink-0">
               <img 
-                src="/arkas-logo.jpg" 
+                src="/arkas-logo-new.jpg" 
                 alt="Arkas Lojistik Logo" 
-                className="h-16 w-auto object-contain"
+                className="h-20 w-20 object-contain rounded-xl shadow-lg arkas-logo"
               />
             </div>
             <div>
