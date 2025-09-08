@@ -261,7 +261,7 @@ function App() {
                   (parseFloat(formData.pazar) || 0) +
                   (parseFloat(formData.harcirah) || 0);
     
-    setFormData(prev => ({ ...prev, toplam: total, sistem: total }));
+    setFormData(prev => ({ ...prev, toplam: total }));
   };
 
   const thisMonthRecords = nakliyeList.filter(item => {
