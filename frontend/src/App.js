@@ -293,29 +293,29 @@ function App() {
         </div>
 
         {/* Search and Add Section */}
-        <Card className="mb-8 bg-white shadow-lg border-0">
-          <CardHeader>
-            <CardTitle className="text-xl text-slate-800">Nakliye Kayıtları</CardTitle>
-            <CardDescription>Nakliye işlemlerinizi görüntüleyin, arayın ve yönetin</CardDescription>
+        <Card className="mb-6 lg:mb-8 bg-white shadow-lg border-0">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg lg:text-xl text-slate-800">Nakliye Kayıtları</CardTitle>
+            <CardDescription className="text-sm lg:text-base">Nakliye işlemlerinizi görüntüleyin, arayın ve yönetin</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div className="flex gap-2 flex-1 max-w-md">
+            <div className="flex flex-col gap-4 items-stretch lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex gap-2 flex-1 max-w-full lg:max-w-md">
                 <Input
                   placeholder="Müşteri, sıra no veya irsaliye no ile ara..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="border-slate-200"
+                  className="border-slate-200 text-sm lg:text-base"
                 />
-                <Button onClick={handleSearch} variant="outline" size="icon">
+                <Button onClick={handleSearch} variant="outline" size="icon" className="flex-shrink-0">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
               
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button onClick={handleNewRecord} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200">
+                  <Button onClick={handleNewRecord} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200 w-full lg:w-auto">
                     <Plus className="mr-2 h-4 w-4" />
                     Yeni Kayıt
                   </Button>
