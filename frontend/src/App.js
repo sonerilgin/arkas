@@ -271,15 +271,18 @@ function App() {
   const handleMonthFilter = async (month, year) => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API}/nakliye`);
-      const filteredData = response.data.filter(item => {
+      const filteredData = nakliyeList.filter(item => {
         const itemDate = new Date(item.tarih);
         return itemDate.getMonth() === month && itemDate.getFullYear() === year;
       });
-      setDetailData(filteredData);
-      setDetailType('month');
-      setDetailDialogOpen(true);
+      setFilteredNakliyeList(filteredData);
+      setCurrentFilter({ type: 'month', month, year });
       setMonthDialogOpen(false);
+      
+      toast({
+        title: "Filtre Uygulandı",
+        description: `${monthNames[month]} ${year} ayına göre ${filteredData.length} kayıt gösteriliyor`
+      });
     } catch (error) {
       console.error("Ay filtresi uygulanırken hata:", error);
       toast({
@@ -290,6 +293,24 @@ function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const clearFilter = () => {
+    setFilteredNakliyeList(nakliyeList);
+    setCurrentFilter({ type: 'all', month: null, year: null });
+    toast({
+      title: "Filtre Temizlendi",
+      description: "Tüm kayıtlar gösteriliyor"
+    });
+  };
+
+  const handleUserEdit = (updatedUser) => {
+    setUserInfo(updatedUser);
+    setUserEditDialogOpen(false);
+    toast({
+      title: "Başarılı",
+      description: "Kullanıcı bilgileri güncellendi"
+    });
   };
 
   const showDetails = (type) => {
