@@ -238,13 +238,17 @@ function App() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-3 bg-blue-600 rounded-xl shadow-lg">
-              <Truck className="h-8 w-8 text-white" />
+          <div className="flex items-center gap-4 mb-2">
+            <div className="flex-shrink-0">
+              <img 
+                src="/arkas-logo.jpg" 
+                alt="Arkas Lojistik Logo" 
+                className="h-16 w-auto object-contain"
+              />
             </div>
             <div>
-              <h1 className="text-4xl font-bold text-slate-800">Nakliye Kontrol Sistemi</h1>
-              <p className="text-slate-600 text-lg">Nakliye işlemlerinizi takip edin ve yönetin</p>
+              <h1 className="text-4xl font-bold text-slate-800">Arkas Lojistik</h1>
+              <p className="text-slate-600 text-lg">Nakliye Takip ve Yönetim Sistemi</p>
             </div>
           </div>
         </div>
