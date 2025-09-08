@@ -426,20 +426,38 @@ function App() {
       <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 lg:py-8">
         {/* Header */}
         <div className="mb-6 lg:mb-8">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 lg:gap-4 mb-2">
-            <div className="flex-shrink-0">
-              <img 
-                src="/arkas-logo-new.jpg" 
-                alt="Arkas Lojistik Logo" 
-                className="h-16 w-16 sm:h-18 sm:w-18 lg:h-20 lg:w-20 object-contain rounded-xl shadow-lg arkas-logo"
-              />
+          <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-3 lg:gap-4 mb-2">
+            <div className="flex items-center gap-3 lg:gap-4">
+              <div className="flex-shrink-0">
+                <img 
+                  src="/arkas-logo-new.jpg" 
+                  alt="Arkas Lojistik Logo" 
+                  className="h-16 w-16 sm:h-18 sm:w-18 lg:h-20 lg:w-20 object-contain rounded-xl shadow-lg arkas-logo"
+                />
+              </div>
+              <div className="text-center sm:text-left">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-800 arkas-brand-text">
+                  <span className="text-slate-800" style={{color: '#1e2563'}}>ARKAS</span>{' '}
+                  <span className="text-blue-500" style={{color: '#3b82f6'}}>LOJİSTİK</span>
+                </h1>
+                <p className="text-slate-600 text-sm sm:text-base lg:text-lg font-medium">Nakliye Takip ve Yönetim Sistemi</p>
+              </div>
             </div>
-            <div className="text-center sm:text-left">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-800 arkas-brand-text">
-                <span className="text-slate-800" style={{color: '#1e2563'}}>ARKAS</span>{' '}
-                <span className="text-blue-500" style={{color: '#3b82f6'}}>LOJİSTİK</span>
-              </h1>
-              <p className="text-slate-600 text-sm sm:text-base lg:text-lg font-medium">Nakliye Takip ve Yönetim Sistemi</p>
+            
+            {/* User Info - Aligned with Arkas Lojistik */}
+            <div className="bg-white rounded-lg shadow-md px-4 py-3 cursor-pointer hover:shadow-lg transition-all duration-200 border border-slate-200 flex-shrink-0" onClick={openUserEditDialog}>
+              <div className="flex items-center gap-2 text-sm">
+                <User className="h-4 w-4 text-slate-600" />
+                <div className="hidden sm:block">
+                  <div className="font-medium text-slate-800">{userInfo.name}</div>
+                  <div className="text-xs text-slate-500">Sicil: {userInfo.sicil}</div>
+                </div>
+                <div className="sm:hidden">
+                  <div className="font-medium text-slate-800 text-xs">
+                    {userInfo.name.split(' ').map(n => n[0]).join('. ')}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
