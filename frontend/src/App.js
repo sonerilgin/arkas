@@ -306,12 +306,14 @@ function App() {
   };
 
   const handleUserEdit = (updatedUser) => {
+    console.log('handleUserEdit called with:', updatedUser);
     setUserInfo(updatedUser);
     setUserEditDialogOpen(false);
     toast({
       title: "Başarılı",
       description: "Kullanıcı bilgileri güncellendi"
     });
+    console.log('User info updated to:', updatedUser);
   };
 
   const showDetails = (type) => {
