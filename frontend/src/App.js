@@ -372,26 +372,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* User Info - Fixed position like table header */}
-      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-slate-200 py-2 mb-4">
-        <div className="container mx-auto px-3 sm:px-4 lg:px-6 flex justify-end">
-          <div className="bg-white rounded-lg shadow-md px-4 py-2 cursor-pointer hover:shadow-lg transition-all duration-200 border border-slate-200" onClick={openUserEditDialog}>
-            <div className="flex items-center gap-2 text-sm">
-              <User className="h-4 w-4 text-slate-600" />
-              <div className="hidden sm:block">
-                <div className="font-medium text-slate-800">{userInfo.name}</div>
-                <div className="text-xs text-slate-500">Sicil: {userInfo.sicil}</div>
-              </div>
-              <div className="sm:hidden">
-                <div className="font-medium text-slate-800 text-xs">
-                  {userInfo.name.split(' ').map(n => n[0]).join('. ')}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* User Edit Dialog */}
       <Dialog open={userEditDialogOpen} onOpenChange={setUserEditDialogOpen}>
         <DialogContent className="max-w-md">
