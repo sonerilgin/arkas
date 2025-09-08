@@ -49,8 +49,6 @@ const monthNames = [
 
 function App() {
   const [nakliyeList, setNakliyeList] = useState([]);
-  const [filteredNakliyeList, setFilteredNakliyeList] = useState([]);
-  const [currentFilter, setCurrentFilter] = useState({ type: 'all', month: null, year: null });
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -59,6 +57,8 @@ function App() {
   const [userEditDialogOpen, setUserEditDialogOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [displayMonth, setDisplayMonth] = useState(new Date().getMonth());
+  const [displayYear, setDisplayYear] = useState(new Date().getFullYear());
   const [detailType, setDetailType] = useState("");
   const [detailData, setDetailData] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
