@@ -14,7 +14,7 @@ import { Separator } from "./components/ui/separator";
 import { Textarea } from "./components/ui/textarea";
 import { useToast } from "./hooks/use-toast";
 import { Toaster } from "./components/ui/toaster";
-import { Search, Plus, Edit3, Trash2, Truck, Package, Calendar, TrendingUp } from "lucide-react";
+import { Search, Plus, Edit3, Trash2, Truck, Package, Calendar, TrendingUp, User, X, ChevronRight } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
