@@ -435,26 +435,6 @@ function App() {
           </div>
         </div>
 
-        {/* Filter Status */}
-        {currentFilter.type === 'month' && (
-          <div className="mb-4 flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-blue-600" />
-              <span className="text-sm text-blue-800 font-medium">
-                {monthNames[currentFilter.month]} {currentFilter.year} ayı gösteriliyor ({filteredNakliyeList.length} kayıt)
-              </span>
-            </div>
-            <Button 
-              onClick={clearFilter} 
-              variant="outline" 
-              size="sm" 
-              className="text-blue-600 border-blue-300 hover:bg-blue-100"
-            >
-              Filtreyi Temizle
-            </Button>
-          </div>
-        )}
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
           <Card className="bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-200">
@@ -463,13 +443,8 @@ function App() {
               <Package className="h-4 w-4 text-blue-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">{filteredNakliyeList.length}</div>
-              <p className="text-xs text-slate-500">
-                {currentFilter.type === 'month' 
-                  ? `${monthNames[currentFilter.month]} ${currentFilter.year} kayıtları`
-                  : 'Toplam nakliye kaydı'
-                }
-              </p>
+              <div className="text-2xl font-bold text-slate-800">{nakliyeList.length}</div>
+              <p className="text-xs text-slate-500">Toplam nakliye kaydı</p>
             </CardContent>
           </Card>
           
