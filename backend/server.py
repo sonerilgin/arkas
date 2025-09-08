@@ -193,6 +193,7 @@ async def search_nakliye(query: str, skip: int = 0, limit: int = 100):
             "$or": [
                 {"musteri": {"$regex": query, "$options": "i"}},
                 {"sira_no": {"$regex": query, "$options": "i"}},
+                {"kod": {"$regex": query, "$options": "i"}},
                 {"irsaliye_no": {"$regex": query, "$options": "i"}}
             ]
         }
