@@ -21,13 +21,21 @@
   transform: scale(1.05);
 }
 
-/* Brand gradient */
-.arkas-gradient {
-  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+/* Arkas brand text styling to match logo */
+.arkas-brand-text {
+  font-family: 'Inter', 'Arial Black', sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  line-height: 1.1;
 }
 
-.arkas-gradient-light {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+.arkas-brand-text span:first-child {
+  color: #1e2563 !important; /* Dark navy blue for ARKAS */
+}
+
+.arkas-brand-text span:last-child {
+  color: #3b82f6 !important; /* Lighter blue for LOJİSTİK */
 }
 
 * {
