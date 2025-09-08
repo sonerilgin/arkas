@@ -485,8 +485,8 @@ function App() {
               <TrendingUp className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">{totalAmount > 0 ? formatCurrency(totalAmount) : formatCurrency(0)}</div>
-              <p className="text-xs text-slate-500">Toplam nakliye tutarı</p>
+              <div className="text-2xl font-bold text-slate-800">{formatCurrency(displayedTotal)}</div>
+              <p className="text-xs text-slate-500">{monthNames[displayMonth]} {displayYear} toplam tutarı</p>
             </CardContent>
           </Card>
         </div>
