@@ -66,6 +66,10 @@ function App() {
     name: "Mehmet Yılmaz",
     sicil: "12345"
   });
+  const [tempUserInfo, setTempUserInfo] = useState({
+    name: "Mehmet Yılmaz",
+    sicil: "12345"
+  });
   const [formData, setFormData] = useState({
     tarih: new Date().toISOString().split('T')[0],
     sira_no: "",
