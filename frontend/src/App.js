@@ -773,6 +773,46 @@ function App() {
           </DialogContent>
         </Dialog>
 
+        {/* PDF Year Selection Dialog */}
+        <Dialog open={pdfYearDialogOpen} onOpenChange={setPdfYearDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>PDF Raporu İçin Yıl Seçin</DialogTitle>
+              <DialogDescription>
+                Hangi yılın nakliye raporunu PDF olarak indirmek istiyorsunuz?
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Yıl</Label>
+                <Select value={selectedPdfYear.toString()} onValueChange={(value) => setSelectedPdfYear(parseInt(value))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 28 }, (_, i) => 2023 + i).map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPdfYearDialogOpen(false)}>
+                İptal
+              </Button>
+              <Button onClick={confirmPdfExport} className="bg-green-600 hover:bg-green-700 text-white">
+                <FileDown className="mr-2 h-4 w-4" />
+                PDF İndir
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Month Filter Status */}
         <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
