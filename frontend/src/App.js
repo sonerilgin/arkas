@@ -825,13 +825,24 @@ function App() {
                 </Button>
               </div>
               
-              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button onClick={handleNewRecord} className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200 w-full lg:w-auto">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Yeni Kayıt
-                  </Button>
-                </DialogTrigger>
+              <div className="flex gap-2 w-full lg:w-auto">
+                <Button 
+                  onClick={exportToPDF} 
+                  variant="outline" 
+                  className="flex-1 lg:flex-none border-green-300 text-green-600 hover:bg-green-50"
+                  disabled={loading}
+                >
+                  <FileDown className="mr-2 h-4 w-4" />
+                  {loading ? 'PDF Hazırlanıyor...' : 'PDF İndir'}
+                </Button>
+                
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={handleNewRecord} className="flex-1 lg:flex-none bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Yeni Kayıt
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-xl text-slate-800">
