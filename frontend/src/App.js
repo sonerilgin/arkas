@@ -443,7 +443,7 @@ function App() {
         </DialogContent>
       </Dialog>
 
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 lg:py-8 pr-32 sm:pr-40">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 lg:py-8">
         {/* Header */}
         <div className="mb-6 lg:mb-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 lg:gap-4 mb-2">
