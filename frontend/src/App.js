@@ -884,14 +884,14 @@ function App() {
                         Yükleniyor...
                       </TableCell>
                     </TableRow>
-                  ) : nakliyeList.length === 0 ? (
+                  ) : displayedRecords.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={8} className="text-center py-8 text-slate-500">
-                        Nakliye kaydı bulunamadı
+                        {monthNames[displayMonth]} {displayYear} ayında nakliye kaydı bulunamadı
                       </TableCell>
                     </TableRow>
                   ) : (
-                    nakliyeList.map((item) => (
+                    displayedRecords.map((item) => (
                       <TableRow key={item.id} className="hover:bg-slate-50 transition-colors">
                         <TableCell className="font-medium">{formatDate(item.tarih)}</TableCell>
                         <TableCell>{item.sira_no}</TableCell>
