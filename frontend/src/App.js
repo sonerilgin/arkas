@@ -354,7 +354,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* User Info - Repositioned */}
-      <div className="fixed top-20 right-8 z-50 bg-white rounded-lg shadow-lg px-4 py-3 cursor-pointer hover:shadow-xl transition-all duration-200" onClick={() => setUserEditDialogOpen(true)}>
+      <div className="fixed top-12 right-8 z-50 bg-white rounded-lg shadow-lg px-4 py-3 cursor-pointer hover:shadow-xl transition-all duration-200" onClick={() => setUserEditDialogOpen(true)}>
         <div className="flex items-center gap-2 text-sm">
           <User className="h-4 w-4 text-slate-600" />
           <div className="hidden sm:block">
