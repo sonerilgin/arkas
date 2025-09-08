@@ -392,20 +392,16 @@ function App() {
           
           <form onSubmit={(e) => {
             e.preventDefault();
-            const formData = new FormData(e.target);
-            const updatedUser = {
-              name: formData.get('name'),
-              sicil: formData.get('sicil')
-            };
-            console.log('Updating user:', updatedUser);
-            handleUserEdit(updatedUser);
+            console.log('Form submitted with tempUserInfo:', tempUserInfo);
+            handleUserEdit(tempUserInfo);
           }} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Ad Soyad</Label>
               <Input
                 id="name"
                 name="name"
-                defaultValue={userInfo.name}
+                value={tempUserInfo.name}
+                onChange={(e) => setTempUserInfo(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="Ad Soyad"
                 required
               />
@@ -416,7 +412,8 @@ function App() {
               <Input
                 id="sicil"
                 name="sicil"
-                defaultValue={userInfo.sicil}
+                value={tempUserInfo.sicil}
+                onChange={(e) => setTempUserInfo(prev => ({ ...prev, sicil: e.target.value }))}
                 placeholder="Sicil numarası"
                 required
               />
