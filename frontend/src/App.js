@@ -485,7 +485,12 @@ function App() {
             onClick={() => showDetails('month')}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Bu Ay</CardTitle>
+              <CardTitle className="text-sm font-medium text-slate-600">
+                {currentFilter.type === 'month' 
+                  ? `${monthNames[currentFilter.month]} ${currentFilter.year}`
+                  : 'Bu Ay'
+                }
+              </CardTitle>
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4 text-green-600" />
                 <ChevronRight className="h-3 w-3 text-slate-400" />
@@ -493,20 +498,19 @@ function App() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-800">{thisMonthRecords.length}</div>
-              <p className="text-xs text-slate-500">Bu ayki kayıt • {formatCurrency(thisMonthTotal)}</p>
+              <p className="text-xs text-slate-500">
+                {currentFilter.type === 'month' 
+                  ? `${monthNames[currentFilter.month]} ${currentFilter.year} kayıt • ${formatCurrency(thisMonthTotal)}`
+                  : `Bu ayki kayıt • ${formatCurrency(thisMonthTotal)}`
+                }
+              </p>
             </CardContent>
           </Card>
 
-          <Card 
-            className="bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-200 cursor-pointer hover:scale-105 sm:col-span-2 lg:col-span-1" 
-            onClick={() => showDetails('amount')}
-          >
+          <Card className="bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-200 sm:col-span-2 lg:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">Toplam Tutar</CardTitle>
-              <div className="flex items-center gap-1">
-                <TrendingUp className="h-4 w-4 text-emerald-600" />
-                <ChevronRight className="h-3 w-3 text-slate-400" />
-              </div>
+              <TrendingUp className="h-4 w-4 text-emerald-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-slate-800">{totalAmount > 0 ? formatCurrency(totalAmount) : formatCurrency(0)}</div>
