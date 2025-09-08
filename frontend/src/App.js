@@ -47,6 +47,9 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [monthDialogOpen, setMonthDialogOpen] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [detailType, setDetailType] = useState("");
   const [detailData, setDetailData] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
