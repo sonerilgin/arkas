@@ -49,16 +49,23 @@ const monthNames = [
 
 function App() {
   const [nakliyeList, setNakliyeList] = useState([]);
+  const [filteredNakliyeList, setFilteredNakliyeList] = useState([]);
+  const [currentFilter, setCurrentFilter] = useState({ type: 'all', month: null, year: null });
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [monthDialogOpen, setMonthDialogOpen] = useState(false);
+  const [userEditDialogOpen, setUserEditDialogOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [detailType, setDetailType] = useState("");
   const [detailData, setDetailData] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
+  const [userInfo, setUserInfo] = useState({
+    name: "Mehmet Yılmaz",
+    sicil: "12345"
+  });
   const [formData, setFormData] = useState({
     tarih: new Date().toISOString().split('T')[0],
     sira_no: "",
