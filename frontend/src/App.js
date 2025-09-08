@@ -234,7 +234,43 @@ function App() {
     const itemDate = new Date(item.tarih);
     const now = new Date();
     return itemDate.getMonth() === now.getMonth() && itemDate.getFullYear() === now.getFullYear();
-  }).length;
+  });
+
+  const thisMonthTotal = thisMonthRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
+
+  const showDetails = (type) => {
+    let data = [];
+    let title = "";
+    
+    switch(type) {
+      case 'total':
+        data = nakliyeList;
+        title = "Tüm Nakliye Kayıtları";
+        break;
+      case 'month':
+        data = thisMonthRecords;
+        title = "Bu Ayki Nakliye Kayıtları";
+        break;
+      case 'amount':
+        data = nakliyeList.map(item => ({
+          ...item,
+          breakdown: {
+            bosTaskima: item.bos_tasima || 0,
+            reefer: item.reefer || 0,
+            bekleme: item.bekleme || 0,
+            geceleme: item.geceleme || 0,
+            pazar: item.pazar || 0,
+            harcirah: item.harcirah || 0
+          }
+        }));
+        title = "Tutar Detayları";
+        break;
+    }
+    
+    setDetailData(data);
+    setDetailType(type);
+    setDetailDialogOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
