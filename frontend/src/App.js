@@ -984,50 +984,61 @@ function App() {
                   {monthNames[displayMonth]} {displayYear} ayında nakliye kaydı bulunamadı
                 </div>
               ) : (
-                displayedRecords.map((item) => (
-                  <Card key={item.id} className="border shadow-sm">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <div>
-                          <div className="font-semibold text-slate-800">{item.musteri}</div>
-                          <div className="text-sm text-slate-500">Sıra: {item.sira_no} {item.kod && `• Kod: ${item.kod}`} • İrsaliye: {item.irsaliye_no}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-lg text-slate-800">{formatCurrency(item.toplam)}</div>
-                          <div className="text-xs text-slate-500">{formatDate(item.tarih)}</div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex justify-between items-center">
-                        <div className="flex gap-1 flex-wrap">
-                          {item.ithalat && <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">İthalat</Badge>}
-                          {item.ihracat && <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">İhracat</Badge>}
-                          {item.bos && <Badge variant="secondary" className="bg-gray-100 text-gray-800 text-xs">Boş</Badge>}
-                          {!item.ithalat && !item.ihracat && !item.bos && <Badge variant="outline" className="text-xs">-</Badge>}
+                displayedRecords.map((item) => {
+                  const toplam = item.toplam || 0;
+                  const sistem = item.sistem || 0;
+                  const fark = toplam - sistem;
+                  
+                  return (
+                    <Card key={item.id} className="border shadow-sm">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <div className="font-semibold text-slate-800">{item.musteri}</div>
+                            <div className="text-sm text-slate-500">Sıra: {item.sira_no} {item.kod && `• Kod: ${item.kod}`} • İrsaliye: {item.irsaliye_no}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-lg text-slate-800">{formatCurrency(toplam)}</div>
+                            <div className="font-medium text-sm text-green-600">{formatCurrency(sistem)}</div>
+                            <div className="text-xs text-slate-500">{formatDate(item.tarih)}</div>
+                          </div>
                         </div>
                         
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleEdit(item)}
-                            className="h-8 w-8 p-0 hover:bg-blue-100"
-                          >
-                            <Edit3 className="h-4 w-4 text-blue-600" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => handleDelete(item.id)}
-                            className="h-8 w-8 p-0 hover:bg-red-100"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
+                        <div className="flex justify-between items-center">
+                          <div className="flex gap-1 flex-wrap">
+                            {item.ithalat && <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">İthalat</Badge>}
+                            {item.ihracat && <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">İhracat</Badge>}
+                            {item.bos && <Badge variant="secondary" className="bg-gray-100 text-gray-800 text-xs">Boş</Badge>}
+                            {!item.ithalat && !item.ihracat && !item.bos && <Badge variant="outline" className="text-xs">-</Badge>}
+                            
+                            <Badge variant="outline" className={`text-xs ml-2 ${fark === 0 ? 'text-gray-500' : fark > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                              {fark === 0 ? 'Eşit' : fark > 0 ? `+${formatCurrency(Math.abs(fark))}` : `-${formatCurrency(Math.abs(fark))}`}
+                            </Badge>
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleEdit(item)}
+                              className="h-8 w-8 p-0 hover:bg-blue-100"
+                            >
+                              <Edit3 className="h-4 w-4 text-blue-600" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleDelete(item.id)}
+                              className="h-8 w-8 p-0 hover:bg-red-100"
+                            >
+                              <Trash2 className="h-4 w-4 text-red-600" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
+                      </CardContent>
+                    </Card>
+                  );
+                })
               )}
             </div>
           </CardContent>
