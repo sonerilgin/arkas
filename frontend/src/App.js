@@ -910,7 +910,7 @@ function App() {
                   Nakliye kaydı bulunamadı
                 </div>
               ) : (
-                filteredNakliyeList.map((item) => (
+                nakliyeList.map((item) => (
                   <Card key={item.id} className="border shadow-sm">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-3">
