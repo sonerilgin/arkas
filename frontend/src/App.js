@@ -237,21 +237,21 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-2">
+        <div className="mb-6 lg:mb-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 lg:gap-4 mb-2">
             <div className="flex-shrink-0">
               <img 
                 src="/arkas-logo-new.jpg" 
                 alt="Arkas Lojistik Logo" 
-                className="h-20 w-20 object-contain rounded-xl shadow-lg arkas-logo"
+                className="h-16 w-16 sm:h-18 sm:w-18 lg:h-20 lg:w-20 object-contain rounded-xl shadow-lg arkas-logo"
               />
             </div>
-            <div>
-              <h1 className="text-4xl font-black text-slate-800 arkas-brand-text">
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-800 arkas-brand-text">
                 <span className="text-slate-800" style={{color: '#1e2563'}}>ARKAS</span>{' '}
                 <span className="text-blue-500" style={{color: '#3b82f6'}}>LOJİSTİK</span>
               </h1>
-              <p className="text-slate-600 text-lg font-medium">Nakliye Takip ve Yönetim Sistemi</p>
+              <p className="text-slate-600 text-sm sm:text-base lg:text-lg font-medium">Nakliye Takip ve Yönetim Sistemi</p>
             </div>
           </div>
         </div>
