@@ -320,6 +320,11 @@ function App() {
     console.log('User info updated to:', updatedUser);
   };
 
+  const openUserEditDialog = () => {
+    setTempUserInfo({ ...userInfo });
+    setUserEditDialogOpen(true);
+  };
+
   const showDetails = (type) => {
     let data = [];
     let title = "";
