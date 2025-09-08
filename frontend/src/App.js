@@ -837,7 +837,7 @@ function App() {
               
               <div className="flex gap-2 w-full lg:w-auto">
                 <Button 
-                  onClick={exportToPDF} 
+                  onClick={handlePdfExport} 
                   variant="outline" 
                   className="flex-1 lg:flex-none border-green-300 text-green-600 hover:bg-green-50"
                   disabled={loading}
