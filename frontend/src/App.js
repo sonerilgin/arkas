@@ -56,10 +56,12 @@ function App() {
   const [formData, setFormData] = useState({
     tarih: new Date().toISOString().split('T')[0],
     sira_no: "",
+    kod: "",
     musteri: "",
     irsaliye_no: "",
     ithalat: false,
     ihracat: false,
+    bos: false,
     bos_tasima: 0,
     reefer: 0,
     bekleme: 0,
