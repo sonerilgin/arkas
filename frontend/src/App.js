@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Checkbox } from "./components/ui/checkbox";
 import { Separator } from "./components/ui/separator";
 import { Textarea } from "./components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
 import { useToast } from "./hooks/use-toast";
 import { Toaster } from "./components/ui/toaster";
 import { Search, Plus, Edit3, Trash2, Truck, Package, Calendar, TrendingUp, User, X, ChevronRight } from "lucide-react";
@@ -40,6 +41,11 @@ const formatDate = (dateString) => {
   const dayName = parts[1]; // Gün ismi
   return `${datePart} ${dayName}`;
 };
+
+const monthNames = [
+  "Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+  "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"
+];
 
 function App() {
   const [nakliyeList, setNakliyeList] = useState([]);
@@ -163,10 +169,12 @@ function App() {
     setFormData({
       tarih: new Date(item.tarih).toISOString().split('T')[0],
       sira_no: item.sira_no,
+      kod: item.kod || "",
       musteri: item.musteri,
       irsaliye_no: item.irsaliye_no,
       ithalat: item.ithalat,
       ihracat: item.ihracat,
+      bos: item.bos || false,
       bos_tasima: item.bos_tasima || 0,
       reefer: item.reefer || 0,
       bekleme: item.bekleme || 0,
@@ -205,10 +213,12 @@ function App() {
     setFormData({
       tarih: new Date().toISOString().split('T')[0],
       sira_no: "",
+      kod: "",
       musteri: "",
       irsaliye_no: "",
       ithalat: false,
       ihracat: false,
+      bos: false,
       bos_tasima: 0,
       reefer: 0,
       bekleme: 0,
@@ -237,15 +247,6 @@ function App() {
     setFormData(prev => ({ ...prev, toplam: total, sistem: total }));
   };
 
-  useEffect(() => {
-    fetchNakliyeList();
-  }, []);
-
-  useEffect(() => {
-    calculateTotal();
-  }, [formData.bos_tasima, formData.reefer, formData.bekleme, formData.geceleme, formData.pazar, formData.harcirah]);
-
-  const totalAmount = nakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
   const thisMonthRecords = nakliyeList.filter(item => {
     const itemDate = new Date(item.tarih);
     const now = new Date();
@@ -314,38 +315,16 @@ function App() {
     setDetailType(type);
     setDetailDialogOpen(true);
   };
-    let data = [];
-    let title = "";
-    
-    switch(type) {
-      case 'total':
-        data = nakliyeList;
-        title = "Tüm Nakliye Kayıtları";
-        break;
-      case 'month':
-        data = thisMonthRecords;
-        title = "Bu Ayki Nakliye Kayıtları";
-        break;
-      case 'amount':
-        data = nakliyeList.map(item => ({
-          ...item,
-          breakdown: {
-            bosTaskima: item.bos_tasima || 0,
-            reefer: item.reefer || 0,
-            bekleme: item.bekleme || 0,
-            geceleme: item.geceleme || 0,
-            pazar: item.pazar || 0,
-            harcirah: item.harcirah || 0
-          }
-        }));
-        title = "Tutar Detayları";
-        break;
-    }
-    
-    setDetailData(data);
-    setDetailType(type);
-    setDetailDialogOpen(true);
-  };
+
+  useEffect(() => {
+    fetchNakliyeList();
+  }, []);
+
+  useEffect(() => {
+    calculateTotal();
+  }, [formData.bos_tasima, formData.reefer, formData.bekleme, formData.geceleme, formData.pazar, formData.harcirah]);
+
+  const totalAmount = nakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -436,6 +415,61 @@ function App() {
           </Card>
         </div>
 
+        {/* Month Selector Dialog */}
+        <Dialog open={monthDialogOpen} onOpenChange={setMonthDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Ay Seçin</DialogTitle>
+              <DialogDescription>
+                Görüntülemek istediğiniz ayı ve yılı seçin
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Ay</Label>
+                <Select value={selectedMonth.toString()} onValueChange={(value) => setSelectedMonth(parseInt(value))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {monthNames.map((month, index) => (
+                      <SelectItem key={index} value={index.toString()}>
+                        {month}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Yıl</Label>
+                <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[2023, 2024, 2025, 2026].map((year) => (
+                      <SelectItem key={year} value={year.toString()}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setMonthDialogOpen(false)}>
+                İptal
+              </Button>
+              <Button onClick={() => handleMonthFilter(selectedMonth, selectedYear)}>
+                Filtrele
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Detail Dialog */}
         <Dialog open={detailDialogOpen} onOpenChange={setDetailDialogOpen}>
           <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
@@ -443,7 +477,7 @@ function App() {
               <DialogTitle className="flex items-center justify-between">
                 <span>
                   {detailType === 'total' && "Tüm Nakliye Kayıtları"}
-                  {detailType === 'month' && "Bu Ayki Nakliye Kayıtları"}
+                  {detailType === 'month' && `${monthNames[selectedMonth]} ${selectedYear} Kayıtları`}
                   {detailType === 'amount' && "Tutar Detayları"}
                 </span>
                 <Button 
@@ -496,6 +530,7 @@ function App() {
                       <TableRow>
                         <TableHead>Tarih</TableHead>
                         <TableHead>Sıra No</TableHead>
+                        <TableHead>Kod</TableHead>
                         <TableHead>Müşteri</TableHead>
                         <TableHead>İrsaliye No</TableHead>
                         <TableHead>Tür</TableHead>
@@ -507,13 +542,15 @@ function App() {
                         <TableRow key={item.id}>
                           <TableCell>{formatDate(item.tarih)}</TableCell>
                           <TableCell>{item.sira_no}</TableCell>
+                          <TableCell>{item.kod || '-'}</TableCell>
                           <TableCell>{item.musteri}</TableCell>
                           <TableCell>{item.irsaliye_no}</TableCell>
                           <TableCell>
                             <div className="flex gap-1 flex-wrap">
                               {item.ithalat && <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">İthalat</Badge>}
                               {item.ihracat && <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">İhracat</Badge>}
-                              {!item.ithalat && !item.ihracat && <Badge variant="outline" className="text-xs">-</Badge>}
+                              {item.bos && <Badge variant="secondary" className="bg-gray-100 text-gray-800 text-xs">Boş</Badge>}
+                              {!item.ithalat && !item.ihracat && !item.bos && <Badge variant="outline" className="text-xs">-</Badge>}
                             </div>
                           </TableCell>
                           <TableCell className="text-right font-bold">{formatCurrency(item.toplam)}</TableCell>
@@ -537,7 +574,7 @@ function App() {
             <div className="flex flex-col gap-4 items-stretch lg:flex-row lg:items-center lg:justify-between">
               <div className="flex gap-2 flex-1 max-w-full lg:max-w-md">
                 <Input
-                  placeholder="Müşteri, sıra no veya irsaliye no ile ara..."
+                  placeholder="Müşteri, sıra no, kod veya irsaliye no ile ara..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
@@ -595,6 +632,15 @@ function App() {
                             />
                           </div>
                           <div className="space-y-2">
+                            <Label htmlFor="kod">Kod</Label>
+                            <Input
+                              id="kod"
+                              value={formData.kod}
+                              onChange={(e) => setFormData(prev => ({ ...prev, kod: e.target.value }))}
+                              placeholder="Kod (opsiyonel)"
+                            />
+                          </div>
+                          <div className="space-y-2">
                             <Label htmlFor="musteri">Müşteri</Label>
                             <Input
                               id="musteri"
@@ -604,7 +650,7 @@ function App() {
                               required
                             />
                           </div>
-                          <div className="space-y-2">
+                          <div className="space-y-2 md:col-span-2">
                             <Label htmlFor="irsaliye_no">İrsaliye No</Label>
                             <Input
                               id="irsaliye_no"
@@ -616,7 +662,7 @@ function App() {
                           </div>
                         </div>
                         
-                        <div className="flex gap-6">
+                        <div className="flex gap-6 flex-wrap">
                           <div className="flex items-center space-x-2">
                             <Checkbox 
                               id="ithalat"
@@ -632,6 +678,14 @@ function App() {
                               onCheckedChange={(checked) => setFormData(prev => ({ ...prev, ihracat: checked }))}
                             />
                             <Label htmlFor="ihracat">İhracat</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id="bos"
+                              checked={formData.bos}
+                              onCheckedChange={(checked) => setFormData(prev => ({ ...prev, bos: checked }))}
+                            />
+                            <Label htmlFor="bos">Boş</Label>
                           </div>
                         </div>
                       </TabsContent>
@@ -716,6 +770,7 @@ function App() {
                   <TableRow className="bg-slate-50">
                     <TableHead className="font-semibold text-slate-700">Tarih</TableHead>
                     <TableHead className="font-semibold text-slate-700">Sıra No</TableHead>
+                    <TableHead className="font-semibold text-slate-700">Kod</TableHead>
                     <TableHead className="font-semibold text-slate-700">Müşteri</TableHead>
                     <TableHead className="font-semibold text-slate-700">İrsaliye No</TableHead>
                     <TableHead className="font-semibold text-slate-700">Tür</TableHead>
@@ -726,13 +781,13 @@ function App() {
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={8} className="text-center py-8 text-slate-500">
                         Yükleniyor...
                       </TableCell>
                     </TableRow>
                   ) : nakliyeList.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={8} className="text-center py-8 text-slate-500">
                         Nakliye kaydı bulunamadı
                       </TableCell>
                     </TableRow>
@@ -741,13 +796,15 @@ function App() {
                       <TableRow key={item.id} className="hover:bg-slate-50 transition-colors">
                         <TableCell className="font-medium">{formatDate(item.tarih)}</TableCell>
                         <TableCell>{item.sira_no}</TableCell>
+                        <TableCell>{item.kod || '-'}</TableCell>
                         <TableCell>{item.musteri}</TableCell>
                         <TableCell>{item.irsaliye_no}</TableCell>
                         <TableCell>
                           <div className="flex gap-1">
                             {item.ithalat && <Badge variant="secondary" className="bg-blue-100 text-blue-800">İthalat</Badge>}
                             {item.ihracat && <Badge variant="secondary" className="bg-green-100 text-green-800">İhracat</Badge>}
-                            {!item.ithalat && !item.ihracat && <Badge variant="outline">-</Badge>}
+                            {item.bos && <Badge variant="secondary" className="bg-gray-100 text-gray-800">Boş</Badge>}
+                            {!item.ithalat && !item.ihracat && !item.bos && <Badge variant="outline">-</Badge>}
                           </div>
                         </TableCell>
                         <TableCell className="text-right font-semibold">{formatCurrency(item.toplam)}</TableCell>
@@ -795,7 +852,7 @@ function App() {
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <div className="font-semibold text-slate-800">{item.musteri}</div>
-                          <div className="text-sm text-slate-500">Sıra: {item.sira_no} • İrsaliye: {item.irsaliye_no}</div>
+                          <div className="text-sm text-slate-500">Sıra: {item.sira_no} {item.kod && `• Kod: ${item.kod}`} • İrsaliye: {item.irsaliye_no}</div>
                         </div>
                         <div className="text-right">
                           <div className="font-bold text-lg text-slate-800">{formatCurrency(item.toplam)}</div>
@@ -804,10 +861,11 @@ function App() {
                       </div>
                       
                       <div className="flex justify-between items-center">
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 flex-wrap">
                           {item.ithalat && <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">İthalat</Badge>}
                           {item.ihracat && <Badge variant="secondary" className="bg-green-100 text-green-800 text-xs">İhracat</Badge>}
-                          {!item.ithalat && !item.ihracat && <Badge variant="outline" className="text-xs">-</Badge>}
+                          {item.bos && <Badge variant="secondary" className="bg-gray-100 text-gray-800 text-xs">Boş</Badge>}
+                          {!item.ithalat && !item.ihracat && !item.bos && <Badge variant="outline" className="text-xs">-</Badge>}
                         </div>
                         
                         <div className="flex gap-2">
