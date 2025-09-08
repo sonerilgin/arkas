@@ -318,12 +318,14 @@ function App() {
   const handleUserEdit = (updatedUser) => {
     console.log('handleUserEdit called with:', updatedUser);
     setUserInfo(updatedUser);
+    // Kalıcı olarak localStorage'a kaydet
+    localStorage.setItem('arkas_user_info', JSON.stringify(updatedUser));
     setUserEditDialogOpen(false);
     toast({
       title: "Başarılı",
-      description: "Kullanıcı bilgileri güncellendi"
+      description: "Kullanıcı bilgileri kalıcı olarak kaydedildi"
     });
-    console.log('User info updated to:', updatedUser);
+    console.log('User info saved to localStorage:', updatedUser);
   };
 
   const openUserEditDialog = () => {
