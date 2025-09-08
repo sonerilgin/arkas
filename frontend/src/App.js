@@ -474,7 +474,9 @@ function App() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">{thisMonthRecords.length}</div>
+              <div className="text-center py-4">
+                <span className="text-lg font-medium text-slate-600">Seçili Ay</span>
+              </div>
             </CardContent>
           </Card>
 
