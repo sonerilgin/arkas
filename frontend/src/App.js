@@ -382,10 +382,12 @@ function App() {
           <form onSubmit={(e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
-            handleUserEdit({
+            const updatedUser = {
               name: formData.get('name'),
               sicil: formData.get('sicil')
-            });
+            };
+            console.log('Updating user:', updatedUser);
+            handleUserEdit(updatedUser);
           }} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Ad Soyad</Label>
