@@ -641,28 +641,44 @@ function App() {
         </Dialog>
 
         {/* Month Filter Status */}
-        <div className="mb-4 flex flex-col sm:flex-row gap-2 items-start sm:items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-blue-600" />
-            <span className="text-sm text-blue-800 font-medium">
-              Tabloda {monthNames[displayMonth]} {displayYear} kayıtları gösteriliyor ({displayedRecords.length} kayıt)
-            </span>
+        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-blue-600" />
+                <span className="text-sm text-blue-800 font-medium">
+                  Tabloda {monthNames[displayMonth]} {displayYear} kayıtları gösteriliyor
+                </span>
+              </div>
+              
+              <div className="flex gap-6 text-sm">
+                <div className="flex items-center gap-1">
+                  <Package className="h-3 w-3 text-blue-600" />
+                  <span className="text-blue-700 font-semibold">{displayedRecords.length} kayıt</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3 text-blue-600" />
+                  <span className="text-blue-700 font-semibold">{formatCurrency(displayedTotal)}</span>
+                </div>
+              </div>
+            </div>
+            
+            <Button 
+              onClick={() => {
+                setDisplayMonth(new Date().getMonth());
+                setDisplayYear(new Date().getFullYear());
+                toast({
+                  title: "Geçerli Ay",
+                  description: "Bu ay kayıtları gösteriliyor"
+                });
+              }} 
+              variant="outline" 
+              size="sm" 
+              className="text-blue-600 border-blue-300 hover:bg-blue-100"
+            >
+              Bu Aya Dön
+            </Button>
           </div>
-          <Button 
-            onClick={() => {
-              setDisplayMonth(new Date().getMonth());
-              setDisplayYear(new Date().getFullYear());
-              toast({
-                title: "Geçerli Ay",
-                description: "Bu ay kayıtları gösteriliyor"
-              });
-            }} 
-            variant="outline" 
-            size="sm" 
-            className="text-blue-600 border-blue-300 hover:bg-blue-100"
-          >
-            Bu Aya Dön
-          </Button>
         </div>
 
         {/* Search and Add Section */}
