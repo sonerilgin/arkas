@@ -92,6 +92,8 @@ function App() {
       setLoading(true);
       const response = await axios.get(`${API}/nakliye`);
       setNakliyeList(response.data);
+      setFilteredNakliyeList(response.data);
+      setCurrentFilter({ type: 'all', month: null, year: null });
     } catch (error) {
       console.error("Nakliye listesi getirilirken hata:", error);
       toast({
