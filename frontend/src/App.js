@@ -342,11 +342,21 @@ function App() {
         return;
       }
 
-      const doc = new jsPDF();
+      const doc = new jsPDF({
+        orientation: 'landscape', // Yatay sayfa - daha fazla alan
+        unit: 'mm',
+        format: 'a4'
+      });
       
-      // PDF başlığı
-      doc.setFontSize(16);
-      doc.text(`ARKAS LOJİSTİK - ${selectedYear} YILI NAKLİYE RAPORU`, 105, 20, { align: 'center' });
+      // PDF başlığı - daha büyük font
+      doc.setFontSize(18);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`ARKAS LOJİSTİK - ${selectedYear} YILI NAKLİYE RAPORU`, 148, 20, { align: 'center' });
+      
+      // Alt başlık
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 148, 28, { align: 'center' });
       
       // Tablo verilerini hazırla
       const tableData = yearlyData.map(item => {
