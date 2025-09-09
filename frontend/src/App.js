@@ -1085,10 +1085,10 @@ function App() {
         </div>
 
         {/* Search and Add Section */}
-        <Card className="mb-6 lg:mb-8 bg-white shadow-lg border-0">
+        <Card className="mb-6 lg:mb-8 bg-white dark:bg-gray-800 shadow-lg border-0 dark:border-gray-700">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg lg:text-xl text-slate-800">Nakliye Kayıtları</CardTitle>
-            <CardDescription className="text-sm lg:text-base">Nakliye işlemlerinizi görüntüleyin, arayın ve yönetin</CardDescription>
+            <CardTitle className="text-lg lg:text-xl text-slate-800 dark:text-gray-100">Nakliye Kayıtları</CardTitle>
+            <CardDescription className="text-sm lg:text-base text-slate-600 dark:text-gray-300">Nakliye işlemlerinizi görüntüleyin, arayın ve yönetin</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-4 items-stretch lg:flex-row lg:items-center lg:justify-between">
