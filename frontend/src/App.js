@@ -820,21 +820,21 @@ function App() {
           </Card>
           
           <Card 
-            className="bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-200 cursor-pointer hover:scale-105" 
+            className="bg-white dark:bg-gray-800 shadow-lg border-0 dark:border-gray-700 hover:shadow-xl transition-all duration-200 cursor-pointer hover:scale-105" 
             onClick={() => showDetails('month')}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">
+              <CardTitle className="text-sm font-medium text-slate-600 dark:text-gray-300">
                 {monthNames[displayMonth]} {displayYear}
               </CardTitle>
               <div className="flex items-center gap-1">
-                <Calendar className="h-4 w-4 text-green-600" />
-                <ChevronRight className="h-3 w-3 text-slate-400" />
+                <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <ChevronRight className="h-3 w-3 text-slate-400 dark:text-gray-500" />
               </div>
             </CardHeader>
             <CardContent>
               <div className="text-center py-4">
-                <span className="text-lg font-medium text-slate-600">Seçili Ay</span>
+                <span className="text-lg font-medium text-slate-600 dark:text-gray-300">Seçili Ay</span>
               </div>
             </CardContent>
           </Card>
