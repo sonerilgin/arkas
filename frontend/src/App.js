@@ -343,73 +343,83 @@ function App() {
       }
 
       const doc = new jsPDF({
-        orientation: 'landscape', // Yatay sayfa - daha fazla alan
+        orientation: 'landscape', // Yatay sayfa
         unit: 'mm',
         format: 'a4'
       });
       
-      // Türkçe karakter desteği için encoding ayarla
+      // Türkçe karakter desteği için UTF-8 encoding
       doc.setFont('helvetica', 'normal');
       
-      // PDF başlığı - daha büyük font
+      // PDF başlığı
       doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      const title = `ARKAS LOJISTIK - ${selectedYear} YILI NAKLIYE RAPORU`;
-      doc.text(title, 148, 15, { align: 'center' });
+      doc.text(`ARKAS LOJİSTİK - ${selectedYear} YILI NAKLİYE RAPORU`, 148, 15, { align: 'center' });
       
       // Alt başlık
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      const subtitle = `Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`;
-      doc.text(subtitle, 148, 22, { align: 'center' });
+      doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 148, 22, { align: 'center' });
       
-      // Tablo verilerini hazırla - Türkçe karakterleri koruyarak
+      // Tablo verilerini hazırla - Türkçe karakterleri koru
       const tableData = yearlyData.map(item => {
         const toplam = item.toplam || 0;
         const sistem = item.sistem || 0;
         const fark = sistem - toplam;
         const turu = [];
-        if (item.ithalat) turu.push('Ithalat');
-        if (item.ihracat) turu.push('Ihracat');
-        if (item.bos) turu.push('Bos');
+        if (item.ithalat) turu.push('İthalat');
+        if (item.ihracat) turu.push('İhracat');
+        if (item.bos) turu.push('Boş');
         
         return [
-          formatDate(item.tarih).replace(/ğ/g, 'g').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ü/g, 'u').replace(/ı/g, 'i').replace(/ö/g, 'o'),
+          formatDate(item.tarih),
           item.sira_no || '',
           item.kod || '-',
-          (item.musteri || '').replace(/ğ/g, 'g').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ü/g, 'u').replace(/ı/g, 'i').replace(/ö/g, 'o'),
+          item.musteri || '',
           item.irsaliye_no || '',
           turu.join(', ') || '-',
-          formatCurrency(toplam).replace(/₺/g, 'TL'),
-          formatCurrency(sistem).replace(/₺/g, 'TL'),
-          fark === 0 ? 'Esit' : (fark > 0 ? `+${formatCurrency(Math.abs(fark)).replace(/₺/g, 'TL')}` : `-${formatCurrency(Math.abs(fark)).replace(/₺/g, 'TL')}`)
+          formatCurrency(toplam),
+          formatCurrency(sistem),
+          fark === 0 ? 'Eşit' : (fark > 0 ? `+${formatCurrency(Math.abs(fark))}` : `-${formatCurrency(Math.abs(fark))}`)
         ];
       });
 
-      // Tablo başlıkları - Türkçe karakterler ASCII'ye
+      // Tablo başlıkları - Türkçe karakterlerle
       const headers = [
-        'Tarih', 'Sira No', 'Kod', 'Musteri', 'Irsaliye No', 
-        'Tur', 'Toplam', 'Sistem', 'Karsilastirma'
+        'Tarih', 'Sıra No', 'Kod', 'Müşteri', 'İrsaliye No', 
+        'Tür', 'Toplam', 'Sistem', 'Karşılaştırma'
       ];
 
-      // AutoTable ile tablo oluştur
+      // AutoTable ile tablo oluştur - Okunabilir ayarlar
       doc.autoTable({
         head: [headers],
         body: tableData,
         startY: 30,
         styles: {
-          fontSize: 8,
-          cellPadding: 2,
+          fontSize: 9, // Okunabilir font boyutu
+          cellPadding: 3, // Daha fazla padding
+          lineWidth: 0.1,
+          lineColor: [200, 200, 200],
+          textColor: [0, 0, 0],
+          fillColor: [255, 255, 255]
         },
         headStyles: {
-          fillColor: [59, 130, 246], // Blue
+          fillColor: [59, 130, 246], // Mavi başlık
           textColor: [255, 255, 255],
-          fontStyle: 'bold'
+          fontStyle: 'bold',
+          fontSize: 10,
+          cellPadding: 4
         },
         columnStyles: {
-          6: { halign: 'right' }, // Toplam
-          7: { halign: 'right', textColor: [34, 197, 94] }, // Sistem - yeşil
-          8: { halign: 'center' }, // Karşılaştırma
+          0: { cellWidth: 25 }, // Tarih
+          1: { cellWidth: 20 }, // Sıra No
+          2: { cellWidth: 15 }, // Kod
+          3: { cellWidth: 45 }, // Müşteri
+          4: { cellWidth: 25 }, // İrsaliye No
+          5: { cellWidth: 25 }, // Tür
+          6: { cellWidth: 25, halign: 'right' }, // Toplam
+          7: { cellWidth: 25, halign: 'right', textColor: [34, 197, 94] }, // Sistem - yeşil
+          8: { cellWidth: 30, halign: 'center' }, // Karşılaştırma
         },
         didParseCell: function(data) {
           // Karşılaştırma sütunu renklendirme
@@ -417,24 +427,39 @@ function App() {
             const value = data.cell.text[0];
             if (value.startsWith('+')) {
               data.cell.styles.textColor = [34, 197, 94]; // Yeşil
+              data.cell.styles.fontStyle = 'bold';
             } else if (value.startsWith('-')) {
               data.cell.styles.textColor = [239, 68, 68]; // Kırmızı
+              data.cell.styles.fontStyle = 'bold';
             }
           }
-        }
+        },
+        margin: { top: 30, left: 10, right: 10 },
+        tableWidth: 'auto',
+        theme: 'grid'
       });
 
-      // Özet bilgileri
+      // Özet bilgileri - Alt kısım
       const totalRecords = yearlyData.length;
       const totalAmount = yearlyData.reduce((sum, item) => sum + (item.toplam || 0), 0);
       const totalSistem = yearlyData.reduce((sum, item) => sum + (item.sistem || 0), 0);
       
-      const finalY = doc.lastAutoTable.finalY + 10;
+      const finalY = doc.lastAutoTable.finalY + 15;
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      
+      // Özet kutusu
+      doc.setDrawColor(59, 130, 246);
+      doc.setFillColor(240, 248, 255);
+      doc.roundedRect(10, finalY - 5, 120, 25, 2, 2, 'FD');
+      
+      doc.setTextColor(0, 0, 0);
+      doc.text(`ÖZET BİLGİLER:`, 15, finalY + 2);
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
-      doc.text(`Toplam Kayıt: ${totalRecords}`, 20, finalY);
-      doc.text(`Toplam Tutar: ${formatCurrency(totalAmount)}`, 20, finalY + 6);
-      doc.text(`Toplam Sistem: ${formatCurrency(totalSistem)}`, 20, finalY + 12);
-      doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 20, finalY + 18);
+      doc.text(`• Toplam Kayıt: ${totalRecords} adet`, 15, finalY + 8);
+      doc.text(`• Toplam Tutar: ${formatCurrency(totalAmount)}`, 15, finalY + 13);
+      doc.text(`• Toplam Sistem: ${formatCurrency(totalSistem)}`, 70, finalY + 13);
 
       // PDF'i indir
       doc.save(`Arkas_Lojistik_${selectedYear}_Raporu.pdf`);
