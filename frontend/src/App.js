@@ -1363,16 +1363,16 @@ function App() {
                         className="border-2 border-slate-400"
                       />
                     </TableHead>
-                    <TableHead className="font-semibold text-slate-700">Tarih</TableHead>
-                    <TableHead className="font-semibold text-slate-700">Sıra No</TableHead>
-                    <TableHead className="font-semibold text-slate-700">Kod</TableHead>
-                    <TableHead className="font-semibold text-slate-700">Müşteri</TableHead>
-                    <TableHead className="font-semibold text-slate-700">İrsaliye No</TableHead>
-                    <TableHead className="font-semibold text-slate-700">Tür</TableHead>
-                    <TableHead className="font-semibold text-slate-700 text-right">Toplam</TableHead>
-                    <TableHead className="font-semibold text-green-600 text-right">Sistem</TableHead>
-                    <TableHead className="font-semibold text-slate-700 text-center">Karşılaştırma</TableHead>
-                    <TableHead className="font-semibold text-slate-700 text-center">İşlemler</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-gray-200">Tarih</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-gray-200">Sıra No</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-gray-200">Kod</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-gray-200">Müşteri</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-gray-200">İrsaliye No</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-gray-200">Tür</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-gray-200 text-right">Toplam</TableHead>
+                    <TableHead className="font-semibold text-green-600 dark:text-green-400 text-right">Sistem</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-gray-200 text-center">Karşılaştırma</TableHead>
+                    <TableHead className="font-semibold text-slate-700 dark:text-gray-200 text-center">İşlemler</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
