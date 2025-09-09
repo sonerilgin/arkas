@@ -445,6 +445,84 @@ function App() {
     setPdfYearDialogOpen(false);
   };
 
+  // Yedekleme fonksiyonları
+  const exportBackup = async () => {
+    try {
+      const response = await axios.get(`${API}/nakliye`);
+      const backupData = {
+        timestamp: new Date().toISOString(),
+        version: "1.0",
+        userInfo: userInfo,
+        nakliyeData: response.data
+      };
+
+      const dataStr = JSON.stringify(backupData, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Yedekleme Başarılı",
+        description: `${response.data.length} kayıt yedeklendi`
+      });
+    } catch (error) {
+      toast({
+        title: "Hata",
+        description: "Yedekleme sırasında hata oluştu",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const importBackup = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const backupData = JSON.parse(e.target.result);
+        
+        if (!backupData.nakliyeData || !Array.isArray(backupData.nakliyeData)) {
+          throw new Error('Geçersiz yedek dosyası');
+        }
+
+        // Verileri geri yükle
+        for (const item of backupData.nakliyeData) {
+          try {
+            await axios.post(`${API}/nakliye`, item);
+          } catch (err) {
+            console.warn('Kayıt yüklenirken hata:', err);
+          }
+        }
+
+        // Kullanıcı bilgilerini geri yükle
+        if (backupData.userInfo) {
+          setUserInfo(backupData.userInfo);
+          localStorage.setItem('arkas_user_info', JSON.stringify(backupData.userInfo));
+        }
+
+        fetchNakliyeList();
+        toast({
+          title: "Geri Yükleme Başarılı",
+          description: `${backupData.nakliyeData.length} kayıt geri yüklendi`
+        });
+      } catch (error) {
+        toast({
+          title: "Hata",
+          description: "Geri yükleme sırasında hata oluştu",
+          variant: "destructive"
+        });
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  };
+
   const showDetails = (type) => {
     let data = [];
     let title = "";
