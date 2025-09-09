@@ -97,6 +97,10 @@ function App() {
     toplam: 0,
     sistem: 0
   });
+  
+  // Çoklu seçim için state'ler
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
 
   const { toast } = useToast();
 
