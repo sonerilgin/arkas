@@ -959,6 +959,34 @@ function App() {
                   {loading ? 'PDF Hazırlanıyor...' : 'PDF İndir'}
                 </Button>
                 
+                <Button 
+                  onClick={exportBackup} 
+                  variant="outline" 
+                  className="flex-1 lg:flex-none border-orange-300 text-orange-600 hover:bg-orange-50"
+                  disabled={loading}
+                >
+                  <Download className="mr-2 h-4 w-4" />
+                  Yedek Al
+                </Button>
+                
+                <Button 
+                  onClick={() => document.getElementById('backup-file-input').click()} 
+                  variant="outline" 
+                  className="flex-1 lg:flex-none border-purple-300 text-purple-600 hover:bg-purple-50"
+                  disabled={loading}
+                >
+                  <Upload className="mr-2 h-4 w-4" />
+                  Yedek Yükle
+                </Button>
+                
+                <input
+                  id="backup-file-input"
+                  type="file"
+                  accept=".json"
+                  onChange={importBackup}
+                  style={{ display: 'none' }}
+                />
+                
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button onClick={handleNewRecord} className="flex-1 lg:flex-none bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200">
