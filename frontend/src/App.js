@@ -1309,6 +1309,13 @@ function App() {
                       
                       return (
                         <TableRow key={item.id} className="hover:bg-slate-50 transition-colors">
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedItems.includes(item.id)}
+                              onCheckedChange={() => handleSelectItem(item.id)}
+                              aria-label={`Select ${item.musteri}`}
+                            />
+                          </TableCell>
                           <TableCell className="font-medium">{formatDate(item.tarih)}</TableCell>
                           <TableCell>{item.sira_no}</TableCell>
                           <TableCell>{item.kod || '-'}</TableCell>
