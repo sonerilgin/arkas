@@ -101,6 +101,12 @@ function App() {
   // Çoklu seçim için state'ler
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
+  
+  // Theme state
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const savedTheme = localStorage.getItem('arkas_theme');
+    return savedTheme === 'dark';
+  });
 
   const { toast } = useToast();
 
