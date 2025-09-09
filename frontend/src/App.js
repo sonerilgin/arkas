@@ -1055,13 +1055,28 @@ function App() {
           <CardContent>
             <div className="flex flex-col gap-4 items-stretch lg:flex-row lg:items-center lg:justify-between">
               <div className="flex gap-2 flex-1 max-w-full lg:max-w-md">
-                <Input
-                  placeholder="Müşteri, sıra no, kod veya irsaliye no ile ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="border-slate-200 text-sm lg:text-base"
-                />
+                <div className="relative flex-1">
+                  <Input
+                    placeholder="Müşteri, sıra no, kod veya irsaliye no ile ara..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    className="border-slate-200 text-sm lg:text-base pr-8"
+                  />
+                  {searchTerm && (
+                    <Button
+                      onClick={() => {
+                        setSearchTerm('');
+                        fetchNakliyeList();
+                      }}
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-gray-100"
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
                 <Button onClick={handleSearch} variant="outline" size="icon" className="flex-shrink-0">
                   <Search className="h-4 w-4" />
                 </Button>
