@@ -104,6 +104,12 @@ function App() {
 
   const { toast } = useToast();
 
+  // Displayed records değiştiğinde seçimi sıfırla
+  useEffect(() => {
+    setSelectedItems([]);
+    setSelectAll(false);
+  }, [displayMonth, displayYear, searchTerm]);
+
   const fetchNakliyeList = async () => {
     try {
       setLoading(true);
