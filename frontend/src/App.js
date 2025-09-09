@@ -348,43 +348,48 @@ function App() {
         format: 'a4'
       });
       
+      // Türkçe karakter desteği için encoding ayarla
+      doc.setFont('helvetica', 'normal');
+      
       // PDF başlığı - daha büyük font
-      doc.setFontSize(18);
+      doc.setFontSize(16);
       doc.setFont('helvetica', 'bold');
-      doc.text(`ARKAS LOJİSTİK - ${selectedYear} YILI NAKLİYE RAPORU`, 148, 20, { align: 'center' });
+      const title = `ARKAS LOJISTIK - ${selectedYear} YILI NAKLIYE RAPORU`;
+      doc.text(title, 148, 15, { align: 'center' });
       
       // Alt başlık
-      doc.setFontSize(12);
+      doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
-      doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 148, 28, { align: 'center' });
+      const subtitle = `Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`;
+      doc.text(subtitle, 148, 22, { align: 'center' });
       
-      // Tablo verilerini hazırla
+      // Tablo verilerini hazırla - Türkçe karakterleri koruyarak
       const tableData = yearlyData.map(item => {
         const toplam = item.toplam || 0;
         const sistem = item.sistem || 0;
         const fark = sistem - toplam;
         const turu = [];
-        if (item.ithalat) turu.push('İthalat');
-        if (item.ihracat) turu.push('İhracat');
-        if (item.bos) turu.push('Boş');
+        if (item.ithalat) turu.push('Ithalat');
+        if (item.ihracat) turu.push('Ihracat');
+        if (item.bos) turu.push('Bos');
         
         return [
-          formatDate(item.tarih),
+          formatDate(item.tarih).replace(/ğ/g, 'g').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ü/g, 'u').replace(/ı/g, 'i').replace(/ö/g, 'o'),
           item.sira_no || '',
           item.kod || '-',
-          item.musteri || '',
+          (item.musteri || '').replace(/ğ/g, 'g').replace(/ş/g, 's').replace(/ç/g, 'c').replace(/ü/g, 'u').replace(/ı/g, 'i').replace(/ö/g, 'o'),
           item.irsaliye_no || '',
           turu.join(', ') || '-',
-          formatCurrency(toplam),
-          formatCurrency(sistem),
-          fark === 0 ? 'Eşit' : (fark > 0 ? `+${formatCurrency(Math.abs(fark))}` : `-${formatCurrency(Math.abs(fark))}`)
+          formatCurrency(toplam).replace(/₺/g, 'TL'),
+          formatCurrency(sistem).replace(/₺/g, 'TL'),
+          fark === 0 ? 'Esit' : (fark > 0 ? `+${formatCurrency(Math.abs(fark)).replace(/₺/g, 'TL')}` : `-${formatCurrency(Math.abs(fark)).replace(/₺/g, 'TL')}`)
         ];
       });
 
-      // Tablo başlıkları
+      // Tablo başlıkları - Türkçe karakterler ASCII'ye
       const headers = [
-        'Tarih', 'Sıra No', 'Kod', 'Müşteri', 'İrsaliye No', 
-        'Tür', 'Toplam', 'Sistem', 'Karşılaştırma'
+        'Tarih', 'Sira No', 'Kod', 'Musteri', 'Irsaliye No', 
+        'Tur', 'Toplam', 'Sistem', 'Karsilastirma'
       ];
 
       // AutoTable ile tablo oluştur
