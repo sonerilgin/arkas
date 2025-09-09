@@ -482,7 +482,7 @@ function App() {
     }
   };
 
-  const importBackup = (event) => {
+  const importBackup = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -495,12 +495,33 @@ function App() {
           throw new Error('Geçersiz yedek dosyası');
         }
 
-        // Verileri geri yükle
+        // Mevcut kayıtları al
+        const existingResponse = await axios.get(`${API}/nakliye`);
+        const existingData = existingResponse.data;
+        
+        let addedCount = 0;
+        let skippedCount = 0;
+
+        // Verileri geri yükle - duplicate kontrolü ile
         for (const item of backupData.nakliyeData) {
           try {
-            await axios.post(`${API}/nakliye`, item);
+            // Aynı sıra_no, musteri ve irsaliye_no kombinasyonu var mı kontrol et
+            const isDuplicate = existingData.some(existing => 
+              existing.sira_no === item.sira_no && 
+              existing.musteri === item.musteri && 
+              existing.irsaliye_no === item.irsaliye_no
+            );
+
+            if (!isDuplicate) {
+              await axios.post(`${API}/nakliye`, item);
+              addedCount++;
+            } else {
+              skippedCount++;
+              console.log(`Duplicate kayıt atlandı: ${item.sira_no} - ${item.musteri} - ${item.irsaliye_no}`);
+            }
           } catch (err) {
             console.warn('Kayıt yüklenirken hata:', err);
+            skippedCount++;
           }
         }
 
@@ -512,8 +533,8 @@ function App() {
 
         fetchNakliyeList();
         toast({
-          title: "Geri Yükleme Başarılı",
-          description: `${backupData.nakliyeData.length} kayıt geri yüklendi`
+          title: "Geri Yükleme Tamamlandı",
+          description: `${addedCount} yeni kayıt eklendi${skippedCount > 0 ? `, ${skippedCount} duplicate kayıt atlandı` : ''}`
         });
       } catch (error) {
         toast({
