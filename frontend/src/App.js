@@ -223,6 +223,8 @@ function App() {
         description: "Nakliye kaydı silindi"
       });
       fetchNakliyeList();
+      // Seçili listeden de kaldır
+      setSelectedItems(prev => prev.filter(itemId => itemId !== id));
     } catch (error) {
       console.error("Silme işlemi sırasında hata:", error);
       toast({
@@ -230,6 +232,76 @@ function App() {
         description: "Silme işlemi sırasında bir hata oluştu",
         variant: "destructive"
       });
+    }
+  };
+
+  // Çoklu seçim fonksiyonları
+  const handleSelectItem = (id) => {
+    setSelectedItems(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(itemId => itemId !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedItems([]);
+      setSelectAll(false);
+    } else {
+      const currentPageIds = displayedRecords.map(item => item.id);
+      setSelectedItems(currentPageIds);
+      setSelectAll(true);
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedItems.length === 0) {
+      toast({
+        title: "Uyarı",
+        description: "Silinecek kayıt seçmediniz",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!window.confirm(`${selectedItems.length} kayıtı silmek istediğinizden emin misiniz?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const id of selectedItems) {
+        try {
+          await axios.delete(`${API}/nakliye/${id}`);
+          successCount++;
+        } catch (error) {
+          console.error(`Kayıt silme hatası (${id}):`, error);
+          errorCount++;
+        }
+      }
+
+      toast({
+        title: "Silme İşlemi Tamamlandı",
+        description: `${successCount} kayıt silindi${errorCount > 0 ? `, ${errorCount} kayıt silinemedi` : ''}`
+      });
+
+      setSelectedItems([]);
+      setSelectAll(false);
+      fetchNakliyeList();
+    } catch (error) {
+      toast({
+        title: "Hata",
+        description: "Toplu silme işlemi sırasında hata oluştu",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
