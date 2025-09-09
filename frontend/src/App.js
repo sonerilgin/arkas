@@ -1041,12 +1041,12 @@ function App() {
         </Dialog>
 
         {/* Month Filter Status */}
-        <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="mb-4 bg-blue-50 dark:bg-gray-800 border border-blue-200 dark:border-gray-600 rounded-lg p-4">
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-blue-600" />
-                <span className="text-sm text-blue-800 font-medium">
+                <Calendar className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm text-blue-800 dark:text-blue-300 font-medium">
                   {searchTerm.trim() 
                     ? `"${searchTerm}" arama sonuçları (tüm kayıtlarda)` 
                     : `Tabloda ${monthNames[displayMonth]} ${displayYear} kayıtları gösteriliyor`
@@ -1056,12 +1056,12 @@ function App() {
               
               <div className="flex gap-6 text-sm">
                 <div className="flex items-center gap-1">
-                  <Package className="h-3 w-3 text-blue-600" />
-                  <span className="text-blue-700 font-semibold">{displayedRecords.length} kayıt</span>
+                  <Package className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                  <span className="text-blue-700 dark:text-blue-300 font-semibold">{displayedRecords.length} kayıt</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <TrendingUp className="h-3 w-3 text-blue-600" />
-                  <span className="text-blue-700 font-semibold">{formatCurrency(displayedTotal)}</span>
+                  <TrendingUp className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                  <span className="text-blue-700 dark:text-blue-300 font-semibold">{formatCurrency(displayedTotal)}</span>
                 </div>
               </div>
             </div>
