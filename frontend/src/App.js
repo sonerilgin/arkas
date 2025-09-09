@@ -763,11 +763,11 @@ function App() {
                 />
               </div>
               <div className="text-center sm:text-left">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-800 arkas-brand-text">
-                  <span className="text-slate-800" style={{color: '#1e2563'}}>ARKAS</span>{' '}
-                  <span className="text-blue-500" style={{color: '#3b82f6'}}>LOJİSTİK</span>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-800 dark:text-gray-100 arkas-brand-text">
+                  <span className="text-slate-800 dark:text-gray-100" style={{color: isDarkMode ? '#f1f5f9' : '#1e2563'}}>ARKAS</span>{' '}
+                  <span className="text-blue-500 dark:text-blue-400" style={{color: isDarkMode ? '#60a5fa' : '#3b82f6'}}>LOJİSTİK</span>
                 </h1>
-                <p className="text-slate-600 text-sm sm:text-base lg:text-lg font-medium">Nakliye Takip ve Yönetim Sistemi</p>
+                <p className="text-slate-600 dark:text-gray-300 text-sm sm:text-base lg:text-lg font-medium">Nakliye Takip ve Yönetim Sistemi</p>
               </div>
             </div>
             
