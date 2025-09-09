@@ -219,10 +219,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Duplicate Prevention in Backup Import"
     - "Multi-Select Checkboxes"
     - "Bulk Delete Functionality"
-  stuck_tasks: []
+  stuck_tasks:
+    - "Multi-Select Checkboxes"
+    - "Bulk Delete Functionality"
   test_all: false
   test_priority: "high_first"
 
