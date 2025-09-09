@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Kullanıcı yedek alma ve yedek geri yükleme butonlarının görünür olmaması sorununu bildirdi. Butonların UI'da görünmesi gerekiyordu."
+user_problem_statement: "Kullanıcı yedek geri yükleme sırasında duplicate kontrolü ve çoklu silme özelliği talep etti. 1) Aynı sıra no, müşteri no ve irsaliye no kombinasyonu varsa kayıt tekrar eklenmemeli. 2) Kayıtları seçebilmek için checkbox'lar ve toplu silme özelliği eklenmeli."
 
 backend:
   - task: "Backup/Restore API Endpoints"
@@ -136,6 +136,42 @@ frontend:
         agent: "testing"
         comment: "✅ TESTED: Both 'Yedek Al' (orange) and 'Yedek Yükle' (purple) buttons are clearly visible with proper styling. Orange button has border-orange-300 text-orange-600 hover:bg-orange-50 classes, purple button has border-purple-300 text-purple-600 hover:bg-purple-50 classes. Both buttons display correct Download and Upload icons respectively. Hover effects work properly."
 
+  - task: "Duplicate Prevention in Backup Import"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Enhanced importBackup() function to check for duplicates based on sira_no, musteri, and irsaliye_no combination before adding records"
+
+  - task: "Multi-Select Checkboxes"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added checkbox column to table header and individual checkboxes for each row with handleSelectItem() and handleSelectAll() functions"
+
+  - task: "Bulk Delete Functionality"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added conditional 'Seçilenleri Sil' button that appears when items are selected, with handleDeleteSelected() function for bulk deletion"
+
   - task: "Backup Export Functionality"
     implemented: true
     working: true
@@ -168,12 +204,15 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "1.1"
+  test_sequence: 2
   run_ui: true
 
 test_plan:
-  current_focus: []
+  current_focus:
+    - "Duplicate Prevention in Backup Import"
+    - "Multi-Select Checkboxes"
+    - "Bulk Delete Functionality"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -183,3 +222,5 @@ agent_communication:
     message: "Added visible backup and restore buttons to UI. Buttons now appear next to PDF export button with proper styling. Need to test functionality."
   - agent: "testing"
     message: "✅ TESTING COMPLETED: All backup/restore functionality tested successfully. Both buttons are visible with proper styling (orange for backup, purple for restore). Export functionality works - downloads JSON file with correct naming. Import functionality properly configured - file dialog opens and accepts JSON files. No errors detected. All 3 tasks now working properly."
+  - agent: "main"
+    message: "Enhanced backup import with duplicate prevention based on sira_no+musteri+irsaliye_no. Added multi-select checkboxes and bulk delete functionality. Table now has checkbox column, conditional bulk delete button, and proper state management."
