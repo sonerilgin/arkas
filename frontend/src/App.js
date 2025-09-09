@@ -1099,7 +1099,7 @@ function App() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    className="border-slate-200 text-sm lg:text-base pr-8"
+                    className="border-slate-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 text-sm lg:text-base pr-8"
                   />
                   {searchTerm && (
                     <Button
