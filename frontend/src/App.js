@@ -341,131 +341,87 @@ function App() {
         return;
       }
 
-      const doc = new jsPDF({
-        orientation: 'landscape', // Yatay sayfa
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      // Türkçe karakter desteği için UTF-8 encoding
-      doc.setFont('helvetica', 'normal');
-      
-      // PDF başlığı
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`ARKAS LOJİSTİK - ${selectedYear} YILI NAKLİYE RAPORU`, 148, 15, { align: 'center' });
-      
-      // Alt başlık
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}`, 148, 22, { align: 'center' });
-      
-      // Tablo verilerini hazırla - Türkçe karakterleri koru
-      const tableData = yearlyData.map(item => {
-        const toplam = item.toplam || 0;
-        const sistem = item.sistem || 0;
-        const fark = sistem - toplam;
-        const turu = [];
-        if (item.ithalat) turu.push('İthalat');
-        if (item.ihracat) turu.push('İhracat');
-        if (item.bos) turu.push('Boş');
-        
-        return [
-          formatDate(item.tarih),
-          item.sira_no || '',
-          item.kod || '-',
-          item.musteri || '',
-          item.irsaliye_no || '',
-          turu.join(', ') || '-',
-          formatCurrency(toplam),
-          formatCurrency(sistem),
-          fark === 0 ? 'Eşit' : (fark > 0 ? `+${formatCurrency(Math.abs(fark))}` : `-${formatCurrency(Math.abs(fark))}`)
-        ];
-      });
+      // HTML tablo oluştur
+      const tableHTML = `
+        <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: #1e3a8a; margin-bottom: 5px;">ARKAS LOJİSTİK</h1>
+            <h2 style="color: #3b82f6; margin-bottom: 10px;">${selectedYear} YILI NAKLİYE RAPORU</h2>
+            <p>Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}</p>
+          </div>
+          
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+              <tr style="background-color: #3b82f6; color: white;">
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Tarih</th>
+                <th style="border: 1px solid #ddd; padding: 8px;">Sıra No</th>
+                <th style="border: 1px solid #ddd; padding: 8px;">Kod</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Müşteri</th>
+                <th style="border: 1px solid #ddd; padding: 8px;">İrsaliye No</th>
+                <th style="border: 1px solid #ddd; padding: 8px;">Tür</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Toplam</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: right; color: #22c55e;">Sistem</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Karşılaştırma</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${yearlyData.map(item => {
+                const toplam = item.toplam || 0;
+                const sistem = item.sistem || 0;
+                const fark = sistem - toplam;
+                const turu = [];
+                if (item.ithalat) turu.push('İthalat');
+                if (item.ihracat) turu.push('İhracat');
+                if (item.bos) turu.push('Boş');
+                const farkText = fark === 0 ? 'Eşit' : (fark > 0 ? `+${formatCurrency(Math.abs(fark))}` : `-${formatCurrency(Math.abs(fark))}`);
+                const farkColor = fark === 0 ? '#6b7280' : (fark > 0 ? '#22c55e' : '#ef4444');
+                
+                return `
+                  <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="border: 1px solid #ddd; padding: 8px;">${formatDate(item.tarih)}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.sira_no}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.kod || '-'}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${item.musteri}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.irsaliye_no}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${turu.join(', ') || '-'}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold;">${formatCurrency(toplam)}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #22c55e;">${formatCurrency(sistem)}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center; font-weight: bold; color: ${farkColor};">${farkText}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+          
+          <div style="display: flex; gap: 30px; background-color: #f8fafc; padding: 15px; border-radius: 8px;">
+            <div><strong>Toplam Kayıt:</strong> ${yearlyData.length} adet</div>
+            <div><strong>Toplam Tutar:</strong> ${formatCurrency(yearlyData.reduce((sum, item) => sum + (item.toplam || 0), 0))}</div>
+            <div><strong>Toplam Sistem:</strong> <span style="color: #22c55e;">${formatCurrency(yearlyData.reduce((sum, item) => sum + (item.sistem || 0), 0))}</span></div>
+          </div>
+        </div>
+      `;
 
-      // Tablo başlıkları - Türkçe karakterlerle
-      const headers = [
-        'Tarih', 'Sıra No', 'Kod', 'Müşteri', 'İrsaliye No', 
-        'Tür', 'Toplam', 'Sistem', 'Karşılaştırma'
-      ];
+      // HTML2PDF ile dönüştür
+      const element = document.createElement('div');
+      element.innerHTML = tableHTML;
+      document.body.appendChild(element);
 
-      // AutoTable ile tablo oluştur - Okunabilir ayarlar
-      doc.autoTable({
-        head: [headers],
-        body: tableData,
-        startY: 30,
-        styles: {
-          fontSize: 9, // Okunabilir font boyutu
-          cellPadding: 3, // Daha fazla padding
-          lineWidth: 0.1,
-          lineColor: [200, 200, 200],
-          textColor: [0, 0, 0],
-          fillColor: [255, 255, 255]
-        },
-        headStyles: {
-          fillColor: [59, 130, 246], // Mavi başlık
-          textColor: [255, 255, 255],
-          fontStyle: 'bold',
-          fontSize: 10,
-          cellPadding: 4
-        },
-        columnStyles: {
-          0: { cellWidth: 25 }, // Tarih
-          1: { cellWidth: 20 }, // Sıra No
-          2: { cellWidth: 15 }, // Kod
-          3: { cellWidth: 45 }, // Müşteri
-          4: { cellWidth: 25 }, // İrsaliye No
-          5: { cellWidth: 25 }, // Tür
-          6: { cellWidth: 25, halign: 'right' }, // Toplam
-          7: { cellWidth: 25, halign: 'right', textColor: [34, 197, 94] }, // Sistem - yeşil
-          8: { cellWidth: 30, halign: 'center' }, // Karşılaştırma
-        },
-        didParseCell: function(data) {
-          // Karşılaştırma sütunu renklendirme
-          if (data.column.index === 8 && data.section === 'body') {
-            const value = data.cell.text[0];
-            if (value.startsWith('+')) {
-              data.cell.styles.textColor = [34, 197, 94]; // Yeşil
-              data.cell.styles.fontStyle = 'bold';
-            } else if (value.startsWith('-')) {
-              data.cell.styles.textColor = [239, 68, 68]; // Kırmızı
-              data.cell.styles.fontStyle = 'bold';
-            }
-          }
-        },
-        margin: { top: 30, left: 10, right: 10 },
-        tableWidth: 'auto',
-        theme: 'grid'
-      });
+      const opt = {
+        margin: 10,
+        filename: `Arkas_Lojistik_${selectedYear}_Raporu.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      };
 
-      // Özet bilgileri - Alt kısım
-      const totalRecords = yearlyData.length;
-      const totalAmount = yearlyData.reduce((sum, item) => sum + (item.toplam || 0), 0);
-      const totalSistem = yearlyData.reduce((sum, item) => sum + (item.sistem || 0), 0);
+      await html2pdf().set(opt).from(element).save();
       
-      const finalY = doc.lastAutoTable.finalY + 15;
-      doc.setFontSize(11);
-      doc.setFont('helvetica', 'bold');
-      
-      // Özet kutusu
-      doc.setDrawColor(59, 130, 246);
-      doc.setFillColor(240, 248, 255);
-      doc.roundedRect(10, finalY - 5, 120, 25, 2, 2, 'FD');
-      
-      doc.setTextColor(0, 0, 0);
-      doc.text(`ÖZET BİLGİLER:`, 15, finalY + 2);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10);
-      doc.text(`• Toplam Kayıt: ${totalRecords} adet`, 15, finalY + 8);
-      doc.text(`• Toplam Tutar: ${formatCurrency(totalAmount)}`, 15, finalY + 13);
-      doc.text(`• Toplam Sistem: ${formatCurrency(totalSistem)}`, 70, finalY + 13);
-
-      // PDF'i indir
-      doc.save(`Arkas_Lojistik_${selectedYear}_Raporu.pdf`);
+      // Geçici elementi kaldır
+      document.body.removeChild(element);
       
       toast({
         title: "Başarılı",
-        description: `${selectedYear} yılı raporu PDF olarak indirildi (${totalRecords} kayıt)`
+        description: `${selectedYear} yılı raporu PDF olarak indirildi (${yearlyData.length} kayıt)`
       });
 
     } catch (error) {
