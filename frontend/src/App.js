@@ -1348,14 +1348,14 @@ function App() {
         </Card>
 
         {/* Data Table */}
-        <Card className="bg-white shadow-lg border-0">
+        <Card className="bg-white dark:bg-gray-800 shadow-lg border-0 dark:border-gray-700">
           <CardContent className="p-0">
             {/* Desktop Table */}
             <div className="hidden lg:block overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-slate-50">
-                    <TableHead className="font-semibold text-slate-700 w-12">
+                  <TableRow className="bg-slate-50 dark:bg-gray-700">
+                    <TableHead className="font-semibold text-slate-700 dark:text-gray-200 w-12">
                       <Checkbox
                         checked={selectAll}
                         onCheckedChange={handleSelectAll}
