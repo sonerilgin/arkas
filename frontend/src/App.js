@@ -839,14 +839,14 @@ function App() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white shadow-lg border-0 hover:shadow-xl transition-all duration-200 sm:col-span-2 lg:col-span-1">
+          <Card className="bg-white dark:bg-gray-800 shadow-lg border-0 dark:border-gray-700 hover:shadow-xl transition-all duration-200 sm:col-span-2 lg:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">Toplam Tutar</CardTitle>
-              <TrendingUp className="h-4 w-4 text-emerald-600" />
+              <CardTitle className="text-sm font-medium text-slate-600 dark:text-gray-300">Toplam Tutar</CardTitle>
+              <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-slate-800">{formatCurrency(displayedTotal)}</div>
-              <p className="text-xs text-slate-500">{monthNames[displayMonth]} {displayYear} toplam tutarı</p>
+              <div className="text-2xl font-bold text-slate-800 dark:text-gray-100">{formatCurrency(displayedTotal)}</div>
+              <p className="text-xs text-slate-500 dark:text-gray-400">{monthNames[displayMonth]} {displayYear} toplam tutarı</p>
             </CardContent>
           </Card>
         </div>
