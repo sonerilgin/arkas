@@ -101,3 +101,77 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Kullanıcı yedek alma ve yedek geri yükleme butonlarının görünür olmaması sorununu bildirdi. Butonların UI'da görünmesi gerekiyordu."
+
+backend:
+  - task: "Backup/Restore API Endpoints"
+    implemented: true
+    working: "NA"
+    file: "server.py"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Backup functionality uses existing /api/nakliye endpoints"
+
+frontend:
+  - task: "Backup/Restore Buttons Visibility"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported buttons not visible: 'butonlar görüşmüyor nerede'"
+      - working: true
+        agent: "main"
+        comment: "Added visible backup and restore buttons with proper styling and functionality"
+
+  - task: "Backup Export Functionality"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Function exportBackup() exists and downloads JSON backup file"
+
+  - task: "Backup Import Functionality"
+    implemented: true
+    working: true
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Function importBackup() exists with file input and data restoration"
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: true
+
+test_plan:
+  current_focus:
+    - "Backup/Restore Buttons Visibility"
+    - "Backup Export Functionality"
+    - "Backup Import Functionality"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Added visible backup and restore buttons to UI. Buttons now appear next to PDF export button with proper styling. Need to test functionality."
