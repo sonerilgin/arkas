@@ -1291,6 +1291,7 @@ function App() {
                         checked={selectAll}
                         onCheckedChange={handleSelectAll}
                         aria-label="Tümünü seç"
+                        className="border-2 border-slate-400"
                       />
                     </TableHead>
                     <TableHead className="font-semibold text-slate-700">Tarih</TableHead>
