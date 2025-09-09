@@ -15,7 +15,7 @@ import { Textarea } from "./components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
 import { useToast } from "./hooks/use-toast";
 import { Toaster } from "./components/ui/toaster";
-import { Search, Plus, Edit3, Trash2, Truck, Package, Calendar, TrendingUp, User, X, ChevronRight, FileDown, Download, Upload } from "lucide-react";
+import { Search, Plus, Edit3, Trash2, Truck, Package, Calendar, TrendingUp, User, X, ChevronRight, FileDown, Download, Upload, Moon, Sun } from "lucide-react";
 import html2pdf from 'html2pdf.js';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
