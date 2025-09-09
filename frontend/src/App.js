@@ -1002,7 +1002,10 @@ function App() {
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-blue-600" />
                 <span className="text-sm text-blue-800 font-medium">
-                  Tabloda {monthNames[displayMonth]} {displayYear} kayıtları gösteriliyor
+                  {searchTerm.trim() 
+                    ? `"${searchTerm}" arama sonuçları (tüm kayıtlarda)` 
+                    : `Tabloda ${monthNames[displayMonth]} ${displayYear} kayıtları gösteriliyor`
+                  }
                 </span>
               </div>
               
