@@ -129,14 +129,21 @@ function App() {
 
   const handleSearch = async () => {
     if (!searchTerm.trim()) {
+      // Arama temizlendiğinde tüm verileri getir
       fetchNakliyeList();
       return;
     }
 
     try {
       setLoading(true);
+      // Arama yapıldığında backend'den tüm sonuçları getir
       const response = await axios.get(`${API}/nakliye/search/${searchTerm}`);
       setNakliyeList(response.data);
+      
+      toast({
+        title: "Arama Tamamlandı",
+        description: `${response.data.length} sonuç bulundu (tüm kayıtlarda)`
+      });
     } catch (error) {
       console.error("Arama yapılırken hata:", error);
       toast({
