@@ -116,6 +116,21 @@ function App() {
     setSelectAll(false);
   }, [displayMonth, displayYear, searchTerm]);
 
+  // Theme yönetimi
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('arkas_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('arkas_theme', 'light');
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
   const fetchNakliyeList = async () => {
     try {
       setLoading(true);
