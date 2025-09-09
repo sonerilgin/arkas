@@ -1333,6 +1333,7 @@ function App() {
                               checked={selectedItems.includes(item.id)}
                               onCheckedChange={() => handleSelectItem(item.id)}
                               aria-label={`Select ${item.musteri}`}
+                              className="border-2 border-slate-400"
                             />
                           </TableCell>
                           <TableCell className="font-medium">{formatDate(item.tarih)}</TableCell>
