@@ -1268,6 +1268,13 @@ function App() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50">
+                    <TableHead className="font-semibold text-slate-700 w-12">
+                      <Checkbox
+                        checked={selectAll}
+                        onCheckedChange={handleSelectAll}
+                        aria-label="Tümünü seç"
+                      />
+                    </TableHead>
                     <TableHead className="font-semibold text-slate-700">Tarih</TableHead>
                     <TableHead className="font-semibold text-slate-700">Sıra No</TableHead>
                     <TableHead className="font-semibold text-slate-700">Kod</TableHead>
