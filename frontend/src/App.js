@@ -1084,6 +1084,18 @@ function App() {
                   style={{ display: 'none' }}
                 />
                 
+                {selectedItems.length > 0 && (
+                  <Button 
+                    onClick={handleDeleteSelected} 
+                    variant="outline" 
+                    className="flex-1 lg:flex-none border-red-300 text-red-600 hover:bg-red-50"
+                    disabled={loading}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Seçilenleri Sil ({selectedItems.length})
+                  </Button>
+                )}
+                
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button onClick={handleNewRecord} className="flex-1 lg:flex-none bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200">
