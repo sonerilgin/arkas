@@ -356,6 +356,12 @@ function App() {
   });
 
   const displayedRecords = nakliyeList.filter(item => {
+    // Eğer arama terimi varsa, tüm kayıtlarda ara (ay/yıl filtresi uygulama)
+    if (searchTerm.trim()) {
+      return true; // Tüm kayıtları dahil et, filtreleme backend'de yapılıyor
+    }
+    
+    // Arama terimi yoksa, ay/yıl filtresini uygula
     const itemDate = new Date(item.tarih);
     return itemDate.getMonth() === displayMonth && itemDate.getFullYear() === displayYear;
   });
