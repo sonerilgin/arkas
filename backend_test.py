@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 import uuid
 
 class NakliyeAPITester:
-    def __init__(self, base_url="https://sevkiyat-kontrol.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://arkas-logistics.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
