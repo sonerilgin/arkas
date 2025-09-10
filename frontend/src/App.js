@@ -863,7 +863,7 @@ function App() {
             onClick={() => showDetails('month')}
           >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-semibold text-slate-600 dark:text-gray-300">
+              <CardTitle className="text-2xl font-bold text-slate-800 dark:text-gray-100">
                 {monthNames[displayMonth]} {displayYear}
               </CardTitle>
               <div className="flex items-center gap-1">
