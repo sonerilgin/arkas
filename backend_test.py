@@ -574,19 +574,35 @@ def main():
         
         # Test 6: Verify users
         print("\n✅ VERIFICATION TESTS")
-        if success:
-            auth_tester.test_verify_user("test@example.com", email_code)
+        if success and email:
+            auth_tester.test_verify_user(email, email_code)
             # Test invalid verification code
-            auth_tester.test_verify_invalid_code("test@example.com")
+            auth_tester.test_verify_invalid_code(email)
         
-        if success_phone:
-            auth_tester.test_verify_user("+905551234567", phone_code)
+        if success_phone and phone:
+            auth_tester.test_verify_user(phone, phone_code)
         
         # Test 7: Login tests
         print("\n🔑 LOGIN TESTS (Verified Users)")
-        login_success, _ = auth_tester.test_login_email()
-        auth_tester.test_login_phone()
-        auth_tester.test_login_invalid_credentials()
+        login_success = False
+        if email:
+            login_success, _ = auth_tester.test_login_email(email)
+        if phone:
+            auth_tester.test_login_phone(phone)
+        
+        # Test invalid credentials with verified email
+        if email:
+            test_data = {
+                "identifier": email,
+                "password": "wrongpassword"
+            }
+            auth_tester.run_test(
+                "Login with Invalid Password (should fail)",
+                "POST",
+                "auth/login",
+                401,
+                data=test_data
+            )
         
         # Test 8: Protected endpoint tests
         print("\n🛡️ PROTECTED ENDPOINT TESTS")
