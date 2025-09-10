@@ -131,33 +131,6 @@ function App() {
     setIsDarkMode(!isDarkMode);
   };
 
-  // Authentication handlers
-  const handleAuthSuccess = (userData) => {
-    setIsAuthenticated(true);
-    setCurrentUser(userData);
-    
-    // Set axios defaults
-    const token = localStorage.getItem('arkas_token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-    
-    // Update userInfo for backward compatibility
-    setUserInfo({
-      name: userData.full_name,
-      sicil: userData.id.slice(-5) // Use last 5 chars of ID as sicil
-    });
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('arkas_token');
-    localStorage.removeItem('arkas_user');
-    delete axios.defaults.headers.common['Authorization'];
-    setIsAuthenticated(false);
-    setCurrentUser(null);
-    setUserInfo({ name: "Mehmet Yılmaz", sicil: "12345" }); // Reset to default
-  };
-
   // If not authenticated, show auth wrapper
   if (!isAuthenticated) {
     return <AuthWrapper onAuthSuccess={handleAuthSuccess} />;
