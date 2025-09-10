@@ -466,7 +466,15 @@ async def reset_password(reset_data: ResetPasswordRequest):
             raise HTTPException(status_code=400, detail="Geçersiz veya süresi dolmuş sıfırlama kodu")
         
         # Check if expired
-        if verification["expires_at"] < datetime.now(timezone.utc):
+        expires_at = verification["expires_at"]
+        if isinstance(expires_at, str):
+            # Parse string datetime
+            expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+        elif expires_at.tzinfo is None:
+            # Make naive datetime timezone-aware (assume UTC)
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+            
+        if expires_at < datetime.now(timezone.utc):
             raise HTTPException(status_code=400, detail="Sıfırlama kodunun süresi dolmuş")
         
         # Mark verification as used
