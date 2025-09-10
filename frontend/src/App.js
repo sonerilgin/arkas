@@ -17,6 +17,7 @@ import { useToast } from "./hooks/use-toast";
 import { Toaster } from "./components/ui/toaster";
 import { Search, Plus, Edit3, Trash2, Truck, Package, Calendar, TrendingUp, User, X, ChevronRight, FileDown, Download, Upload, Moon, Sun, LogOut } from "lucide-react";
 import html2pdf from 'html2pdf.js';
+import LoginScreen from './components/LoginScreen';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
