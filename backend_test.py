@@ -549,9 +549,9 @@ def main():
             phone_code = None
             
             for line in log_output.split('\n'):
-                if 'VERIFICATION EMAIL to test@example.com: Code =' in line:
+                if f'VERIFICATION EMAIL to {email}: Code =' in line:
                     email_code = line.split('Code = ')[-1].strip()
-                elif 'VERIFICATION SMS to +905551234567: Code =' in line:
+                elif f'VERIFICATION SMS to {phone}: Code =' in line:
                     phone_code = line.split('Code = ')[-1].strip()
             
             if email_code:
