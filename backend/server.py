@@ -126,6 +126,7 @@ class NakliyeKayitUpdate(BaseModel):
     toplam: Optional[float] = None
     sistem: Optional[float] = None
     yatan_tutar: Optional[float] = None
+    yatan_tarih: Optional[str] = None
 
 
 def prepare_for_mongo(data):
