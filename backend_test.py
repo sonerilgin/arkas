@@ -510,7 +510,27 @@ def main():
         
         # Test 5: Test unverified user login (should fail)
         print("\n🔒 LOGIN TESTS (Unverified Users)")
-        auth_tester.test_login_unverified_user()
+        import time
+        unverified_email = f"unverified{int(time.time())}@example.com"
+        register_data = {
+            "email": unverified_email,
+            "password": "test123",
+            "full_name": "Unverified User"
+        }
+        auth_tester.run_test("Register Unverified User", "POST", "auth/register", 200, data=register_data)
+        
+        # Try to login without verification
+        login_data = {
+            "identifier": unverified_email,
+            "password": "test123"
+        }
+        auth_tester.run_test(
+            "Login Unverified User (should fail)",
+            "POST",
+            "auth/login",
+            401,
+            data=login_data
+        )
         
         # IMPORTANT: Get verification codes from backend logs
         print("\n" + "⚠️ "*20)
