@@ -26,6 +26,36 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
+# Collections
+users_collection = db["users"]
+verification_codes_collection = db["verification_codes"]
+biometric_credentials_collection = db["biometric_credentials"]
+
+# Security
+security = HTTPBearer()
+
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    token = credentials.credentials
+    token_data = verify_token(token)
+    if token_data is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Get user from database
+    identifier = token_data["identifier"]
+    if is_valid_email(identifier):
+        user = await users_collection.find_one({"email": identifier})
+    else:
+        user = await users_collection.find_one({"phone": identifier})
+    
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return user
+
 # Create the main app without a prefix
 app = FastAPI()
 
