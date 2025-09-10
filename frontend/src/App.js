@@ -1336,6 +1336,17 @@ function App() {
                               placeholder="0.00"
                             />
                           </div>
+                          <div className="space-y-2 md:col-span-2">
+                            <Label htmlFor="yatan_tutar">Yatan Tutar</Label>
+                            <Input
+                              id="yatan_tutar"
+                              type="number"
+                              step="0.01"
+                              value={formData.yatan_tutar}
+                              onChange={(e) => setFormData(prev => ({ ...prev, yatan_tutar: e.target.value }))}
+                              placeholder="0.00"
+                            />
+                          </div>
                         </div>
                       </TabsContent>
                     </Tabs>
