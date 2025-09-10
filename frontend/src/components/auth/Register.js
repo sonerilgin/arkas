@@ -29,6 +29,7 @@ export default function Register({ onBackToLogin, onRegistrationSuccess }) {
           description: "Şifreler eşleşmiyor",
           variant: "destructive"
         });
+        setLoading(false); // Add this line
         return;
       }
 
@@ -43,7 +44,11 @@ export default function Register({ onBackToLogin, onRegistrationSuccess }) {
         registerData.phone = data.identifier;
       }
 
+      console.log('Sending registration data:', registerData); // Debug log
+
       const response = await axios.post(`${API}/api/auth/register`, registerData);
+      
+      console.log('Registration response:', response); // Debug log
       
       toast({
         title: "Kayıt Başarılı!",
