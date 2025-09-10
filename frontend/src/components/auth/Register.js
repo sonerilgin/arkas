@@ -52,10 +52,11 @@ export default function Register({ onBackToLogin, onRegistrationSuccess }) {
       
       toast({
         title: "Kayıt Başarılı!",
-        description: "Doğrulama kodu gönderildi. Lütfen kontrol edin."
+        description: "Hesabınız oluşturuldu. Giriş yapabilirsiniz."
       });
       
-      onRegistrationSuccess(data.identifier, registrationType);
+      // No verification needed - go back to login
+      onBackToLogin();
       
     } catch (error) {
       console.error('Registration error:', error);
