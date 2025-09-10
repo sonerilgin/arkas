@@ -1120,36 +1120,58 @@ function App() {
                 </Button>
               </div>
               
-              <div className="flex gap-2 w-full lg:w-auto">
-                <Button 
-                  onClick={handlePdfExport} 
-                  variant="outline" 
-                  className="flex-1 lg:flex-none border-green-300 text-green-600 hover:bg-green-50"
-                  disabled={loading}
-                >
-                  <FileDown className="mr-2 h-4 w-4" />
-                  {loading ? 'PDF Hazırlanıyor...' : 'PDF İndir'}
-                </Button>
+              <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                {/* İlk satır: PDF ve Yedek butonları */}
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button 
+                    onClick={handlePdfExport} 
+                    variant="outline" 
+                    className="flex-1 sm:flex-none border-green-300 text-green-600 hover:bg-green-50 text-xs sm:text-sm"
+                    disabled={loading}
+                  >
+                    <FileDown className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden xs:inline">{loading ? 'PDF Hazırlanıyor...' : 'PDF İndir'}</span>
+                    <span className="xs:hidden">PDF</span>
+                  </Button>
+                  
+                  <Button 
+                    onClick={exportBackup} 
+                    variant="outline" 
+                    className="flex-1 sm:flex-none border-orange-300 text-orange-600 hover:bg-orange-50 text-xs sm:text-sm"
+                    disabled={loading}
+                  >
+                    <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden xs:inline">Yedek Al</span>
+                    <span className="xs:hidden">Yedek</span>
+                  </Button>
+                </div>
                 
-                <Button 
-                  onClick={exportBackup} 
-                  variant="outline" 
-                  className="flex-1 lg:flex-none border-orange-300 text-orange-600 hover:bg-orange-50"
-                  disabled={loading}
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Yedek Al
-                </Button>
-                
-                <Button 
-                  onClick={() => document.getElementById('backup-file-input').click()} 
-                  variant="outline" 
-                  className="flex-1 lg:flex-none border-purple-300 text-purple-600 hover:bg-purple-50"
-                  disabled={loading}
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Yedek Yükle
-                </Button>
+                {/* İkinci satır: Yükleme ve Yeni Kayıt butonları */}
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <Button 
+                    onClick={() => document.getElementById('backup-file-input').click()} 
+                    variant="outline" 
+                    className="flex-1 sm:flex-none border-purple-300 text-purple-600 hover:bg-purple-50 text-xs sm:text-sm"
+                    disabled={loading}
+                  >
+                    <Upload className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="hidden xs:inline">Yedek Yükle</span>
+                    <span className="xs:hidden">Yükle</span>
+                  </Button>
+                  
+                  {selectedItems.length > 0 && (
+                    <Button 
+                      onClick={handleDeleteSelected} 
+                      variant="outline" 
+                      className="flex-1 sm:flex-none border-red-300 text-red-600 hover:bg-red-50 text-xs sm:text-sm"
+                      disabled={loading}
+                    >
+                      <Trash2 className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="hidden xs:inline">Seçilenleri Sil ({selectedItems.length})</span>
+                      <span className="xs:hidden">Sil ({selectedItems.length})</span>
+                    </Button>
+                  )}
+                </div>
                 
                 <input
                   id="backup-file-input"
@@ -1158,18 +1180,6 @@ function App() {
                   onChange={importBackup}
                   style={{ display: 'none' }}
                 />
-                
-                {selectedItems.length > 0 && (
-                  <Button 
-                    onClick={handleDeleteSelected} 
-                    variant="outline" 
-                    className="flex-1 lg:flex-none border-red-300 text-red-600 hover:bg-red-50"
-                    disabled={loading}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Seçilenleri Sil ({selectedItems.length})
-                  </Button>
-                )}
                 
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
