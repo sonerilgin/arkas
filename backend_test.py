@@ -548,11 +548,28 @@ def main():
         print("\n🔄 PASSWORD RESET TESTS")
         auth_tester.test_forgot_password("test@example.com")
         
-        # Get reset code
-        reset_code = input("\nEnter PASSWORD RESET code (or press Enter for mock): ").strip()
-        if not reset_code:
-            reset_code = "789012"  # Mock code
-            print(f"Using mock code: {reset_code}")
+        # Get reset code from logs
+        try:
+            result = subprocess.run(['tail', '-n', '50', '/var/log/supervisor/backend.out.log'], 
+                                  capture_output=True, text=True)
+            log_output = result.stdout
+            
+            reset_code = None
+            for line in log_output.split('\n'):
+                if 'PASSWORD RESET EMAIL to test@example.com: Code =' in line:
+                    reset_code = line.split('Code = ')[-1].strip()
+                    break
+            
+            if reset_code:
+                print(f"🔄 Found PASSWORD RESET code: {reset_code}")
+            else:
+                reset_code = "789012"  # Fallback
+                print(f"🔄 Using fallback RESET code: {reset_code}")
+                
+        except Exception as e:
+            print(f"❌ Error reading reset code from logs: {e}")
+            reset_code = "789012"
+            print(f"Using fallback reset code: {reset_code}")
         
         auth_tester.test_reset_password("test@example.com", reset_code)
         auth_tester.test_reset_password_invalid_code("test@example.com")
