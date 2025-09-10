@@ -85,11 +85,11 @@ class AuthAPITester:
 
     def test_register_phone(self):
         """Test user registration with phone"""
-        # Use timestamp to ensure unique phone
+        # Use timestamp to ensure unique phone (Turkish format: +905XXXXXXXXX)
         import time
-        timestamp = str(int(time.time()))[-4:]  # Last 4 digits
+        timestamp = str(int(time.time()))[-6:]  # Last 6 digits to make 10 total
         test_data = {
-            "phone": f"+9055512{timestamp}",
+            "phone": f"+90555{timestamp}",  # Turkish format: +90555XXXXXX
             "password": "test123",
             "full_name": "Test User Phone"
         }
