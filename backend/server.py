@@ -83,6 +83,7 @@ class NakliyeKayit(BaseModel):
     toplam: Optional[float] = 0.0
     sistem: Optional[float] = 0.0
     yatan_tutar: Optional[float] = 0.0
+    yatan_tarih: Optional[str] = ""
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
