@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the new Arkas Lojistik authentication system with comprehensive endpoint testing including registration, verification, login, protected routes, and password reset functionality."
+user_problem_statement: "Kullanıcıdan 3 önemli UI/UX ve veri gösterim iyileştirmesi: 1. Ekran küçülünce isim kısaltma yapılmaması, 2. Toplam ve Sistem sütunlarının altında aylık toplamların gösterilmesi, 3. Karşılaştırma sütununun yanına Yatan Tutar sütunu eklenmesi ve altında toplamının gösterilmesi."
 
 backend:
   - task: "Authentication System - User Registration (Email)"
