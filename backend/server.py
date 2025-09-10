@@ -268,7 +268,7 @@ async def register_user(user_data: UserCreate):
         if existing_user:
             raise HTTPException(status_code=400, detail="Bu email veya telefon numarası zaten kullanılıyor")
         
-        # Create user
+        # Create user - DIRECTLY VERIFIED
         user_id = str(uuid.uuid4())
         hashed_password = get_password_hash(user_data.password)
         
@@ -278,49 +278,17 @@ async def register_user(user_data: UserCreate):
             "phone": user_data.phone,
             "full_name": user_data.full_name,
             "hashed_password": hashed_password,
-            "is_verified": False,
-            "created_at": datetime.now(timezone.utc)
+            "is_verified": True,  # AUTO VERIFIED - NO EMAIL/SMS NEEDED
+            "created_at": datetime.now(timezone.utc),
+            "verified_at": datetime.now(timezone.utc)
         }
         
         await users_collection.insert_one(user_doc)
         
-        # Generate and send verification code
-        verification_code = generate_verification_code()
-        
-        # Store verification code
-        await verification_codes_collection.insert_one({
-            "id": str(uuid.uuid4()),
-            "user_id": user_id,
-            "code": verification_code,
-            "type": "email_verification" if user_data.email else "phone_verification",
-            "identifier": user_data.email or user_data.phone,
-            "created_at": datetime.now(timezone.utc),
-            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10),
-            "used": False
-        })
-        
-        # Send verification code
-        if user_data.email:
-            success = await NotificationService.send_verification_email(
-                user_data.email, verification_code, user_data.full_name
-            )
-        else:
-            success = await NotificationService.send_verification_sms(
-                user_data.phone, verification_code, user_data.full_name
-            )
-        
-        if not success:
-            # Still return success but mention notification issue
-            return {
-                "message": "Kullanıcı oluşturuldu ancak doğrulama kodu gönderilemedi",
-                "user_id": user_id,
-                "verification_sent": False
-            }
-        
         return {
-            "message": "Kullanıcı başarıyla oluşturuldu. Doğrulama kodu gönderildi.",
+            "message": "Hesap başarıyla oluşturuldu. Giriş yapabilirsiniz.",
             "user_id": user_id,
-            "verification_sent": True
+            "auto_verified": True
         }
         
     except HTTPException:
