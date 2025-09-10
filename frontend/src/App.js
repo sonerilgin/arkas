@@ -873,7 +873,7 @@ function App() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-4">
-                {/* Alt yazıyı kaldırdık, sadece boş alan */}
+                <span className="text-lg font-medium text-slate-600 dark:text-gray-300">Seçili Ay</span>
               </div>
             </CardContent>
           </Card>
