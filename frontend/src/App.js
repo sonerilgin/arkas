@@ -417,15 +417,6 @@ function App() {
     return itemDate.getMonth() === displayMonth && itemDate.getFullYear() === displayYear;
   });
 
-  // Debug için
-  console.log('Debug Info:', {
-    nakliyeListLength: nakliyeList.length,
-    displayedRecordsLength: displayedRecords.length,
-    displayMonth,
-    displayYear,
-    searchTerm
-  });
-
   const displayedTotal = displayedRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
 
   const thisMonthTotal = thisMonthRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
