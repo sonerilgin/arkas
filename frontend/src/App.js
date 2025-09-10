@@ -1095,7 +1095,7 @@ function App() {
               <div className="flex gap-2 flex-1 max-w-full lg:max-w-md">
                 <div className="relative flex-1">
                   <Input
-                    placeholder="Müşteri, sıra no, kod veya irsaliye no ile ara..."
+                    placeholder="Arama yap..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
