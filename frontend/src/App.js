@@ -165,31 +165,6 @@ function App() {
     setUserInfo({ name: "Mehmet Yılmaz", sicil: "12345" }); // Reset to default
   };
 
-  // Add axios interceptor for authentication
-  useEffect(() => {
-    const token = localStorage.getItem('arkas_token');
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-
-    // Add response interceptor to handle 401 errors
-    const responseInterceptor = axios.interceptors.response.add(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401) {
-          handleLogout();
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    return () => {
-      if (axios.interceptors && axios.interceptors.response) {
-        axios.interceptors.response.eject(responseInterceptor);
-      }
-    };
-  }, [isAuthenticated]);
-
   // If not authenticated, show auth wrapper
   if (!isAuthenticated) {
     return <AuthWrapper onAuthSuccess={handleAuthSuccess} />;
