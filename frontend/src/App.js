@@ -242,7 +242,8 @@ function App() {
       pazar: item.pazar || 0,
       harcirah: item.harcirah || 0,
       toplam: item.toplam || 0,
-      sistem: item.sistem || 0
+      sistem: item.sistem || 0,
+      yatan_tutar: item.yatan_tutar || 0
     });
     setIsDialogOpen(true);
   };
