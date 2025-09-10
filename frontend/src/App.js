@@ -177,9 +177,11 @@ function App() {
     );
 
     return () => {
-      axios.interceptors.response.eject(responseInterceptor);
+      if (axios.interceptors && axios.interceptors.response) {
+        axios.interceptors.response.eject(responseInterceptor);
+      }
     };
-  }, []);
+  }, [isAuthenticated]);
 
   // If not authenticated, show auth wrapper
   if (!isAuthenticated) {
