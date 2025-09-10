@@ -519,6 +519,7 @@ function App() {
             <div><strong>Toplam Kayıt:</strong> ${yearlyData.length} adet</div>
             <div><strong>Toplam Tutar:</strong> ${formatCurrency(yearlyData.reduce((sum, item) => sum + (item.toplam || 0), 0))}</div>
             <div><strong>Toplam Sistem:</strong> <span style="color: #22c55e;">${formatCurrency(yearlyData.reduce((sum, item) => sum + (item.sistem || 0), 0))}</span></div>
+            <div><strong>Toplam Yatan:</strong> <span style="color: #8b5cf6;">${formatCurrency(yearlyData.reduce((sum, item) => sum + (item.yatan_tutar || 0), 0))}</span></div>
           </div>
         </div>
       `;
