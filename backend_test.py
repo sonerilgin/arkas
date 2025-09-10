@@ -64,8 +64,11 @@ class AuthAPITester:
 
     def test_register_email(self):
         """Test user registration with email"""
+        # Use timestamp to ensure unique email
+        import time
+        timestamp = str(int(time.time()))
         test_data = {
-            "email": "test@example.com",
+            "email": f"test{timestamp}@example.com",
             "password": "test123",
             "full_name": "Test User"
         }
@@ -78,12 +81,15 @@ class AuthAPITester:
         )
         if success:
             self.created_users.append(test_data["email"])
-        return success, response
+        return success, response, test_data["email"]
 
     def test_register_phone(self):
         """Test user registration with phone"""
+        # Use timestamp to ensure unique phone
+        import time
+        timestamp = str(int(time.time()))[-4:]  # Last 4 digits
         test_data = {
-            "phone": "+905551234567",
+            "phone": f"+9055512{timestamp}",
             "password": "test123",
             "full_name": "Test User Phone"
         }
@@ -96,7 +102,7 @@ class AuthAPITester:
         )
         if success:
             self.created_users.append(test_data["phone"])
-        return success, response
+        return success, response, test_data["phone"]
 
     def test_register_duplicate(self):
         """Test duplicate registration (should fail)"""
