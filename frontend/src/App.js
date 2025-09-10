@@ -791,14 +791,9 @@ function App() {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md px-4 py-3 cursor-pointer hover:shadow-lg transition-all duration-200 border border-slate-200 dark:border-gray-600 flex-shrink-0" onClick={openUserEditDialog}>
                 <div className="flex items-center gap-2 text-sm">
                   <User className="h-4 w-4 text-slate-600 dark:text-gray-300" />
-                  <div className="hidden sm:block">
+                  <div>
                     <div className="font-medium text-slate-800 dark:text-gray-200">{userInfo.name}</div>
                     <div className="text-xs text-slate-500 dark:text-gray-400">Sicil: {userInfo.sicil}</div>
-                  </div>
-                  <div className="sm:hidden">
-                    <div className="font-medium text-slate-800 dark:text-gray-200 text-xs">
-                      {userInfo.name.split(' ').map(n => n[0]).join('. ')}
-                    </div>
                   </div>
                 </div>
               </div>
