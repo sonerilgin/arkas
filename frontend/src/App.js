@@ -1478,6 +1478,32 @@ function App() {
                   )}
                 </TableBody>
               </Table>
+              
+              {/* Toplam Bilgileri - Desktop */}
+              {!loading && displayedRecords.length > 0 && (
+                <div className="border-t bg-slate-50 dark:bg-gray-700 p-4">
+                  <div className="flex justify-end gap-8 text-sm font-medium">
+                    <div className="flex flex-col items-end">
+                      <span className="text-slate-600 dark:text-gray-300">Toplam:</span>
+                      <span className="text-lg font-bold text-slate-800 dark:text-gray-100">
+                        {formatCurrency(displayedRecords.reduce((sum, item) => sum + (item.toplam || 0), 0))}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-green-600 dark:text-green-400">Sistem:</span>
+                      <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                        {formatCurrency(displayedRecords.reduce((sum, item) => sum + (item.sistem || 0), 0))}
+                      </span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-purple-600 dark:text-purple-400">Yatan Tutar:</span>
+                      <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                        {formatCurrency(displayedRecords.reduce((sum, item) => sum + (item.yatan_tutar || 0), 0))}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Mobile Card View */}
