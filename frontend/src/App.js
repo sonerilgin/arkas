@@ -50,6 +50,11 @@ const monthNames = [
 ];
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    // Otomatik giriş kontrolü - parolayı hatırla seçiliyse
+    const savedCredentials = localStorage.getItem('arkas_login_credentials');
+    return !!savedCredentials;
+  });
   const [nakliyeList, setNakliyeList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
