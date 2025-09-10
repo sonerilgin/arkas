@@ -386,242 +386,341 @@ class NakliyeAPITester:
             except:
                 pass
 
-def main():
-    print("🚀 Starting Arkas Lojistik Authentication API Tests...")
-    
-    # Setup authentication tester
-    auth_tester = AuthAPITester()
-    print(f"Backend URL: {auth_tester.base_url}")
-    
-    all_tests_passed = True
-    
-    try:
-        print("\n" + "="*60)
-        print("🔐 AUTHENTICATION SYSTEM TESTS")
-        print("="*60)
-        
-        # Test 1: Register user with email
-        print("\n📝 REGISTRATION TESTS")
-        success, response, email = auth_tester.test_register_email()
-        if not success:
-            print("❌ Email registration failed - cannot continue with email tests")
-            email = None
-        
-        # Test 2: Register user with phone
-        success_phone, response_phone, phone = auth_tester.test_register_phone()
-        if not success_phone:
-            print("❌ Phone registration failed - cannot continue with phone tests")
-            phone = None
-        
-        # Test 3: Test duplicate registration (use existing email)
-        if email:
-            test_data = {
-                "email": email,
-                "password": "test123",
-                "full_name": "Test User Duplicate"
-            }
-            auth_tester.run_test(
-                "Register Duplicate User (should fail)",
-                "POST",
-                "auth/register",
-                400,
-                data=test_data
-            )
-        
-        # Test 4: Test invalid email registration (expect 422 from pydantic)
-        auth_tester.run_test(
-            "Register with Invalid Email (should fail)",
-            "POST",
-            "auth/register",
-            422,  # Changed from 400 to 422 as pydantic returns 422
-            data={
-                "email": "invalid-email",
-                "password": "test123",
-                "full_name": "Test User Invalid"
-            }
-        )
-        
-        # Test 5: Test unverified user login (should fail)
-        print("\n🔒 LOGIN TESTS (Unverified Users)")
-        import time
-        unverified_email = f"unverified{int(time.time())}@example.com"
-        register_data = {
-            "email": unverified_email,
-            "password": "test123",
-            "full_name": "Unverified User"
-        }
-        auth_tester.run_test("Register Unverified User", "POST", "auth/register", 200, data=register_data)
-        
-        # Try to login without verification
-        login_data = {
-            "identifier": unverified_email,
-            "password": "test123"
-        }
-        auth_tester.run_test(
-            "Login Unverified User (should fail)",
-            "POST",
-            "auth/login",
-            401,
-            data=login_data
-        )
-        
-        # IMPORTANT: Get verification codes from backend logs
-        print("\n" + "⚠️ "*20)
-        print("🔍 CHECKING BACKEND LOGS FOR VERIFICATION CODES")
-        print("⚠️ "*20)
-        
-        # Get verification codes from backend logs
-        import subprocess
-        try:
-            result = subprocess.run(['tail', '-n', '100', '/var/log/supervisor/backend.out.log'], 
-                                  capture_output=True, text=True)
-            log_output = result.stdout
-            
-            # Extract codes from logs
-            email_code = None
-            phone_code = None
-            
-            for line in log_output.split('\n'):
-                if f'VERIFICATION EMAIL to {email}: Code =' in line:
-                    email_code = line.split('Code = ')[-1].strip()
-                elif f'VERIFICATION SMS to {phone}: Code =' in line:
-                    phone_code = line.split('Code = ')[-1].strip()
-            
-            if email_code:
-                print(f"📧 Found EMAIL verification code: {email_code}")
-            else:
-                email_code = "123456"  # Fallback
-                print(f"📧 Using fallback EMAIL code: {email_code}")
-                
-            if phone_code:
-                print(f"📱 Found PHONE verification code: {phone_code}")
-            else:
-                phone_code = "654321"  # Fallback
-                print(f"📱 Using fallback PHONE code: {phone_code}")
-                
-        except Exception as e:
-            print(f"❌ Error reading logs: {e}")
-            email_code = "123456"
-            phone_code = "654321"
-            print(f"Using fallback codes: email={email_code}, phone={phone_code}")
-        
-        # Test 6: Verify users
-        print("\n✅ VERIFICATION TESTS")
-        if success and email:
-            auth_tester.test_verify_user(email, email_code)
-            # Test invalid verification code
-            auth_tester.test_verify_invalid_code(email)
-        
-        if success_phone and phone:
-            auth_tester.test_verify_user(phone, phone_code)
-        
-        # Test 7: Login tests
-        print("\n🔑 LOGIN TESTS (Verified Users)")
-        login_success = False
-        if email:
-            login_success, _ = auth_tester.test_login_email(email)
-        if phone:
-            auth_tester.test_login_phone(phone)
-        
-        # Test invalid credentials with verified email
-        if email:
-            test_data = {
-                "identifier": email,
-                "password": "wrongpassword"
-            }
-            auth_tester.run_test(
-                "Login with Invalid Password (should fail)",
-                "POST",
-                "auth/login",
-                401,
-                data=test_data
-            )
-        
-        # Test 8: Protected endpoint tests
-        print("\n🛡️ PROTECTED ENDPOINT TESTS")
-        if login_success:
-            auth_tester.test_get_user_info()
-        auth_tester.test_get_user_info_invalid_token()
-        
-        # Test 9: Password reset tests
-        print("\n🔄 PASSWORD RESET TESTS")
-        if email:
-            auth_tester.test_forgot_password(email)
-            
-            # Get reset code from logs
-            try:
-                result = subprocess.run(['tail', '-n', '50', '/var/log/supervisor/backend.out.log'], 
-                                      capture_output=True, text=True)
-                log_output = result.stdout
-                
-                reset_code = None
-                for line in log_output.split('\n'):
-                    if f'PASSWORD RESET EMAIL to {email}: Code =' in line:
-                        reset_code = line.split('Code = ')[-1].strip()
-                        break
-                
-                if reset_code:
-                    print(f"🔄 Found PASSWORD RESET code: {reset_code}")
-                else:
-                    reset_code = "789012"  # Fallback
-                    print(f"🔄 Using fallback RESET code: {reset_code}")
-                    
-            except Exception as e:
-                print(f"❌ Error reading reset code from logs: {e}")
-                reset_code = "789012"
-                print(f"Using fallback reset code: {reset_code}")
-            
-            # Test actual password reset now that datetime bug is fixed
-            auth_tester.test_reset_password(email, reset_code)
-            auth_tester.test_reset_password_invalid_code(email)
-            
-            # Test 10: Login with new password
-            print("\n🔐 LOGIN WITH NEW PASSWORD TEST")
-            new_login_data = {
-                "identifier": email,
-                "password": "newpass123"
-            }
-            auth_tester.run_test(
-                "Login with New Password",
-                "POST",
-                "auth/login",
-                200,
-                data=new_login_data
-            )
-        
-        # Print authentication test summary
-        all_tests_passed = auth_tester.print_summary()
-        
-    except Exception as e:
-        print(f"❌ Authentication test suite failed with error: {str(e)}")
-        all_tests_passed = False
-    
-    # Also run basic nakliye tests to ensure system integration
-    print("\n" + "="*60)
-    print("📦 BASIC NAKLIYE SYSTEM INTEGRATION TEST")
-    print("="*60)
+def test_yatan_tutar_integration():
+    """Comprehensive test suite for yatan_tutar field integration"""
+    print("🚀 Starting Yatan Tutar Field Integration Tests...")
     
     nakliye_tester = NakliyeAPITester()
+    print(f"Backend URL: {nakliye_tester.base_url}")
+    
+    all_tests_passed = True
+    created_record_ids = []
+    
     try:
-        # Just test root endpoint to ensure nakliye system is working
-        nakliye_tester.test_root_endpoint()
-        nakliye_success = nakliye_tester.tests_passed == nakliye_tester.tests_run
+        print("\n" + "="*70)
+        print("💰 YATAN TUTAR FIELD INTEGRATION TESTS")
+        print("="*70)
+        
+        # Test 1: CRUD Operations with Yatan Tutar Field
+        print("\n📝 CRUD OPERATIONS WITH YATAN TUTAR FIELD")
+        
+        # Test 1a: POST /api/nakliye - Create new records with yatan_tutar field
+        test_records = [
+            {
+                "tarih": "2024-01-15T10:30:00Z",
+                "sira_no": "YT001",
+                "kod": "TEST001",
+                "musteri": "Ahmet Yılmaz Transport",
+                "irsaliye_no": "IRS-2024-001",
+                "ithalat": True,
+                "ihracat": False,
+                "bos": False,
+                "bos_tasima": 150.0,
+                "reefer": 200.0,
+                "bekleme": 50.0,
+                "geceleme": 100.0,
+                "pazar": 75.0,
+                "harcirah": 125.0,
+                "toplam": 700.0,
+                "sistem": 650.0,
+                "yatan_tutar": 50.0  # New field with positive value
+            },
+            {
+                "tarih": "2024-01-16T14:45:00Z",
+                "sira_no": "YT002",
+                "kod": "TEST002",
+                "musteri": "Mehmet Kaya Lojistik",
+                "irsaliye_no": "IRS-2024-002",
+                "ithalat": False,
+                "ihracat": True,
+                "bos": False,
+                "bos_tasima": 300.0,
+                "reefer": 0.0,
+                "bekleme": 25.0,
+                "geceleme": 0.0,
+                "pazar": 0.0,
+                "harcirah": 200.0,
+                "toplam": 525.0,
+                "sistem": 500.0,
+                "yatan_tutar": 25.5  # New field with decimal value
+            },
+            {
+                "tarih": "2024-01-17T09:15:00Z",
+                "sira_no": "YT003",
+                "kod": "TEST003",
+                "musteri": "Fatma Demir Nakliyat",
+                "irsaliye_no": "IRS-2024-003",
+                "ithalat": False,
+                "ihracat": False,
+                "bos": True,
+                "bos_tasima": 100.0,
+                "reefer": 0.0,
+                "bekleme": 0.0,
+                "geceleme": 0.0,
+                "pazar": 0.0,
+                "harcirah": 50.0,
+                "toplam": 150.0,
+                "sistem": 150.0,
+                "yatan_tutar": 0.0  # New field with zero value
+            }
+        ]
+        
+        for i, record in enumerate(test_records):
+            print(f"\n🔸 Creating test record {i+1} with yatan_tutar: {record['yatan_tutar']}")
+            record_id = nakliye_tester.test_create_nakliye(record)
+            if record_id:
+                created_record_ids.append(record_id)
+                print(f"   ✅ Created record with ID: {record_id}")
+            else:
+                print(f"   ❌ Failed to create record {i+1}")
+                all_tests_passed = False
+        
+        # Test 1b: GET /api/nakliye - Verify yatan_tutar field returned in response
+        print("\n📋 GET OPERATIONS - VERIFY YATAN TUTAR IN RESPONSES")
+        success, nakliye_list = nakliye_tester.test_get_nakliye_list()
+        if success and nakliye_list:
+            print(f"   📊 Retrieved {len(nakliye_list)} records")
+            yatan_tutar_found = 0
+            for record in nakliye_list:
+                if 'yatan_tutar' in record:
+                    yatan_tutar_found += 1
+                    print(f"   ✅ Record {record.get('sira_no', 'N/A')} has yatan_tutar: {record['yatan_tutar']}")
+                else:
+                    print(f"   ❌ Record {record.get('sira_no', 'N/A')} missing yatan_tutar field")
+                    all_tests_passed = False
+            print(f"   📈 Found yatan_tutar field in {yatan_tutar_found}/{len(nakliye_list)} records")
+        else:
+            print("   ❌ Failed to retrieve nakliye list")
+            all_tests_passed = False
+        
+        # Test 1c: GET /api/nakliye/{id} - Individual record retrieval
+        print("\n🔍 INDIVIDUAL RECORD RETRIEVAL")
+        for record_id in created_record_ids[:2]:  # Test first 2 records
+            success, record = nakliye_tester.test_get_nakliye_by_id(record_id)
+            if success and record:
+                if 'yatan_tutar' in record:
+                    print(f"   ✅ Record {record_id} has yatan_tutar: {record['yatan_tutar']}")
+                else:
+                    print(f"   ❌ Record {record_id} missing yatan_tutar field")
+                    all_tests_passed = False
+            else:
+                print(f"   ❌ Failed to retrieve record {record_id}")
+                all_tests_passed = False
+        
+        # Test 1d: PUT /api/nakliye/{id} - Update records including yatan_tutar field
+        print("\n✏️ UPDATE OPERATIONS WITH YATAN TUTAR")
+        if created_record_ids:
+            update_tests = [
+                {"yatan_tutar": 75.25, "musteri": "Updated Ahmet Yılmaz Transport"},
+                {"yatan_tutar": 0.0, "toplam": 600.0},
+                {"yatan_tutar": 150.75, "sistem": 800.0, "harcirah": 175.0}
+            ]
+            
+            for i, update_data in enumerate(update_tests):
+                if i < len(created_record_ids):
+                    record_id = created_record_ids[i]
+                    print(f"   🔸 Updating record {record_id} with yatan_tutar: {update_data['yatan_tutar']}")
+                    success, updated_record = nakliye_tester.test_update_nakliye(record_id, update_data)
+                    if success and updated_record:
+                        if updated_record.get('yatan_tutar') == update_data['yatan_tutar']:
+                            print(f"   ✅ Successfully updated yatan_tutar to {update_data['yatan_tutar']}")
+                        else:
+                            print(f"   ❌ yatan_tutar not updated correctly. Expected: {update_data['yatan_tutar']}, Got: {updated_record.get('yatan_tutar')}")
+                            all_tests_passed = False
+                    else:
+                        print(f"   ❌ Failed to update record {record_id}")
+                        all_tests_passed = False
+        
+        # Test 2: Data Validation Tests
+        print("\n🔍 DATA VALIDATION TESTS")
+        
+        # Test 2a: Valid yatan_tutar values
+        print("\n   📊 Testing valid yatan_tutar values")
+        valid_test_cases = [
+            {"yatan_tutar": 0, "description": "zero value"},
+            {"yatan_tutar": 100.50, "description": "positive decimal"},
+            {"yatan_tutar": 1000, "description": "positive integer"},
+            {"yatan_tutar": 0.01, "description": "small decimal"}
+        ]
+        
+        for case in valid_test_cases:
+            test_record = {
+                "tarih": "2024-01-18T12:00:00Z",
+                "sira_no": f"VAL{case['yatan_tutar']}",
+                "musteri": f"Validation Test {case['description']}",
+                "irsaliye_no": f"VAL-{case['yatan_tutar']}",
+                "toplam": 500.0,
+                "sistem": 450.0,
+                "yatan_tutar": case['yatan_tutar']
+            }
+            print(f"   🔸 Testing {case['description']}: {case['yatan_tutar']}")
+            record_id = nakliye_tester.test_create_nakliye(test_record)
+            if record_id:
+                created_record_ids.append(record_id)
+                print(f"   ✅ Valid value accepted: {case['yatan_tutar']}")
+            else:
+                print(f"   ❌ Valid value rejected: {case['yatan_tutar']}")
+                all_tests_passed = False
+        
+        # Test 2b: Missing yatan_tutar (should default to 0.0)
+        print("\n   📊 Testing missing yatan_tutar field (should default to 0.0)")
+        test_record_no_yatan = {
+            "tarih": "2024-01-19T12:00:00Z",
+            "sira_no": "NO_YATAN",
+            "musteri": "Test Missing Yatan Tutar",
+            "irsaliye_no": "NO-YATAN-001",
+            "toplam": 300.0,
+            "sistem": 300.0
+            # yatan_tutar intentionally omitted
+        }
+        
+        record_id = nakliye_tester.test_create_nakliye(test_record_no_yatan)
+        if record_id:
+            created_record_ids.append(record_id)
+            # Verify the record has default yatan_tutar
+            success, record = nakliye_tester.test_get_nakliye_by_id(record_id)
+            if success and record:
+                yatan_tutar_value = record.get('yatan_tutar', 'MISSING')
+                if yatan_tutar_value == 0.0:
+                    print(f"   ✅ Missing yatan_tutar defaulted to 0.0")
+                else:
+                    print(f"   ❌ Missing yatan_tutar not defaulted correctly. Got: {yatan_tutar_value}")
+                    all_tests_passed = False
+            else:
+                print(f"   ❌ Failed to retrieve record to verify default")
+                all_tests_passed = False
+        else:
+            print(f"   ❌ Failed to create record without yatan_tutar")
+            all_tests_passed = False
+        
+        # Test 3: Search Functionality
+        print("\n🔍 SEARCH FUNCTIONALITY WITH YATAN TUTAR")
+        
+        # Test 3a: Search by customer name (should still work with new field)
+        search_queries = ["Ahmet", "Mehmet", "Transport", "Lojistik"]
+        for query in search_queries:
+            print(f"   🔸 Searching for: '{query}'")
+            success, search_results = nakliye_tester.test_search_nakliye(query)
+            if success:
+                print(f"   ✅ Search returned {len(search_results)} results")
+                # Verify yatan_tutar field is present in search results
+                for result in search_results:
+                    if 'yatan_tutar' not in result:
+                        print(f"   ❌ Search result missing yatan_tutar field")
+                        all_tests_passed = False
+                        break
+                else:
+                    print(f"   ✅ All search results contain yatan_tutar field")
+            else:
+                print(f"   ❌ Search failed for query: '{query}'")
+                all_tests_passed = False
+        
+        # Test 4: Backward Compatibility
+        print("\n🔄 BACKWARD COMPATIBILITY TESTS")
+        
+        # Test 4a: Verify API responses include new field with appropriate defaults
+        print("   📊 Verifying all API responses include yatan_tutar field")
+        success, all_records = nakliye_tester.test_get_nakliye_list()
+        if success and all_records:
+            missing_yatan_tutar = 0
+            for record in all_records:
+                if 'yatan_tutar' not in record:
+                    missing_yatan_tutar += 1
+            
+            if missing_yatan_tutar == 0:
+                print(f"   ✅ All {len(all_records)} records have yatan_tutar field")
+            else:
+                print(f"   ❌ {missing_yatan_tutar}/{len(all_records)} records missing yatan_tutar field")
+                all_tests_passed = False
+        else:
+            print("   ❌ Failed to retrieve records for compatibility check")
+            all_tests_passed = False
+        
+        # Test 5: Model Validation
+        print("\n🏗️ MODEL VALIDATION TESTS")
+        
+        # Test 5a: Verify MongoDB serialization/deserialization
+        print("   📊 Testing MongoDB serialization/deserialization")
+        if created_record_ids:
+            test_record_id = created_record_ids[0]
+            success, record = nakliye_tester.test_get_nakliye_by_id(test_record_id)
+            if success and record:
+                # Check that yatan_tutar is properly serialized as float
+                yatan_tutar = record.get('yatan_tutar')
+                if isinstance(yatan_tutar, (int, float)):
+                    print(f"   ✅ yatan_tutar properly serialized as numeric: {yatan_tutar} ({type(yatan_tutar).__name__})")
+                else:
+                    print(f"   ❌ yatan_tutar not properly serialized. Type: {type(yatan_tutar)}, Value: {yatan_tutar}")
+                    all_tests_passed = False
+            else:
+                print("   ❌ Failed to retrieve record for serialization test")
+                all_tests_passed = False
+        
+        # Test 6: DELETE operations (ensure they still work)
+        print("\n🗑️ DELETE OPERATIONS TEST")
+        if created_record_ids:
+            # Test deleting one record to ensure delete still works
+            test_delete_id = created_record_ids[-1]  # Delete the last created record
+            print(f"   🔸 Testing delete operation on record: {test_delete_id}")
+            success = nakliye_tester.test_delete_nakliye(test_delete_id)
+            if success:
+                print(f"   ✅ Successfully deleted record with yatan_tutar field")
+                created_record_ids.remove(test_delete_id)  # Remove from cleanup list
+            else:
+                print(f"   ❌ Failed to delete record with yatan_tutar field")
+                all_tests_passed = False
+        
+        # Print test summary
+        print(f"\n📊 Yatan Tutar Integration Test Results:")
+        print(f"   Tests Run: {nakliye_tester.tests_run}")
+        print(f"   Tests Passed: {nakliye_tester.tests_passed}")
+        print(f"   Success Rate: {(nakliye_tester.tests_passed/nakliye_tester.tests_run)*100:.1f}%")
+        
+        if nakliye_tester.tests_passed == nakliye_tester.tests_run and all_tests_passed:
+            print("🎉 All yatan_tutar integration tests passed!")
+        else:
+            print("❌ Some yatan_tutar integration tests failed!")
+            all_tests_passed = False
+        
     except Exception as e:
-        print(f"❌ Nakliye integration test failed: {str(e)}")
-        nakliye_success = False
+        print(f"❌ Yatan tutar test suite failed with error: {str(e)}")
+        all_tests_passed = False
+    
+    finally:
+        # Cleanup created records
+        if created_record_ids:
+            print(f"\n🧹 Cleaning up {len(created_record_ids)} test records...")
+            for record_id in created_record_ids:
+                try:
+                    nakliye_tester.test_delete_nakliye(record_id)
+                except:
+                    pass
+    
+    return all_tests_passed
+
+def main():
+    """Main test runner focusing on yatan_tutar field integration"""
+    print("🚀 Starting Arkas Lojistik Yatan Tutar Integration Tests...")
+    
+    # Run comprehensive yatan_tutar integration tests
+    yatan_tutar_success = test_yatan_tutar_integration()
     
     # Final summary
-    print("\n" + "="*60)
+    print("\n" + "="*70)
     print("📋 FINAL TEST SUMMARY")
-    print("="*60)
-    print(f"🔐 Authentication Tests: {'✅ PASSED' if all_tests_passed else '❌ FAILED'}")
-    print(f"📦 Nakliye Integration: {'✅ PASSED' if nakliye_success else '❌ FAILED'}")
+    print("="*70)
+    print(f"💰 Yatan Tutar Integration: {'✅ PASSED' if yatan_tutar_success else '❌ FAILED'}")
     
-    if all_tests_passed and nakliye_success:
-        print("\n🎉 ALL SYSTEMS WORKING CORRECTLY!")
+    if yatan_tutar_success:
+        print("\n🎉 YATAN TUTAR INTEGRATION WORKING CORRECTLY!")
+        print("✅ All CRUD operations support yatan_tutar field")
+        print("✅ Data validation working properly")
+        print("✅ Search functionality maintained")
+        print("✅ Backward compatibility ensured")
+        print("✅ Model serialization/deserialization working")
         return 0
     else:
-        print("\n❌ SOME TESTS FAILED - CHECK LOGS ABOVE")
+        print("\n❌ YATAN TUTAR INTEGRATION TESTS FAILED - CHECK LOGS ABOVE")
         return 1
 
 if __name__ == "__main__":
