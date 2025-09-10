@@ -358,9 +358,7 @@ async def login_user(login_data: UserLogin):
         if not verify_password(login_data.password, user["hashed_password"]):
             raise HTTPException(status_code=401, detail="Geçersiz kimlik bilgileri")
         
-        # Check if user is verified
-        if not user.get("is_verified", False):
-            raise HTTPException(status_code=401, detail="Hesap doğrulanmadı. Lütfen email/SMS kodunu kontrol edin.")
+        # NO VERIFICATION CHECK - DIRECT LOGIN
         
         # Create access token
         access_token = create_access_token(
