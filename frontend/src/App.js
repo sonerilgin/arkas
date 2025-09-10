@@ -793,9 +793,7 @@ function App() {
                   <User className="h-4 w-4 text-slate-600 dark:text-gray-300" />
                   <div className="hidden sm:block">
                     <div className="font-medium text-slate-800 dark:text-gray-200">{userInfo.name}</div>
-                    <div className="text-xs text-slate-500 dark:text-gray-400">
-                      {currentUser?.email || currentUser?.phone || `Sicil: ${userInfo.sicil}`}
-                    </div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">Sicil: {userInfo.sicil}</div>
                   </div>
                   <div className="sm:hidden">
                     <div className="font-medium text-slate-800 dark:text-gray-200 text-xs">
