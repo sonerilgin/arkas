@@ -65,23 +65,21 @@ export default function Login({ onLoginSuccess, onSwitchToRegister, onSwitchToFo
     }
   };
 
-  const handleBiometricLogin = async () => {
+  const handleBiometricLogin = async (biometricData) => {
     try {
-      if (!biometricSupported) {
+      // In a real implementation, you would send biometric data to backend
+      // For now, simulate successful biometric login
+      const savedUser = localStorage.getItem('arkas_user');
+      if (savedUser) {
+        const userData = JSON.parse(savedUser);
+        onLoginSuccess(userData);
+      } else {
         toast({
-          title: "Desteklenmiyor",
-          description: "Bu cihazda biyometrik doğrulama desteklenmiyor",
+          title: "Biometric Error",
+          description: "Kullanıcı bulunamadı. Lütfen normal giriş yapın.",
           variant: "destructive"
         });
-        return;
       }
-
-      // This would implement WebAuthn
-      toast({
-        title: "Geliştiriliyor",
-        description: "Biyometrik giriş özelliği yakında aktif olacak",
-      });
-      
     } catch (error) {
       toast({
         title: "Biyometrik Hata",
