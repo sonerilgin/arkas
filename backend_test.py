@@ -3,6 +3,322 @@ import sys
 import json
 from datetime import datetime, timezone
 import uuid
+import time
+
+class AuthAPITester:
+    def __init__(self, base_url="https://arkas-logistics.preview.emergentagent.com/api"):
+        self.base_url = base_url
+        self.tests_run = 0
+        self.tests_passed = 0
+        self.access_token = None
+        self.created_users = []
+        self.verification_codes = {}  # Store codes from console output
+
+    def run_test(self, name, method, endpoint, expected_status, data=None, params=None, headers=None):
+        """Run a single API test"""
+        url = f"{self.base_url}/{endpoint}"
+        default_headers = {'Content-Type': 'application/json'}
+        if headers:
+            default_headers.update(headers)
+
+        self.tests_run += 1
+        print(f"\n🔍 Testing {name}...")
+        print(f"   URL: {url}")
+        if data:
+            print(f"   Data: {json.dumps(data, indent=2)}")
+        
+        try:
+            if method == 'GET':
+                response = requests.get(url, headers=default_headers, params=params)
+            elif method == 'POST':
+                response = requests.post(url, json=data, headers=default_headers)
+            elif method == 'PUT':
+                response = requests.put(url, json=data, headers=default_headers)
+            elif method == 'DELETE':
+                response = requests.delete(url, headers=default_headers)
+
+            print(f"   Status Code: {response.status_code}")
+            
+            success = response.status_code == expected_status
+            if success:
+                self.tests_passed += 1
+                print(f"✅ Passed - Expected {expected_status}, got {response.status_code}")
+                try:
+                    response_data = response.json()
+                    print(f"   Response: {json.dumps(response_data, indent=2)}")
+                    return True, response_data
+                except:
+                    return True, {}
+            else:
+                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
+                try:
+                    error_detail = response.json()
+                    print(f"   Error: {json.dumps(error_detail, indent=2)}")
+                except:
+                    print(f"   Error: {response.text}")
+                return False, {}
+
+        except Exception as e:
+            print(f"❌ Failed - Error: {str(e)}")
+            return False, {}
+
+    def test_register_email(self):
+        """Test user registration with email"""
+        test_data = {
+            "email": "test@example.com",
+            "password": "test123",
+            "full_name": "Test User"
+        }
+        success, response = self.run_test(
+            "Register User with Email",
+            "POST",
+            "auth/register",
+            200,
+            data=test_data
+        )
+        if success:
+            self.created_users.append(test_data["email"])
+        return success, response
+
+    def test_register_phone(self):
+        """Test user registration with phone"""
+        test_data = {
+            "phone": "+905551234567",
+            "password": "test123",
+            "full_name": "Test User Phone"
+        }
+        success, response = self.run_test(
+            "Register User with Phone",
+            "POST",
+            "auth/register",
+            200,
+            data=test_data
+        )
+        if success:
+            self.created_users.append(test_data["phone"])
+        return success, response
+
+    def test_register_duplicate(self):
+        """Test duplicate registration (should fail)"""
+        test_data = {
+            "email": "test@example.com",
+            "password": "test123",
+            "full_name": "Test User Duplicate"
+        }
+        success, response = self.run_test(
+            "Register Duplicate User (should fail)",
+            "POST",
+            "auth/register",
+            400,
+            data=test_data
+        )
+        return success, response
+
+    def test_register_invalid_email(self):
+        """Test registration with invalid email"""
+        test_data = {
+            "email": "invalid-email",
+            "password": "test123",
+            "full_name": "Test User Invalid"
+        }
+        success, response = self.run_test(
+            "Register with Invalid Email (should fail)",
+            "POST",
+            "auth/register",
+            400,
+            data=test_data
+        )
+        return success, response
+
+    def test_verify_user(self, identifier, code):
+        """Test user verification"""
+        test_data = {
+            "identifier": identifier,
+            "code": code
+        }
+        success, response = self.run_test(
+            f"Verify User ({identifier})",
+            "POST",
+            "auth/verify",
+            200,
+            data=test_data
+        )
+        return success, response
+
+    def test_verify_invalid_code(self, identifier):
+        """Test verification with invalid code"""
+        test_data = {
+            "identifier": identifier,
+            "code": "000000"
+        }
+        success, response = self.run_test(
+            f"Verify with Invalid Code (should fail)",
+            "POST",
+            "auth/verify",
+            400,
+            data=test_data
+        )
+        return success, response
+
+    def test_login_email(self):
+        """Test login with email"""
+        test_data = {
+            "identifier": "test@example.com",
+            "password": "test123"
+        }
+        success, response = self.run_test(
+            "Login with Email",
+            "POST",
+            "auth/login",
+            200,
+            data=test_data
+        )
+        if success and 'access_token' in response:
+            self.access_token = response['access_token']
+            print(f"   🔑 Access token obtained: {self.access_token[:20]}...")
+        return success, response
+
+    def test_login_phone(self):
+        """Test login with phone"""
+        test_data = {
+            "identifier": "+905551234567",
+            "password": "test123"
+        }
+        success, response = self.run_test(
+            "Login with Phone",
+            "POST",
+            "auth/login",
+            200,
+            data=test_data
+        )
+        return success, response
+
+    def test_login_invalid_credentials(self):
+        """Test login with invalid credentials"""
+        test_data = {
+            "identifier": "test@example.com",
+            "password": "wrongpassword"
+        }
+        success, response = self.run_test(
+            "Login with Invalid Password (should fail)",
+            "POST",
+            "auth/login",
+            401,
+            data=test_data
+        )
+        return success, response
+
+    def test_login_unverified_user(self):
+        """Test login with unverified user"""
+        # First register a new user
+        register_data = {
+            "email": "unverified@example.com",
+            "password": "test123",
+            "full_name": "Unverified User"
+        }
+        self.run_test("Register Unverified User", "POST", "auth/register", 200, data=register_data)
+        
+        # Try to login without verification
+        login_data = {
+            "identifier": "unverified@example.com",
+            "password": "test123"
+        }
+        success, response = self.run_test(
+            "Login Unverified User (should fail)",
+            "POST",
+            "auth/login",
+            401,
+            data=login_data
+        )
+        return success, response
+
+    def test_get_user_info(self):
+        """Test getting current user info with token"""
+        if not self.access_token:
+            print("❌ No access token available for user info test")
+            return False, {}
+        
+        headers = {"Authorization": f"Bearer {self.access_token}"}
+        success, response = self.run_test(
+            "Get Current User Info",
+            "GET",
+            "auth/me",
+            200,
+            headers=headers
+        )
+        return success, response
+
+    def test_get_user_info_invalid_token(self):
+        """Test getting user info with invalid token"""
+        headers = {"Authorization": "Bearer invalid_token_here"}
+        success, response = self.run_test(
+            "Get User Info with Invalid Token (should fail)",
+            "GET",
+            "auth/me",
+            401,
+            headers=headers
+        )
+        return success, response
+
+    def test_forgot_password(self, identifier):
+        """Test forgot password"""
+        test_data = {
+            "identifier": identifier
+        }
+        success, response = self.run_test(
+            f"Forgot Password ({identifier})",
+            "POST",
+            "auth/forgot-password",
+            200,
+            data=test_data
+        )
+        return success, response
+
+    def test_reset_password(self, identifier, code):
+        """Test password reset"""
+        test_data = {
+            "identifier": identifier,
+            "code": code,
+            "new_password": "newpass123"
+        }
+        success, response = self.run_test(
+            f"Reset Password ({identifier})",
+            "POST",
+            "auth/reset-password",
+            200,
+            data=test_data
+        )
+        return success, response
+
+    def test_reset_password_invalid_code(self, identifier):
+        """Test password reset with invalid code"""
+        test_data = {
+            "identifier": identifier,
+            "code": "000000",
+            "new_password": "newpass123"
+        }
+        success, response = self.run_test(
+            f"Reset Password with Invalid Code (should fail)",
+            "POST",
+            "auth/reset-password",
+            400,
+            data=test_data
+        )
+        return success, response
+
+    def print_summary(self):
+        """Print test summary"""
+        print(f"\n📊 Authentication Test Results:")
+        print(f"   Tests Run: {self.tests_run}")
+        print(f"   Tests Passed: {self.tests_passed}")
+        print(f"   Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        if self.tests_passed == self.tests_run:
+            print("🎉 All authentication tests passed!")
+            return True
+        else:
+            print("❌ Some authentication tests failed!")
+            return False
 
 class NakliyeAPITester:
     def __init__(self, base_url="https://arkas-logistics.preview.emergentagent.com/api"):
