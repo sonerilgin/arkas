@@ -1592,7 +1592,12 @@ function App() {
                             <div className="font-bold text-lg text-slate-800">{formatCurrency(toplam)}</div>
                             <div className="font-medium text-sm text-green-600">{formatCurrency(sistem)}</div>
                             {(item.yatan_tutar || 0) > 0 && (
-                              <div className="font-medium text-xs text-purple-600">Yatan: {formatCurrency(item.yatan_tutar || 0)}</div>
+                              <div 
+                                className="font-medium text-xs text-purple-600 cursor-help" 
+                                title={item.yatan_tarih ? `Yatış Tarihi: ${new Date(item.yatan_tarih).toLocaleDateString('tr-TR')}` : 'Yatış tarihi belirtilmemiş'}
+                              >
+                                Yatan: {formatCurrency(item.yatan_tutar || 0)}
+                              </div>
                             )}
                             <div className="text-xs text-slate-500">{formatDate(item.tarih)}</div>
                           </div>
