@@ -846,7 +846,7 @@ function App() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
           <Card className="bg-white dark:bg-gray-800 shadow-lg border-0 dark:border-gray-700 hover:shadow-xl transition-all duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600 dark:text-gray-300">Toplam Kayıt</CardTitle>
@@ -857,8 +857,28 @@ function App() {
               <p className="text-xs text-slate-500 dark:text-gray-400">{monthNames[displayMonth]} {displayYear} kayıt sayısı</p>
             </CardContent>
           </Card>
+          
+          <Card 
+            className="bg-white dark:bg-gray-800 shadow-lg border-0 dark:border-gray-700 hover:shadow-xl transition-all duration-200 cursor-pointer hover:scale-105" 
+            onClick={() => showDetails('month')}
+          >
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-2xl font-bold text-slate-800 dark:text-gray-100">
+                {monthNames[displayMonth]} {displayYear}
+              </CardTitle>
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <ChevronRight className="h-3 w-3 text-slate-400 dark:text-gray-500" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-4">
+                {/* Alt yazıyı kaldırdık, sadece boş alan */}
+              </div>
+            </CardContent>
+          </Card>
 
-          <Card className="bg-white dark:bg-gray-800 shadow-lg border-0 dark:border-gray-700 hover:shadow-xl transition-all duration-200">
+          <Card className="bg-white dark:bg-gray-800 shadow-lg border-0 dark:border-gray-700 hover:shadow-xl transition-all duration-200 sm:col-span-2 lg:col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600 dark:text-gray-300">Toplam Tutar</CardTitle>
               <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
