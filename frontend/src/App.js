@@ -801,6 +801,18 @@ function App() {
                   <span className="text-blue-500 dark:text-blue-400" style={{color: isDarkMode ? '#60a5fa' : '#3b82f6'}}>LOJİSTİK</span>
                 </h1>
                 <p className="text-slate-600 dark:text-gray-300 text-sm sm:text-base lg:text-lg font-medium">Nakliye Takip ve Yönetim Sistemi</p>
+                
+                {/* Ay Seçimi */}
+                <div 
+                  className="mt-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-700 rounded-lg px-3 py-1 transition-colors inline-block"
+                  onClick={() => showDetails('month')}
+                >
+                  <div className="text-2xl font-bold text-slate-800 dark:text-gray-100 flex items-center gap-2">
+                    {monthNames[displayMonth]} {displayYear}
+                    <Calendar className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-gray-400">Ay seçmek için tıklayın</p>
+                </div>
               </div>
             </div>
             
