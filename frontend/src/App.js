@@ -138,6 +138,15 @@ function App() {
     setIsDarkMode(!isDarkMode);
   };
 
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('arkas_login_credentials');
+    setIsLoggedIn(false);
+  };
+
   const fetchNakliyeList = async () => {
     try {
       setLoading(true);
