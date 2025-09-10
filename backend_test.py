@@ -477,8 +477,8 @@ def test_yatan_tutar_integration():
         
         # Test 1b: GET /api/nakliye - Verify yatan_tutar field returned in response
         print("\n📋 GET OPERATIONS - VERIFY YATAN TUTAR IN RESPONSES")
-        success, nakliye_list = nakliye_tester.test_get_nakliye_list()
-        if success and nakliye_list:
+        nakliye_list = nakliye_tester.test_get_nakliye_list()
+        if nakliye_list:
             print(f"   📊 Retrieved {len(nakliye_list)} records")
             yatan_tutar_found = 0
             for record in nakliye_list:
