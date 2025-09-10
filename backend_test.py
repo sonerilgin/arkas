@@ -620,8 +620,8 @@ def test_yatan_tutar_integration():
         
         # Test 4a: Verify API responses include new field with appropriate defaults
         print("   📊 Verifying all API responses include yatan_tutar field")
-        success, all_records = nakliye_tester.test_get_nakliye_list()
-        if success and all_records:
+        all_records = nakliye_tester.test_get_nakliye_list()
+        if all_records:
             missing_yatan_tutar = 0
             for record in all_records:
                 if 'yatan_tutar' not in record:
