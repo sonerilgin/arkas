@@ -712,8 +712,10 @@ function App() {
   };
 
   useEffect(() => {
-    fetchNakliyeList();
-  }, []);
+    if (isLoggedIn) {
+      fetchNakliyeList();
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     calculateTotal();
