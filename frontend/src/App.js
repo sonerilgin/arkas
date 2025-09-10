@@ -131,11 +131,6 @@ function App() {
     setIsDarkMode(!isDarkMode);
   };
 
-  // If not authenticated, show auth wrapper
-  if (!isAuthenticated) {
-    return <AuthWrapper onAuthSuccess={handleAuthSuccess} />;
-  }
-
   const fetchNakliyeList = async () => {
     try {
       setLoading(true);
