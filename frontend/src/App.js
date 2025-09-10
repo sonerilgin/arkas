@@ -1487,7 +1487,9 @@ function App() {
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right font-semibold text-purple-600">{formatCurrency(item.yatan_tutar || 0)}</TableCell>
+                          <TableCell className="text-right font-semibold text-purple-600">
+                            {(item.yatan_tutar || 0) > 0 ? formatCurrency(item.yatan_tutar || 0) : '-'}
+                          </TableCell>
                           <TableCell className="text-center">
                             <div className="flex gap-1 justify-center">
                               <Button
