@@ -482,26 +482,45 @@ def main():
         print("\n🔒 LOGIN TESTS (Unverified Users)")
         auth_tester.test_login_unverified_user()
         
-        # IMPORTANT: Manual verification step
+        # IMPORTANT: Get verification codes from backend logs
         print("\n" + "⚠️ "*20)
-        print("🔍 MANUAL VERIFICATION REQUIRED")
+        print("🔍 CHECKING BACKEND LOGS FOR VERIFICATION CODES")
         print("⚠️ "*20)
-        print("Check the backend console logs for verification codes!")
-        print("Look for messages like:")
-        print("📧 VERIFICATION EMAIL to test@example.com: Code = XXXXXX")
-        print("📱 VERIFICATION SMS to +905551234567: Code = XXXXXX")
-        print("\nEnter the codes when prompted, or press Enter to use mock codes...")
         
-        # Get verification codes from user input or use mock
-        email_code = input("\nEnter EMAIL verification code (or press Enter for mock): ").strip()
-        if not email_code:
-            email_code = "123456"  # Mock code for testing
-            print(f"Using mock code: {email_code}")
-        
-        phone_code = input("Enter PHONE verification code (or press Enter for mock): ").strip()
-        if not phone_code:
-            phone_code = "654321"  # Mock code for testing
-            print(f"Using mock code: {phone_code}")
+        # Get verification codes from backend logs
+        import subprocess
+        try:
+            result = subprocess.run(['tail', '-n', '100', '/var/log/supervisor/backend.out.log'], 
+                                  capture_output=True, text=True)
+            log_output = result.stdout
+            
+            # Extract codes from logs
+            email_code = None
+            phone_code = None
+            
+            for line in log_output.split('\n'):
+                if 'VERIFICATION EMAIL to test@example.com: Code =' in line:
+                    email_code = line.split('Code = ')[-1].strip()
+                elif 'VERIFICATION SMS to +905551234567: Code =' in line:
+                    phone_code = line.split('Code = ')[-1].strip()
+            
+            if email_code:
+                print(f"📧 Found EMAIL verification code: {email_code}")
+            else:
+                email_code = "123456"  # Fallback
+                print(f"📧 Using fallback EMAIL code: {email_code}")
+                
+            if phone_code:
+                print(f"📱 Found PHONE verification code: {phone_code}")
+            else:
+                phone_code = "654321"  # Fallback
+                print(f"📱 Using fallback PHONE code: {phone_code}")
+                
+        except Exception as e:
+            print(f"❌ Error reading logs: {e}")
+            email_code = "123456"
+            phone_code = "654321"
+            print(f"Using fallback codes: email={email_code}, phone={phone_code}")
         
         # Test 6: Verify users
         print("\n✅ VERIFICATION TESTS")
