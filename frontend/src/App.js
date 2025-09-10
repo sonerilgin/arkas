@@ -802,6 +802,17 @@ function App() {
             
             {/* User Info & Theme Toggle */}
             <div className="flex items-center gap-2">
+              {/* Logout Button */}
+              <Button
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="bg-white hover:bg-red-50 dark:bg-gray-800 dark:hover:bg-red-900 border-slate-200 dark:border-gray-600 text-red-600 hover:text-red-700"
+              >
+                <LogOut className="h-4 w-4 mr-1" />
+                Çıkış
+              </Button>
+              
               {/* Theme Toggle Button */}
               <Button
                 onClick={toggleTheme}
