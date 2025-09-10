@@ -123,6 +123,7 @@ class NakliyeKayitUpdate(BaseModel):
     harcirah: Optional[float] = None
     toplam: Optional[float] = None
     sistem: Optional[float] = None
+    yatan_tutar: Optional[float] = None
 
 
 def prepare_for_mongo(data):
