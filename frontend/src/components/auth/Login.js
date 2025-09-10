@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { useToast } from '../../hooks/use-toast';
+import BiometricAuth from './BiometricAuth';
 import axios from 'axios';
 
 const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
