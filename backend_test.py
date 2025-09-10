@@ -166,10 +166,10 @@ class AuthAPITester:
         )
         return success, response
 
-    def test_login_email(self):
+    def test_login_email(self, email):
         """Test login with email"""
         test_data = {
-            "identifier": "test@example.com",
+            "identifier": email,
             "password": "test123"
         }
         success, response = self.run_test(
@@ -184,10 +184,10 @@ class AuthAPITester:
             print(f"   🔑 Access token obtained: {self.access_token[:20]}...")
         return success, response
 
-    def test_login_phone(self):
+    def test_login_phone(self, phone):
         """Test login with phone"""
         test_data = {
-            "identifier": "+905551234567",
+            "identifier": phone,
             "password": "test123"
         }
         success, response = self.run_test(
