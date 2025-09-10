@@ -873,7 +873,8 @@ function App() {
             </CardHeader>
             <CardContent>
               <div className="text-center py-4">
-                <span className="text-lg font-medium text-slate-600 dark:text-gray-300">Seçili Ay</span>
+                <div className="text-2xl font-bold text-slate-800 dark:text-gray-100">{monthNames[displayMonth]} {displayYear}</div>
+                <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">Seçili Ay</p>
               </div>
             </CardContent>
           </Card>
