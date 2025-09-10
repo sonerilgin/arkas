@@ -186,7 +186,12 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Authentication System - All endpoints tested and working"
+    - "Yatan Tutar Field - Backend Model Updates"
+    - "Name Shortening Prevention"
+    - "Monthly Totals Display"
+    - "Yatan Tutar Column Implementation"
+    - "PDF Export Yatan Tutar Integration"
+    - "Mobile Responsive Design"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
