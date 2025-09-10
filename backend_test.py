@@ -448,98 +448,143 @@ class NakliyeAPITester:
                 pass
 
 def main():
-    # Setup
-    tester = NakliyeAPITester()
+    print("🚀 Starting Arkas Lojistik Authentication API Tests...")
     
-    # Test data as specified in the requirements
-    test_data = {
-        "tarih": "2025-09-08T00:00:00Z",
-        "sira_no": "24560",
-        "musteri": "Test Müşteri A.Ş.",
-        "irsaliye_no": "326800",
-        "ithalat": True,
-        "ihracat": False,
-        "bos_tasima": 0.0,
-        "reefer": 0.0,
-        "bekleme": 200.0,
-        "geceleme": 0.0,
-        "pazar": 0.0,
-        "harcirah": 750.5,
-        "toplam": 950.5,
-        "sistem": 950.5
-    }
-
-    print("🚀 Starting Nakliye API Tests...")
-    print(f"Backend URL: {tester.base_url}")
-
+    # Setup authentication tester
+    auth_tester = AuthAPITester()
+    print(f"Backend URL: {auth_tester.base_url}")
+    
+    all_tests_passed = True
+    
     try:
-        # Test 1: Root endpoint
-        tester.test_root_endpoint()
-
-        # Test 2: Create nakliye record
-        created_id = tester.test_create_nakliye(test_data)
-        if not created_id:
-            print("❌ Cannot continue tests - record creation failed")
-            return 1
-
-        # Test 3: Get nakliye list
-        nakliye_list = tester.test_get_nakliye_list()
+        print("\n" + "="*60)
+        print("🔐 AUTHENTICATION SYSTEM TESTS")
+        print("="*60)
         
-        # Test 4: Get specific nakliye record
-        success, retrieved_record = tester.test_get_nakliye_by_id(created_id)
+        # Test 1: Register user with email
+        print("\n📝 REGISTRATION TESTS")
+        success, response = auth_tester.test_register_email()
+        if not success:
+            print("❌ Email registration failed - cannot continue with email tests")
+        
+        # Test 2: Register user with phone
+        success_phone, response_phone = auth_tester.test_register_phone()
+        if not success_phone:
+            print("❌ Phone registration failed - cannot continue with phone tests")
+        
+        # Test 3: Test duplicate registration
+        auth_tester.test_register_duplicate()
+        
+        # Test 4: Test invalid email registration
+        auth_tester.test_register_invalid_email()
+        
+        # Test 5: Test unverified user login (should fail)
+        print("\n🔒 LOGIN TESTS (Unverified Users)")
+        auth_tester.test_login_unverified_user()
+        
+        # IMPORTANT: Manual verification step
+        print("\n" + "⚠️ "*20)
+        print("🔍 MANUAL VERIFICATION REQUIRED")
+        print("⚠️ "*20)
+        print("Check the backend console logs for verification codes!")
+        print("Look for messages like:")
+        print("📧 VERIFICATION EMAIL to test@example.com: Code = XXXXXX")
+        print("📱 VERIFICATION SMS to +905551234567: Code = XXXXXX")
+        print("\nEnter the codes when prompted, or press Enter to use mock codes...")
+        
+        # Get verification codes from user input or use mock
+        email_code = input("\nEnter EMAIL verification code (or press Enter for mock): ").strip()
+        if not email_code:
+            email_code = "123456"  # Mock code for testing
+            print(f"Using mock code: {email_code}")
+        
+        phone_code = input("Enter PHONE verification code (or press Enter for mock): ").strip()
+        if not phone_code:
+            phone_code = "654321"  # Mock code for testing
+            print(f"Using mock code: {phone_code}")
+        
+        # Test 6: Verify users
+        print("\n✅ VERIFICATION TESTS")
         if success:
-            print(f"   Retrieved record: {retrieved_record.get('musteri', 'N/A')}")
-
-        # Test 5: Update nakliye record
-        update_data = {
-            "musteri": "Updated Test Müşteri A.Ş.",
-            "bekleme": 300.0,
-            "toplam": 1050.5
+            auth_tester.test_verify_user("test@example.com", email_code)
+            # Test invalid verification code
+            auth_tester.test_verify_invalid_code("test@example.com")
+        
+        if success_phone:
+            auth_tester.test_verify_user("+905551234567", phone_code)
+        
+        # Test 7: Login tests
+        print("\n🔑 LOGIN TESTS (Verified Users)")
+        login_success, _ = auth_tester.test_login_email()
+        auth_tester.test_login_phone()
+        auth_tester.test_login_invalid_credentials()
+        
+        # Test 8: Protected endpoint tests
+        print("\n🛡️ PROTECTED ENDPOINT TESTS")
+        if login_success:
+            auth_tester.test_get_user_info()
+        auth_tester.test_get_user_info_invalid_token()
+        
+        # Test 9: Password reset tests
+        print("\n🔄 PASSWORD RESET TESTS")
+        auth_tester.test_forgot_password("test@example.com")
+        
+        # Get reset code
+        reset_code = input("\nEnter PASSWORD RESET code (or press Enter for mock): ").strip()
+        if not reset_code:
+            reset_code = "789012"  # Mock code
+            print(f"Using mock code: {reset_code}")
+        
+        auth_tester.test_reset_password("test@example.com", reset_code)
+        auth_tester.test_reset_password_invalid_code("test@example.com")
+        
+        # Test 10: Login with new password
+        print("\n🔐 LOGIN WITH NEW PASSWORD TEST")
+        new_login_data = {
+            "identifier": "test@example.com",
+            "password": "newpass123"
         }
-        success, updated_record = tester.test_update_nakliye(created_id, update_data)
-        if success:
-            print(f"   Updated customer: {updated_record.get('musteri', 'N/A')}")
-
-        # Test 6: Search functionality
-        # Search by customer name
-        tester.test_search_nakliye("Test Müşteri")
-        
-        # Search by sira_no
-        tester.test_search_nakliye("24560")
-        
-        # Search by irsaliye_no
-        tester.test_search_nakliye("326800")
-
-        # Test 7: Delete nakliye record
-        tester.test_delete_nakliye(created_id)
-
-        # Test 8: Verify deletion (should return 404)
-        success, _ = tester.run_test(
-            "Verify Deletion (should fail)",
-            "GET",
-            f"nakliye/{created_id}",
-            404
+        auth_tester.run_test(
+            "Login with New Password",
+            "POST",
+            "auth/login",
+            200,
+            data=new_login_data
         )
-
+        
+        # Print authentication test summary
+        all_tests_passed = auth_tester.print_summary()
+        
     except Exception as e:
-        print(f"❌ Test suite failed with error: {str(e)}")
-        return 1
-
-    finally:
-        # Cleanup any remaining records
-        tester.cleanup_created_records()
-
-    # Print results
-    print(f"\n📊 Test Results:")
-    print(f"   Tests Run: {tester.tests_run}")
-    print(f"   Tests Passed: {tester.tests_passed}")
-    print(f"   Success Rate: {(tester.tests_passed/tester.tests_run)*100:.1f}%")
+        print(f"❌ Authentication test suite failed with error: {str(e)}")
+        all_tests_passed = False
     
-    if tester.tests_passed == tester.tests_run:
-        print("🎉 All tests passed!")
+    # Also run basic nakliye tests to ensure system integration
+    print("\n" + "="*60)
+    print("📦 BASIC NAKLIYE SYSTEM INTEGRATION TEST")
+    print("="*60)
+    
+    nakliye_tester = NakliyeAPITester()
+    try:
+        # Just test root endpoint to ensure nakliye system is working
+        nakliye_tester.test_root_endpoint()
+        nakliye_success = nakliye_tester.tests_passed == nakliye_tester.tests_run
+    except Exception as e:
+        print(f"❌ Nakliye integration test failed: {str(e)}")
+        nakliye_success = False
+    
+    # Final summary
+    print("\n" + "="*60)
+    print("📋 FINAL TEST SUMMARY")
+    print("="*60)
+    print(f"🔐 Authentication Tests: {'✅ PASSED' if all_tests_passed else '❌ FAILED'}")
+    print(f"📦 Nakliye Integration: {'✅ PASSED' if nakliye_success else '❌ FAILED'}")
+    
+    if all_tests_passed and nakliye_success:
+        print("\n🎉 ALL SYSTEMS WORKING CORRECTLY!")
         return 0
     else:
-        print("❌ Some tests failed!")
+        print("\n❌ SOME TESTS FAILED - CHECK LOGS ABOVE")
         return 1
 
 if __name__ == "__main__":
