@@ -469,20 +469,44 @@ def main():
         
         # Test 1: Register user with email
         print("\n📝 REGISTRATION TESTS")
-        success, response = auth_tester.test_register_email()
+        success, response, email = auth_tester.test_register_email()
         if not success:
             print("❌ Email registration failed - cannot continue with email tests")
+            email = None
         
         # Test 2: Register user with phone
-        success_phone, response_phone = auth_tester.test_register_phone()
+        success_phone, response_phone, phone = auth_tester.test_register_phone()
         if not success_phone:
             print("❌ Phone registration failed - cannot continue with phone tests")
+            phone = None
         
-        # Test 3: Test duplicate registration
-        auth_tester.test_register_duplicate()
+        # Test 3: Test duplicate registration (use existing email)
+        if email:
+            test_data = {
+                "email": email,
+                "password": "test123",
+                "full_name": "Test User Duplicate"
+            }
+            auth_tester.run_test(
+                "Register Duplicate User (should fail)",
+                "POST",
+                "auth/register",
+                400,
+                data=test_data
+            )
         
-        # Test 4: Test invalid email registration
-        auth_tester.test_register_invalid_email()
+        # Test 4: Test invalid email registration (expect 422 from pydantic)
+        auth_tester.run_test(
+            "Register with Invalid Email (should fail)",
+            "POST",
+            "auth/register",
+            422,  # Changed from 400 to 422 as pydantic returns 422
+            data={
+                "email": "invalid-email",
+                "password": "test123",
+                "full_name": "Test User Invalid"
+            }
+        )
         
         # Test 5: Test unverified user login (should fail)
         print("\n🔒 LOGIN TESTS (Unverified Users)")
