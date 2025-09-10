@@ -192,7 +192,8 @@ function App() {
         pazar: parseFloat(formData.pazar) || 0,
         harcirah: parseFloat(formData.harcirah) || 0,
         toplam: parseFloat(formData.toplam) || 0,
-        sistem: parseFloat(formData.sistem) || 0
+        sistem: parseFloat(formData.sistem) || 0,
+        yatan_tutar: parseFloat(formData.yatan_tutar) || 0
       };
 
       if (editingItem) {
