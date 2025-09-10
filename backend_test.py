@@ -571,9 +571,23 @@ def main():
                 reset_code = "789012"
                 print(f"Using fallback reset code: {reset_code}")
             
-            # Note: Skip actual password reset due to datetime bug in backend
-            print("⚠️ Skipping actual password reset due to backend datetime comparison bug")
+            # Test actual password reset now that datetime bug is fixed
+            auth_tester.test_reset_password(email, reset_code)
             auth_tester.test_reset_password_invalid_code(email)
+            
+            # Test 10: Login with new password
+            print("\n🔐 LOGIN WITH NEW PASSWORD TEST")
+            new_login_data = {
+                "identifier": email,
+                "password": "newpass123"
+            }
+            auth_tester.run_test(
+                "Login with New Password",
+                "POST",
+                "auth/login",
+                200,
+                data=new_login_data
+            )
         
         # Print authentication test summary
         all_tests_passed = auth_tester.print_summary()
