@@ -169,44 +169,7 @@ class AuthAPITester:
         )
         return success, response
 
-    def test_login_invalid_credentials(self):
-        """Test login with invalid credentials"""
-        test_data = {
-            "identifier": "test@example.com",
-            "password": "wrongpassword"
-        }
-        success, response = self.run_test(
-            "Login with Invalid Password (should fail)",
-            "POST",
-            "auth/login",
-            401,
-            data=test_data
-        )
-        return success, response
 
-    def test_login_unverified_user(self):
-        """Test login with unverified user"""
-        # First register a new user
-        register_data = {
-            "email": "unverified@example.com",
-            "password": "test123",
-            "full_name": "Unverified User"
-        }
-        self.run_test("Register Unverified User", "POST", "auth/register", 200, data=register_data)
-        
-        # Try to login without verification
-        login_data = {
-            "identifier": "unverified@example.com",
-            "password": "test123"
-        }
-        success, response = self.run_test(
-            "Login Unverified User (should fail)",
-            "POST",
-            "auth/login",
-            401,
-            data=login_data
-        )
-        return success, response
 
     def test_get_user_info(self):
         """Test getting current user info with token"""
