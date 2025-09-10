@@ -778,6 +778,19 @@ function App() {
               />
             </div>
             
+            {/* Biometric Authentication */}
+            <div className="pt-4 border-t">
+              <BiometricAuth
+                currentUser={currentUser}
+                onRegister={(data) => {
+                  toast({
+                    title: "Parmak İzi Kaydedildi",
+                    description: "Artık parmak izinizle giriş yapabilirsiniz"
+                  });
+                }}
+              />
+            </div>
+            
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setUserEditDialogOpen(false)}>
                 İptal
