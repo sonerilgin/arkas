@@ -239,6 +239,312 @@ async def search_nakliye(query: str, skip: int = 0, limit: int = 100):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+# ========== AUTHENTICATION ENDPOINTS ==========
+
+@api_router.post("/auth/register", response_model=dict)
+async def register_user(user_data: UserCreate):
+    try:
+        # Validate that either email or phone is provided
+        if not user_data.email and not user_data.phone:
+            raise HTTPException(status_code=400, detail="Email veya telefon numarası gerekli")
+        
+        # Validate email format if provided
+        if user_data.email and not is_valid_email(user_data.email):
+            raise HTTPException(status_code=400, detail="Geçersiz email formatı")
+        
+        # Validate and format phone if provided
+        if user_data.phone:
+            if not is_valid_phone(user_data.phone):
+                raise HTTPException(status_code=400, detail="Geçersiz telefon numarası formatı")
+            user_data.phone = format_phone(user_data.phone)
+        
+        # Check if user already exists
+        existing_user = None
+        if user_data.email:
+            existing_user = await users_collection.find_one({"email": user_data.email})
+        if not existing_user and user_data.phone:
+            existing_user = await users_collection.find_one({"phone": user_data.phone})
+        
+        if existing_user:
+            raise HTTPException(status_code=400, detail="Bu email veya telefon numarası zaten kullanılıyor")
+        
+        # Create user
+        user_id = str(uuid.uuid4())
+        hashed_password = get_password_hash(user_data.password)
+        
+        user_doc = {
+            "id": user_id,
+            "email": user_data.email,
+            "phone": user_data.phone,
+            "full_name": user_data.full_name,
+            "hashed_password": hashed_password,
+            "is_verified": False,
+            "created_at": datetime.now(timezone.utc)
+        }
+        
+        await users_collection.insert_one(user_doc)
+        
+        # Generate and send verification code
+        verification_code = generate_verification_code()
+        
+        # Store verification code
+        await verification_codes_collection.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "code": verification_code,
+            "type": "email_verification" if user_data.email else "phone_verification",
+            "identifier": user_data.email or user_data.phone,
+            "created_at": datetime.now(timezone.utc),
+            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10),
+            "used": False
+        })
+        
+        # Send verification code
+        if user_data.email:
+            success = await NotificationService.send_verification_email(
+                user_data.email, verification_code, user_data.full_name
+            )
+        else:
+            success = await NotificationService.send_verification_sms(
+                user_data.phone, verification_code, user_data.full_name
+            )
+        
+        if not success:
+            # Still return success but mention notification issue
+            return {
+                "message": "Kullanıcı oluşturuldu ancak doğrulama kodu gönderilemedi",
+                "user_id": user_id,
+                "verification_sent": False
+            }
+        
+        return {
+            "message": "Kullanıcı başarıyla oluşturuldu. Doğrulama kodu gönderildi.",
+            "user_id": user_id,
+            "verification_sent": True
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Kayıt sırasında hata: {str(e)}")
+
+@api_router.post("/auth/verify", response_model=dict)
+async def verify_user(verification_data: VerificationRequest):
+    try:
+        # Find verification code
+        verification = await verification_codes_collection.find_one({
+            "identifier": verification_data.identifier,
+            "code": verification_data.code,
+            "used": False
+        })
+        
+        if not verification:
+            raise HTTPException(status_code=400, detail="Geçersiz veya süresi dolmuş doğrulama kodu")
+        
+        # Check if expired
+        if verification["expires_at"] < datetime.now(timezone.utc):
+            raise HTTPException(status_code=400, detail="Doğrulama kodunun süresi dolmuş")
+        
+        # Mark verification as used
+        await verification_codes_collection.update_one(
+            {"_id": verification["_id"]},
+            {"$set": {"used": True, "used_at": datetime.now(timezone.utc)}}
+        )
+        
+        # Update user as verified
+        await users_collection.update_one(
+            {"id": verification["user_id"]},
+            {"$set": {"is_verified": True, "verified_at": datetime.now(timezone.utc)}}
+        )
+        
+        return {"message": "Hesap başarıyla doğrulandı"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Doğrulama sırasında hata: {str(e)}")
+
+@api_router.post("/auth/login", response_model=Token)
+async def login_user(login_data: UserLogin):
+    try:
+        # Find user by email or phone
+        user = None
+        if is_valid_email(login_data.identifier):
+            user = await users_collection.find_one({"email": login_data.identifier})
+        else:
+            formatted_phone = format_phone(login_data.identifier)
+            user = await users_collection.find_one({"phone": formatted_phone})
+        
+        if not user:
+            raise HTTPException(status_code=401, detail="Geçersiz kimlik bilgileri")
+        
+        # Verify password
+        if not verify_password(login_data.password, user["hashed_password"]):
+            raise HTTPException(status_code=401, detail="Geçersiz kimlik bilgileri")
+        
+        # Check if user is verified
+        if not user.get("is_verified", False):
+            raise HTTPException(status_code=401, detail="Hesap doğrulanmadı. Lütfen email/SMS kodunu kontrol edin.")
+        
+        # Create access token
+        access_token = create_access_token(
+            data={"sub": user.get("email") or user.get("phone")}
+        )
+        
+        return {"access_token": access_token, "token_type": "bearer"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Giriş sırasında hata: {str(e)}")
+
+@api_router.post("/auth/forgot-password", response_model=dict)
+async def forgot_password(forgot_data: ForgotPasswordRequest):
+    try:
+        # Find user
+        user = None
+        if is_valid_email(forgot_data.identifier):
+            user = await users_collection.find_one({"email": forgot_data.identifier})
+        else:
+            formatted_phone = format_phone(forgot_data.identifier)
+            user = await users_collection.find_one({"phone": formatted_phone})
+        
+        if not user:
+            # Return success even if user not found (security)
+            return {"message": "Eğer hesap varsa, şifre sıfırlama kodu gönderildi"}
+        
+        # Generate reset code
+        reset_code = generate_verification_code()
+        
+        # Store reset code
+        await verification_codes_collection.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": user["id"],
+            "code": reset_code,
+            "type": "password_reset",
+            "identifier": forgot_data.identifier,
+            "created_at": datetime.now(timezone.utc),
+            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10),
+            "used": False
+        })
+        
+        # Send reset code
+        if user.get("email"):
+            await NotificationService.send_password_reset_email(
+                user["email"], reset_code, user["full_name"]
+            )
+        else:
+            await NotificationService.send_password_reset_sms(
+                user["phone"], reset_code, user["full_name"]
+            )
+        
+        return {"message": "Şifre sıfırlama kodu gönderildi"}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Şifre sıfırlama sırasında hata: {str(e)}")
+
+@api_router.post("/auth/reset-password", response_model=dict)
+async def reset_password(reset_data: ResetPasswordRequest):
+    try:
+        # Find verification code
+        verification = await verification_codes_collection.find_one({
+            "identifier": reset_data.identifier,
+            "code": reset_data.code,
+            "type": "password_reset",
+            "used": False
+        })
+        
+        if not verification:
+            raise HTTPException(status_code=400, detail="Geçersiz veya süresi dolmuş sıfırlama kodu")
+        
+        # Check if expired
+        if verification["expires_at"] < datetime.now(timezone.utc):
+            raise HTTPException(status_code=400, detail="Sıfırlama kodunun süresi dolmuş")
+        
+        # Mark verification as used
+        await verification_codes_collection.update_one(
+            {"_id": verification["_id"]},
+            {"$set": {"used": True, "used_at": datetime.now(timezone.utc)}}
+        )
+        
+        # Update user password
+        new_hashed_password = get_password_hash(reset_data.new_password)
+        await users_collection.update_one(
+            {"id": verification["user_id"]},
+            {"$set": {
+                "hashed_password": new_hashed_password,
+                "password_reset_at": datetime.now(timezone.utc)
+            }}
+        )
+        
+        return {"message": "Şifre başarıyla sıfırlandı"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Şifre sıfırlama sırasında hata: {str(e)}")
+
+@api_router.get("/auth/me", response_model=UserResponse)
+async def get_current_user_info(current_user: dict = Depends(get_current_user)):
+    return UserResponse(
+        id=current_user["id"],
+        email=current_user.get("email"),
+        phone=current_user.get("phone"),
+        full_name=current_user["full_name"],
+        is_verified=current_user.get("is_verified", False),
+        created_at=current_user["created_at"]
+    )
+
+@api_router.post("/auth/resend-verification", response_model=dict)
+async def resend_verification_code(identifier: str):
+    try:
+        # Find user
+        user = None
+        if is_valid_email(identifier):
+            user = await users_collection.find_one({"email": identifier})
+        else:
+            formatted_phone = format_phone(identifier)
+            user = await users_collection.find_one({"phone": formatted_phone})
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="Kullanıcı bulunamadı")
+        
+        if user.get("is_verified", False):
+            raise HTTPException(status_code=400, detail="Hesap zaten doğrulanmış")
+        
+        # Generate new verification code
+        verification_code = generate_verification_code()
+        
+        # Store verification code
+        await verification_codes_collection.insert_one({
+            "id": str(uuid.uuid4()),
+            "user_id": user["id"],
+            "code": verification_code,
+            "type": "email_verification" if user.get("email") else "phone_verification",
+            "identifier": identifier,
+            "created_at": datetime.now(timezone.utc),
+            "expires_at": datetime.now(timezone.utc) + timedelta(minutes=10),
+            "used": False
+        })
+        
+        # Send verification code
+        if user.get("email"):
+            success = await NotificationService.send_verification_email(
+                user["email"], verification_code, user["full_name"]
+            )
+        else:
+            success = await NotificationService.send_verification_sms(
+                user["phone"], verification_code, user["full_name"]
+            )
+        
+        return {"message": "Doğrulama kodu tekrar gönderildi", "sent": success}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Doğrulama kodu gönderme sırasında hata: {str(e)}")
+
+
 # Include the router in the main app
 app.include_router(api_router)
 
