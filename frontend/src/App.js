@@ -523,7 +523,7 @@ function App() {
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold;">${formatCurrency(toplam)}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #22c55e;">${formatCurrency(sistem)}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center; font-weight: bold; color: ${farkColor};">${farkText}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #8b5cf6;">${formatCurrency(item.yatan_tutar || 0)}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #8b5cf6;">${(item.yatan_tutar || 0) > 0 ? formatCurrency(item.yatan_tutar || 0) : '-'}</td>
                   </tr>
                 `;
               }).join('')}
