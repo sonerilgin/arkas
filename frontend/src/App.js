@@ -359,7 +359,8 @@ function App() {
       pazar: 0,
       harcirah: 0,
       toplam: 0,
-      sistem: 0
+      sistem: 0,
+      yatan_tutar: 0
     });
   };
 
