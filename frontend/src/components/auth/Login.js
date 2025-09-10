@@ -187,15 +187,10 @@ export default function Login({ onLoginSuccess, onSwitchToRegister, onSwitchToFo
           )}
 
           {biometricSupported && (
-            <Button 
-              type="button"
-              variant="outline"
-              onClick={handleBiometricLogin}
-              className="w-full border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-400 dark:hover:bg-purple-950"
-            >
-              <Fingerprint className="mr-2 h-4 w-4" />
-              Parmak İzi ile Giriş
-            </Button>
+            <BiometricAuth
+              currentUser={loggedInUser}
+              onLogin={handleBiometricLogin}
+            />
           )}
 
           <div className="flex flex-col space-y-2 text-center text-sm">
