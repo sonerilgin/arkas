@@ -1533,6 +1533,7 @@ function App() {
                           <div className="text-right">
                             <div className="font-bold text-lg text-slate-800">{formatCurrency(toplam)}</div>
                             <div className="font-medium text-sm text-green-600">{formatCurrency(sistem)}</div>
+                            <div className="font-medium text-xs text-purple-600">Yatan: {formatCurrency(item.yatan_tutar || 0)}</div>
                             <div className="text-xs text-slate-500">{formatDate(item.tarih)}</div>
                           </div>
                         </div>
