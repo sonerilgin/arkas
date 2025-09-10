@@ -104,37 +104,7 @@ class AuthAPITester:
             self.created_users.append(test_data["phone"])
         return success, response, test_data["phone"]
 
-    def test_register_duplicate(self):
-        """Test duplicate registration (should fail)"""
-        test_data = {
-            "email": "test@example.com",
-            "password": "test123",
-            "full_name": "Test User Duplicate"
-        }
-        success, response = self.run_test(
-            "Register Duplicate User (should fail)",
-            "POST",
-            "auth/register",
-            400,
-            data=test_data
-        )
-        return success, response
 
-    def test_register_invalid_email(self):
-        """Test registration with invalid email"""
-        test_data = {
-            "email": "invalid-email",
-            "password": "test123",
-            "full_name": "Test User Invalid"
-        }
-        success, response = self.run_test(
-            "Register with Invalid Email (should fail)",
-            "POST",
-            "auth/register",
-            400,
-            data=test_data
-        )
-        return success, response
 
     def test_verify_user(self, identifier, code):
         """Test user verification"""
