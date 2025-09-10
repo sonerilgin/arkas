@@ -138,6 +138,54 @@ function App() {
     setIsDarkMode(!isDarkMode);
   };
 
+  // Authentication handlers
+  const handleAuthSuccess = (userData) => {
+    setIsAuthenticated(true);
+    setCurrentUser(userData);
+    
+    // Update userInfo for backward compatibility
+    setUserInfo({
+      name: userData.full_name,
+      sicil: userData.id.slice(-5) // Use last 5 chars of ID as sicil
+    });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('arkas_token');
+    localStorage.removeItem('arkas_user');
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    setUserInfo({ name: "Mehmet Yılmaz", sicil: "12345" }); // Reset to default
+  };
+
+  // Add axios interceptor for authentication
+  useEffect(() => {
+    const token = localStorage.getItem('arkas_token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+
+    // Add response interceptor to handle 401 errors
+    const responseInterceptor = axios.interceptors.response.add(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          handleLogout();
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(responseInterceptor);
+    };
+  }, []);
+
+  // If not authenticated, show auth wrapper
+  if (!isAuthenticated) {
+    return <AuthWrapper onAuthSuccess={handleAuthSuccess} />;
+  }
+
   const fetchNakliyeList = async () => {
     try {
       setLoading(true);
