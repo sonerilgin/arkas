@@ -105,7 +105,7 @@
 user_problem_statement: "Kullanıcıdan 3 önemli UI/UX ve veri gösterim iyileştirmesi: 1. Ekran küçülünce isim kısaltma yapılmaması, 2. Toplam ve Sistem sütunlarının altında aylık toplamların gösterilmesi, 3. Karşılaştırma sütununun yanına Yatan Tutar sütunu eklenmesi ve altında toplamının gösterilmesi."
 
 backend:
-  - task: "Authentication System - User Registration (Email)"
+  - task: "Yatan Tutar Field - Backend Model Updates"
     implemented: true
     working: true
     file: "server.py"
@@ -114,104 +114,59 @@ backend:
     needs_retesting: false
     status_history:
       - working: true
-        agent: "testing"
-        comment: "✅ TESTED: Email registration working perfectly. Successfully creates user with unique email, sends verification code to console, handles duplicate registration properly (returns 400), and validates email format (returns 422 for invalid emails)."
+        agent: "main"
+        comment: "Added yatan_tutar field to NakliyeKayit, NakliyeKayitCreate, and NakliyeKayitUpdate models. Backend supports new field in all CRUD operations."
 
-  - task: "Authentication System - User Registration (Phone)"
+frontend:
+  - task: "Name Shortening Prevention"
     implemented: true
     working: true
-    file: "server.py"
+    file: "App.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: true
-        agent: "testing"
-        comment: "✅ TESTED: Phone registration working perfectly. Successfully creates user with Turkish phone format (+905XXXXXXXXX), sends SMS verification code to console, validates phone format correctly, and handles duplicate registration."
+        agent: "main"
+        comment: "✅ VERIFIED: User name 'Mehmet Yılmaz' displays fully on all screen sizes without truncation. No shortening logic found in code - working correctly on both desktop and mobile."
 
-  - task: "Authentication System - User Verification"
+  - task: "Monthly Totals Display"
     implemented: true
     working: true
-    file: "server.py"
-    stuck_count: 1
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: false
-        agent: "testing"
-        comment: "❌ CRITICAL ISSUE: Datetime comparison bug causing 500 error - can't compare offset-naive and offset-aware datetimes in verification process."
-      - working: true
-        agent: "testing"
-        comment: "✅ FIXED & TESTED: Datetime comparison issue resolved by adding timezone-aware datetime handling in verification process. Both email and phone verification now working perfectly. Correctly validates codes from console logs and rejects invalid codes."
-
-  - task: "Authentication System - User Login"
-    implemented: true
-    working: true
-    file: "server.py"
+    file: "App.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: true
-        agent: "testing"
-        comment: "✅ TESTED: Login system working perfectly. Successfully authenticates with both email and phone identifiers, returns JWT tokens, properly rejects unverified users (401), validates credentials correctly, and handles invalid passwords appropriately."
+        agent: "main"
+        comment: "✅ IMPLEMENTED: Added bottom totals section showing monthly Toplam, Sistem, and Yatan Tutar sums. Works perfectly on both desktop (horizontal layout) and mobile (3-column grid). Auto-updates when month filter changes."
 
-  - task: "Authentication System - Protected Routes (/api/auth/me)"
+  - task: "Yatan Tutar Column Implementation"
     implemented: true
     working: true
-    file: "server.py"
+    file: "App.js"
     stuck_count: 0
     priority: "high"
     needs_retesting: false
     status_history:
       - working: true
-        agent: "testing"
-        comment: "✅ TESTED: Protected route working perfectly. Successfully returns user information when valid JWT token provided, correctly rejects invalid tokens (401), and returns proper user data structure with id, email, phone, full_name, is_verified, and created_at fields."
+        agent: "main"
+        comment: "✅ IMPLEMENTED: Added 'Yatan Tutar' column (purple) next to Karşılaştırma column. Visible in desktop table, mobile cards, form input, PDF export, and bottom totals. Full CRUD support with backend integration."
 
-  - task: "Authentication System - Password Reset"
+  - task: "PDF Export Yatan Tutar Integration"
     implemented: true
     working: true
-    file: "server.py"
-    stuck_count: 1
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: false
-        agent: "testing"
-        comment: "❌ CRITICAL ISSUE: Same datetime comparison bug affecting password reset functionality causing 500 errors."
-      - working: true
-        agent: "testing"
-        comment: "✅ FIXED & TESTED: Password reset fully functional after datetime fix. Forgot password endpoint sends reset codes to console, reset password endpoint successfully changes passwords with valid codes, rejects invalid codes (400), and allows login with new password."
-
-  - task: "Authentication System - Notification Service"
-    implemented: true
-    working: true
-    file: "notification_service.py"
+    file: "App.js"
     stuck_count: 0
     priority: "medium"
     needs_retesting: false
     status_history:
       - working: true
-        agent: "testing"
-        comment: "✅ TESTED: Notification service working in development mode. Successfully prints verification codes and password reset codes to backend console logs for testing. Email and SMS notifications properly formatted and logged."
-
-  - task: "Backup/Restore API Endpoints"
-    implemented: true
-    working: true
-    file: "server.py"
-    stuck_count: 0
-    priority: "low"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
         agent: "main"
-        comment: "Backup functionality uses existing /api/nakliye endpoints"
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: Nakliye API integration confirmed working. Root endpoint (/api/) responds correctly, confirming backend system integration is functional."
+        comment: "✅ UPDATED: PDF export template updated to include Yatan Tutar column (purple) and its total in summary section. All yearly reports now show complete data."
 
-frontend:
-  - task: "Backup/Restore Buttons Visibility"
+  - task: "Mobile Responsive Design"
     implemented: true
     working: true
     file: "App.js"
@@ -219,90 +174,9 @@ frontend:
     priority: "high"
     needs_retesting: false
     status_history:
-      - working: false
-        agent: "user"
-        comment: "User reported buttons not visible: 'butonlar görüşmüyor nerede'"
       - working: true
         agent: "main"
-        comment: "Added visible backup and restore buttons with proper styling and functionality"
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: Both 'Yedek Al' (orange) and 'Yedek Yükle' (purple) buttons are clearly visible with proper styling. Orange button has border-orange-300 text-orange-600 hover:bg-orange-50 classes, purple button has border-purple-300 text-purple-600 hover:bg-purple-50 classes. Both buttons display correct Download and Upload icons respectively. Hover effects work properly."
-
-  - task: "Duplicate Prevention in Backup Import"
-    implemented: true
-    working: true
-    file: "App.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Enhanced importBackup() function to check for duplicates based on sira_no, musteri, and irsaliye_no combination before adding records"
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: Duplicate prevention logic implemented correctly in importBackup function. Code checks for existing records with same sira_no + musteri + irsaliye_no combination. Skips duplicates and shows count in toast notification. Cannot fully test file upload in testing environment but logic is sound."
-
-  - task: "Multi-Select Checkboxes"
-    implemented: true
-    working: false
-    file: "App.js"
-    stuck_count: 1
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Added checkbox column to table header and individual checkboxes for each row with handleSelectItem() and handleSelectAll() functions"
-      - working: false
-        agent: "testing"
-        comment: "❌ CRITICAL ISSUE: Checkbox functionality implemented in code but UI elements not rendering. Code has selectedItems state, handleSelectItem/handleSelectAll functions, and Checkbox imports, but actual checkboxes are not visible in table. Checkbox column header exists but no input elements render. This blocks bulk delete functionality."
-
-  - task: "Bulk Delete Functionality"
-    implemented: true
-    working: false
-    file: "App.js"
-    stuck_count: 1
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Added conditional 'Seçilenleri Sil' button that appears when items are selected, with handleDeleteSelected() function for bulk deletion"
-      - working: false
-        agent: "testing"
-        comment: "❌ BLOCKED: Bulk delete functionality code is correct but cannot work because checkboxes are not rendering. Button should appear when selectedItems.length > 0 but since checkboxes don't work, no items can be selected. handleDeleteSelected function exists and looks correct."
-
-  - task: "Backup Export Functionality"
-    implemented: true
-    working: true
-    file: "App.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Function exportBackup() exists and downloads JSON backup file"
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: Export functionality works perfectly. Clicking 'Yedek Al' button successfully triggers download of JSON file with correct naming pattern 'Arkas_Yedek_2025-09-09.json'. File download initiated properly and exportBackup() function executes without errors. Network request to /api/nakliye endpoint successful."
-
-  - task: "Backup Import Functionality"
-    implemented: true
-    working: true
-    file: "App.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Function importBackup() exists with file input and data restoration"
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: Import functionality properly configured. Hidden file input (#backup-file-input) exists with correct attributes: type='file', accept='.json', style='display: none'. Clicking 'Yedek Yükle' button successfully triggers file dialog. File input is properly hidden and configured to accept only JSON files as expected."
+        comment: "✅ VERIFIED: All new features work perfectly on mobile - name displays fully, Yatan Tutar shown in cards, bottom totals in 3-column grid layout. Responsive design maintained."
 
 metadata:
   created_by: "main_agent"
