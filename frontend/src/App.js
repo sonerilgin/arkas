@@ -53,10 +53,6 @@ const monthNames = [
 ];
 
 function App() {
-  // Authentication state
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
-  
   const [nakliyeList, setNakliyeList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
