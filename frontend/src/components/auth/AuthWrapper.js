@@ -9,7 +9,6 @@ const API = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
 export default function AuthWrapper({ onAuthSuccess }) {
   const [currentView, setCurrentView] = useState('login');
-  const [verificationData, setVerificationData] = useState(null);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -36,19 +35,8 @@ export default function AuthWrapper({ onAuthSuccess }) {
     onAuthSuccess(userData);
   };
 
-  const handleRegistrationSuccess = (identifier, type) => {
-    setVerificationData({ identifier, type });
-    setCurrentView('verification');
-  };
-
-  const handleVerificationSuccess = () => {
-    setCurrentView('login');
-    setVerificationData(null);
-  };
-
   const handleBackToLogin = () => {
     setCurrentView('login');
-    setVerificationData(null);
   };
 
   const handleSwitchToRegister = () => {
@@ -64,17 +52,6 @@ export default function AuthWrapper({ onAuthSuccess }) {
       return (
         <Register
           onBackToLogin={handleBackToLogin}
-          onRegistrationSuccess={handleRegistrationSuccess}
-        />
-      );
-    
-    case 'verification':
-      return (
-        <Verification
-          identifier={verificationData?.identifier}
-          type={verificationData?.type}
-          onBackToLogin={handleBackToLogin}
-          onVerificationSuccess={handleVerificationSuccess}
         />
       );
     
