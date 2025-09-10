@@ -14,6 +14,7 @@ export default function Login({ onLoginSuccess, onSwitchToRegister, onSwitchToFo
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [biometricSupported, setBiometricSupported] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState(null);
   const { toast } = useToast();
   
   const { register, handleSubmit, formState: { errors } } = useForm();
