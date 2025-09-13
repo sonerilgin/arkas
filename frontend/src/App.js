@@ -1025,53 +1025,65 @@ function App() {
       const dataStr = JSON.stringify(backupData, null, 2);
       const filename = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
       
-      // Android detection
+      // Android ve PWA detection
       const isAndroid = /Android/i.test(navigator.userAgent);
+      const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone === true;
       
-      if (isAndroid) {
-        // Android için Data URL yaklaşımı - basit ve güvenilir
-        const dataUrl = 'data:application/json;charset=utf-8;base64,' + btoa(unescape(encodeURIComponent(dataStr)));
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = filename;
-        link.style.display = 'none';
-        
-        // Android için önemli: body'ye ekle ve zorla tıkla
-        document.body.appendChild(link);
-        
-        // Biraz bekle ve tıkla
-        setTimeout(() => {
-          try {
-            link.click();
+      // Android PWA için Web Share API (tek çalışan yöntem)
+      if (isAndroid && navigator.share) {
+        try {
+          const file = new File([dataStr], filename, { type: 'application/json' });
+          
+          await navigator.share({
+            title: 'Arkas Lojistik Yedek Dosyası',
+            text: 'Nakliye ve yatan tutar verilerinizin yedeği',
+            files: [file]
+          });
+          
+          toast({
+            title: "Android Paylaşım Başarılı",
+            description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı paylaşıldı`
+          });
+          return;
+        } catch (shareError) {
+          console.log('Web Share error:', shareError);
+          if (shareError.name === 'AbortError') {
             toast({
-              title: "Android Yedekleme",
-              description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı hazırlandı`
+              title: "Paylaşım İptal Edildi",
+              description: "Dosya paylaşımı kullanıcı tarafından iptal edildi"
             });
-          } catch (clickError) {
-            console.error('Android click error:', clickError);
-            toast({
-              title: "İndirme Sorunu",
-              description: "Dosya indirilemedi. Lütfen farklı bir tarayıcı deneyin.",
-              variant: "destructive"
-            });
-          } finally {
-            setTimeout(() => {
-              try {
-                document.body.removeChild(link);
-              } catch (removeError) {
-                console.warn('Link removal error:', removeError);
-              }
-            }, 500);
+            return;
           }
-        }, 200);
-        
-        return;
+          // Fallback'e geç
+        }
       }
       
-      // Masaüstü ve iOS için - daha gelişmiş yaklaşım
+      // Android PWA için alternatif çözüm - kopyala ve talimat ver
+      if (isAndroid && isPWA) {
+        try {
+          await navigator.clipboard.writeText(dataStr);
+          toast({
+            title: "Android PWA - Veri Kopyalandı",
+            description: "Yedek veriler panoya kopyalandı. Bir metin editöründe yapıştırarak .json dosyası olarak kaydedin.",
+            duration: 8000
+          });
+          return;
+        } catch (clipboardError) {
+          toast({
+            title: "Android PWA Kısıtlaması",
+            description: "PWA modunda dosya indirme kısıtlı. Lütfen uygulamayı normal tarayıcıda açmayı deneyin.",
+            variant: "destructive",
+            duration: 8000
+          });
+          return;
+        }
+      }
+      
+      // Masaüstü ve normal tarayıcı için geleneksel yöntem
       const dataBlob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
       
-      // Modern Web Share API test (Android hariç)
+      // Web Share API (desktop için)
       if (navigator.share && !isAndroid) {
         try {
           const file = new File([dataBlob], filename, { type: 'application/json' });
@@ -1083,12 +1095,12 @@ function App() {
             return;
           }
         } catch (shareError) {
-          console.log('Web Share hatası:', shareError);
+          console.log('Desktop Web Share hatası:', shareError);
           // Fallback'e geç
         }
       }
       
-      // Geleneksel download yöntemi (masaüstü için)
+      // Geleneksel download (masaüstü)
       const url = URL.createObjectURL(dataBlob);
       const link = document.createElement('a');
       link.href = url;
