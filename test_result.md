@@ -249,15 +249,18 @@ test_plan:
 
   - task: "Yatan Tutar Multi-Delete Feature"
     implemented: true
-    working: "NA"
+    working: false
     file: "App.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "New multi-delete feature implemented for Yatan Tutar management dialog. Includes header checkbox for select all, individual row checkboxes, visual highlighting of selected rows (blue background), and 'Seçilenleri Sil' button that appears when items are selected. Need to test checkbox functionality, multi-selection behavior, and visual feedback."
+      - working: false
+        agent: "testing"
+        comment: "CRITICAL ISSUES FOUND: 1) Header checkbox (select all) not functioning - clicks but remains unchecked, 2) Visual highlighting missing - selected rows should have bg-blue-50 class but only show default hover styling, 3) Delete button text duplicated ('Seçilenleri Sil (1)Sil (1)' instead of 'Seçilenleri Sil (1)'). WORKING: Individual row checkboxes work correctly, delete button appears when items selected, dialog opens/closes properly. The core multi-select logic needs fixes for header checkbox state management and visual feedback."
 
 agent_communication:
   - agent: "main"
