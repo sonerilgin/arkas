@@ -140,6 +140,12 @@ function App() {
     setSelectAll(false);
   }, [displayMonth, displayYear, searchTerm]);
 
+  // Yatan Tutar displayed records değiştiğinde seçimi sıfırla
+  useEffect(() => {
+    setSelectedYatulanItems([]);
+    setSelectAllYatulan(false);
+  }, [displayMonth, displayYear, searchTerm, yatulanTutarDialogOpen]);
+
   // Theme yönetimi
   useEffect(() => {
     if (isDarkMode) {
