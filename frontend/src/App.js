@@ -1852,6 +1852,177 @@ function App() {
         </Card>
       </div>
       <Toaster />
+
+      {/* Yatan Tutar Yönetimi Dialog */}
+      <Dialog open={yatulanTutarDialogOpen} onOpenChange={setYatulanTutarDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl text-slate-800 flex items-center gap-2">
+              💰 Yatan Tutar Yönetimi
+              {editingYatulanTutar ? " - Düzenle" : " - Yeni Kayıt"}
+            </DialogTitle>
+            <DialogDescription>
+              Para yatış bilgilerini ve hangi tarihler arasındaki çalışmaya karşılık geldiğini yönetin
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Yatan Tutar Formu */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="yatan_tutar">Yatan Tutar (₺)</Label>
+                <Input
+                  id="yatan_tutar"
+                  type="number"
+                  step="0.01"
+                  value={yatulanTutarFormData.tutar}
+                  onChange={(e) => setYatulanTutarFormData(prev => ({ ...prev, tutar: e.target.value }))}
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="yatan_tarih">Para Yatış Tarihi</Label>
+                <Input
+                  id="yatan_tarih"
+                  type="date"
+                  value={yatulanTutarFormData.yatan_tarih}
+                  onChange={(e) => setYatulanTutarFormData(prev => ({ ...prev, yatan_tarih: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="baslangic_tarih">Çalışma Başlangıç Tarihi</Label>
+                <Input
+                  id="baslangic_tarih"
+                  type="date"
+                  value={yatulanTutarFormData.baslangic_tarih}
+                  onChange={(e) => setYatulanTutarFormData(prev => ({ ...prev, baslangic_tarih: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bitis_tarih">Çalışma Bitiş Tarihi</Label>
+                <Input
+                  id="bitis_tarih"
+                  type="date"
+                  value={yatulanTutarFormData.bitis_tarih}
+                  onChange={(e) => setYatulanTutarFormData(prev => ({ ...prev, bitis_tarih: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="aciklama">Açıklama (İsteğe Bağlı)</Label>
+                <Textarea
+                  id="aciklama"
+                  value={yatulanTutarFormData.aciklama}
+                  onChange={(e) => setYatulanTutarFormData(prev => ({ ...prev, aciklama: e.target.value }))}
+                  placeholder="Ek bilgiler..."
+                  rows={2}
+                />
+              </div>
+            </div>
+
+            {/* Mevcut Yatan Tutar Kayıtları */}
+            <div className="border-t pt-6">
+              <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
+                📋 Mevcut Yatan Tutar Kayıtları
+                <span className="text-sm text-slate-500">({yatulanTutarList.length} kayıt)</span>
+              </h3>
+              
+              {yatulanTutarList.length === 0 ? (
+                <div className="text-center py-8 text-slate-500">
+                  Henüz yatan tutar kaydı bulunmuyor
+                </div>
+              ) : (
+                <div className="max-h-64 overflow-y-auto border rounded-lg">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tutar</TableHead>
+                        <TableHead>Yatış Tarihi</TableHead>
+                        <TableHead>Çalışma Dönemi</TableHead>
+                        <TableHead>Açıklama</TableHead>
+                        <TableHead className="text-center">İşlemler</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {yatulanTutarList.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="font-semibold text-purple-600">
+                            {formatCurrency(item.tutar)}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(item.yatan_tarih).toLocaleDateString('tr-TR')}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-xs">
+                              {new Date(item.baslangic_tarih).toLocaleDateString('tr-TR')} - 
+                              {new Date(item.bitis_tarih).toLocaleDateString('tr-TR')}
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-32 truncate">
+                            {item.aciklama || '-'}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex gap-1 justify-center">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => openYatulanTutarDialog(item)}
+                                className="h-6 w-6 p-0"
+                              >
+                                <Edit3 className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => deleteYatulanTutar(item.id)}
+                                className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+
+              {/* Toplam Özet */}
+              {yatulanTutarList.length > 0 && (
+                <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg mt-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-purple-600 font-medium">Toplam Yatan Tutar:</span>
+                      <div className="text-lg font-bold text-purple-700">
+                        {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0))}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-purple-600 font-medium">Ortalama Tutar:</span>
+                      <div className="text-lg font-bold text-purple-700">
+                        {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0) / yatulanTutarList.length)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setYatulanTutarDialogOpen(false)}>
+              Kapat
+            </Button>
+            <Button 
+              onClick={submitYatulanTutar} 
+              disabled={loading}
+              className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800"
+            >
+              {loading ? "Kaydediliyor..." : editingYatulanTutar ? "Güncelle" : "Kaydet"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
