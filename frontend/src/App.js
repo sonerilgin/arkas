@@ -462,33 +462,58 @@ function App() {
     setUserEditDialogOpen(true);
   };
 
-  const exportToPDF = async (selectedYear) => {
+  const exportToPDF = async () => {
     try {
       setLoading(true);
       
-      // Seçilen yıla göre verileri al
+      // Seçilen tarih aralığına göre verileri al
       const response = await axios.get(`${API}/nakliye`);
-      const yearlyData = response.data.filter(item => {
-        const itemDate = new Date(item.tarih);
-        return itemDate.getFullYear() === selectedYear;
-      });
+      let filteredData = response.data;
+      let reportTitle = "";
+      let reportPeriod = "";
 
-      if (yearlyData.length === 0) {
+      if (pdfReportType === 'yearly') {
+        filteredData = response.data.filter(item => {
+          const itemDate = new Date(item.tarih);
+          return itemDate.getFullYear() === selectedPdfYear;
+        });
+        reportTitle = `${selectedPdfYear} YILI NAKLİYE RAPORU`;
+        reportPeriod = `${selectedPdfYear} Yılı Tümü`;
+      } else {
+        filteredData = response.data.filter(item => {
+          const itemDate = new Date(item.tarih);
+          return itemDate.getFullYear() === selectedPdfYear && itemDate.getMonth() === selectedPdfMonth;
+        });
+        reportTitle = `${monthNames[selectedPdfMonth]} ${selectedPdfYear} NAKLİYE RAPORU`;
+        reportPeriod = `${monthNames[selectedPdfMonth]} ${selectedPdfYear}`;
+      }
+
+      if (filteredData.length === 0) {
         toast({
           title: "Uyarı",
-          description: `${selectedYear} yılında kayıt bulunamadı`,
+          description: `${reportPeriod} döneminde kayıt bulunamadı`,
           variant: "destructive"
         });
         return;
       }
+
+      // Yatan tutar analizi
+      const yatulanTutarData = filteredData.filter(item => (item.yatan_tutar || 0) > 0);
+      const toplamYatulanTutar = yatulanTutarData.reduce((sum, item) => sum + (item.yatan_tutar || 0), 0);
+      
+      // Tarih aralığı hesaplama
+      const tarihler = filteredData.map(item => new Date(item.tarih)).sort((a, b) => a - b);
+      const enEskiTarih = tarihler[0];
+      const enYeniTarih = tarihler[tarihler.length - 1];
 
       // HTML tablo oluştur
       const tableHTML = `
         <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px;">
           <div style="text-align: center; margin-bottom: 20px;">
             <h1 style="color: #1e3a8a; margin-bottom: 5px;">ARKAS LOJİSTİK</h1>
-            <h2 style="color: #3b82f6; margin-bottom: 10px;">${selectedYear} YILI NAKLİYE RAPORU</h2>
+            <h2 style="color: #3b82f6; margin-bottom: 10px;">${reportTitle}</h2>
             <p>Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}</p>
+            <p><strong>Kapsanan Dönem:</strong> ${formatDate(enEskiTarih.toISOString())} - ${formatDate(enYeniTarih.toISOString())}</p>
           </div>
           
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -504,10 +529,11 @@ function App() {
                 <th style="border: 1px solid #ddd; padding: 8px; text-align: right; color: #22c55e;">Sistem</th>
                 <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Karşılaştırma</th>
                 <th style="border: 1px solid #ddd; padding: 8px; text-align: right; color: #8b5cf6;">Yatan Tutar</th>
+                <th style="border: 1px solid #ddd; padding: 8px; text-align: center; color: #8b5cf6;">Yatış Tarihi</th>
               </tr>
             </thead>
             <tbody>
-              ${yearlyData.map(item => {
+              ${filteredData.map(item => {
                 const toplam = item.toplam || 0;
                 const sistem = item.sistem || 0;
                 const fark = sistem - toplam;
@@ -530,18 +556,34 @@ function App() {
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #22c55e;">${formatCurrency(sistem)}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center; font-weight: bold; color: ${farkColor};">${farkText}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #8b5cf6;">${(item.yatan_tutar || 0) > 0 ? formatCurrency(item.yatan_tutar || 0) : '-'}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center; color: #8b5cf6;">${item.yatan_tarih ? new Date(item.yatan_tarih).toLocaleDateString('tr-TR') : '-'}</td>
                   </tr>
                 `;
               }).join('')}
             </tbody>
           </table>
           
-          <div style="display: flex; gap: 30px; background-color: #f8fafc; padding: 15px; border-radius: 8px;">
-            <div><strong>Toplam Kayıt:</strong> ${yearlyData.length} adet</div>
-            <div><strong>Toplam Tutar:</strong> ${formatCurrency(yearlyData.reduce((sum, item) => sum + (item.toplam || 0), 0))}</div>
-            <div><strong>Toplam Sistem:</strong> <span style="color: #22c55e;">${formatCurrency(yearlyData.reduce((sum, item) => sum + (item.sistem || 0), 0))}</span></div>
-            <div><strong>Toplam Yatan:</strong> <span style="color: #8b5cf6;">${formatCurrency(yearlyData.reduce((sum, item) => sum + (item.yatan_tutar || 0), 0))}</span></div>
+          <div style="display: flex; flex-wrap: wrap; gap: 20px; background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div><strong>Toplam Kayıt:</strong> ${filteredData.length} adet</div>
+            <div><strong>Toplam Tutar:</strong> ${formatCurrency(filteredData.reduce((sum, item) => sum + (item.toplam || 0), 0))}</div>
+            <div><strong>Toplam Sistem:</strong> <span style="color: #22c55e;">${formatCurrency(filteredData.reduce((sum, item) => sum + (item.sistem || 0), 0))}</span></div>
+            <div><strong>Toplam Yatan:</strong> <span style="color: #8b5cf6;">${formatCurrency(toplamYatulanTutar)}</span></div>
           </div>
+
+          ${yatulanTutarData.length > 0 ? `
+          <div style="background-color: #faf5ff; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
+            <h3 style="color: #8b5cf6; margin-bottom: 10px;">💰 YATAN TUTAR DETAYLARI</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 10px;">
+              <div><strong>Yatan İşlem Sayısı:</strong> ${yatulanTutarData.length} adet</div>
+              <div><strong>Toplam Yatan Tutar:</strong> <span style="color: #8b5cf6;">${formatCurrency(toplamYatulanTutar)}</span></div>
+              <div><strong>Ortalama Yatan Tutar:</strong> ${formatCurrency(toplamYatulanTutar / yatulanTutarData.length)}</div>
+            </div>
+            <p style="font-size: 11px; color: #6b7280; margin: 0;">
+              <strong>Kapsanan Dönem:</strong> ${formatDate(enEskiTarih.toISOString())} - ${formatDate(enYeniTarih.toISOString())} 
+              (${Math.ceil((enYeniTarih - enEskiTarih) / (1000 * 60 * 60 * 24))} gün)
+            </p>
+          </div>
+          ` : ''}
         </div>
       `;
 
@@ -550,9 +592,13 @@ function App() {
       element.innerHTML = tableHTML;
       document.body.appendChild(element);
 
+      const fileName = pdfReportType === 'yearly' 
+        ? `Arkas_Lojistik_${selectedPdfYear}_Yillik_Raporu.pdf`
+        : `Arkas_Lojistik_${monthNames[selectedPdfMonth]}_${selectedPdfYear}_Raporu.pdf`;
+
       const opt = {
         margin: 10,
-        filename: `Arkas_Lojistik_${selectedYear}_Raporu.pdf`,
+        filename: fileName,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
@@ -565,7 +611,7 @@ function App() {
       
       toast({
         title: "Başarılı",
-        description: `${selectedYear} yılı raporu PDF olarak indirildi (${yearlyData.length} kayıt)`
+        description: `${reportPeriod} raporu PDF olarak indirildi (${filteredData.length} kayıt)`
       });
 
     } catch (error) {
