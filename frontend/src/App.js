@@ -965,10 +965,16 @@ function App() {
         const existingResponse = await axios.get(`${API}/nakliye`);
         const existingData = existingResponse.data;
         
-        let addedCount = 0;
-        let skippedCount = 0;
+        // Mevcut yatan tutar kayıtlarını al
+        const existingYatulanResponse = await axios.get(`${API}/yatan-tutar`);
+        const existingYatulanData = existingYatulanResponse.data;
+        
+        let nakliyeAddedCount = 0;
+        let nakliyeSkippedCount = 0;
+        let yatulanAddedCount = 0;
+        let yatulanSkippedCount = 0;
 
-        // Verileri geri yükle - duplicate kontrolü ile
+        // Nakliye verilerini geri yükle - duplicate kontrolü ile
         for (const item of backupData.nakliyeData) {
           try {
             // Aynı sıra_no, musteri ve irsaliye_no kombinasyonu var mı kontrol et
@@ -980,14 +986,39 @@ function App() {
 
             if (!isDuplicate) {
               await axios.post(`${API}/nakliye`, item);
-              addedCount++;
+              nakliyeAddedCount++;
             } else {
-              skippedCount++;
-              console.log(`Duplicate kayıt atlandı: ${item.sira_no} - ${item.musteri} - ${item.irsaliye_no}`);
+              nakliyeSkippedCount++;
+              console.log(`Duplicate nakliye kaydı atlandı: ${item.sira_no} - ${item.musteri} - ${item.irsaliye_no}`);
             }
           } catch (err) {
-            console.warn('Kayıt yüklenirken hata:', err);
-            skippedCount++;
+            console.warn('Nakliye kaydı yüklenirken hata:', err);
+            nakliyeSkippedCount++;
+          }
+        }
+
+        // Yatan Tutar verilerini geri yükle (eğer varsa)
+        if (backupData.yatulanTutarData && Array.isArray(backupData.yatulanTutarData)) {
+          for (const item of backupData.yatulanTutarData) {
+            try {
+              // Aynı tutar, yatan_tarih ve baslangic_tarih kombinasyonu var mı kontrol et
+              const isDuplicate = existingYatulanData.some(existing => 
+                existing.tutar === item.tutar && 
+                existing.yatan_tarih === item.yatan_tarih && 
+                existing.baslangic_tarih === item.baslangic_tarih
+              );
+
+              if (!isDuplicate) {
+                await axios.post(`${API}/yatan-tutar`, item);
+                yatulanAddedCount++;
+              } else {
+                yatulanSkippedCount++;
+                console.log(`Duplicate yatan tutar kaydı atlandı: ${item.tutar} - ${item.yatan_tarih}`);
+              }
+            } catch (err) {
+              console.warn('Yatan tutar kaydı yüklenirken hata:', err);
+              yatulanSkippedCount++;
+            }
           }
         }
 
@@ -998,14 +1029,27 @@ function App() {
         }
 
         fetchNakliyeList();
+        fetchYatulanTutarList();
+        
+        // Detaylı sonuç mesajı
+        let message = `${nakliyeAddedCount} nakliye kaydı eklendi`;
+        if (yatulanAddedCount > 0) {
+          message += `, ${yatulanAddedCount} yatan tutar kaydı eklendi`;
+        }
+        if (nakliyeSkippedCount > 0 || yatulanSkippedCount > 0) {
+          const totalSkipped = nakliyeSkippedCount + yatulanSkippedCount;
+          message += `, ${totalSkipped} duplicate kayıt atlandı`;
+        }
+        
         toast({
           title: "Geri Yükleme Tamamlandı",
-          description: `${addedCount} yeni kayıt eklendi${skippedCount > 0 ? `, ${skippedCount} duplicate kayıt atlandı` : ''}`
+          description: message
         });
       } catch (error) {
+        console.error('Import backup error:', error);
         toast({
           title: "Hata",
-          description: "Geri yükleme sırasında hata oluştu",
+          description: "Geri yükleme sırasında hata oluştu: " + error.message,
           variant: "destructive"
         });
       }
