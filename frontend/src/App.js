@@ -2240,17 +2240,6 @@ function App() {
                       </div>
                     </div>
                   </div>
-                  
-                  {/* Tüm Aylar Karşılaştırması */}
-                  <div className="border-t border-purple-200 mt-3 pt-3">
-                    <div className="text-center text-sm">
-                      <span className="text-slate-600">Tüm Zamanlar Toplamı: </span>
-                      <span className="font-bold text-slate-700">
-                        {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0))}
-                      </span>
-                      <span className="text-slate-500 ml-2">({yatulanTutarList.length} toplam kayıt)</span>
-                    </div>
-                  </div>
                 </div>
               )}
             </div>
