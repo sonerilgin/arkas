@@ -30,6 +30,8 @@ db = client[os.environ['DB_NAME']]
 users_collection = db["users"]
 verification_codes_collection = db["verification_codes"]
 biometric_credentials_collection = db["biometric_credentials"]
+nakliye_collection = db["nakliye_kayitlari"]
+yatan_tutar_collection = db["yatan_tutar"]
 
 # Security
 security = HTTPBearer()
