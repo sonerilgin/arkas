@@ -619,6 +619,19 @@ function App() {
   const displayedTotal = displayedRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
   const displayedYatulanTotal = displayedYatulanTutar.reduce((sum, item) => sum + (item.tutar || 0), 0);
 
+  // Yatan Tutar header checkbox otomatik güncelleme
+  useEffect(() => {
+    if (displayedYatulanTutar.length === 0) {
+      setSelectAllYatulan(false);
+    } else if (selectedYatulanItems.length === displayedYatulanTutar.length && displayedYatulanTutar.length > 0) {
+      setSelectAllYatulan(true);
+    } else if (selectedYatulanItems.length === 0) {
+      setSelectAllYatulan(false);
+    } else {
+      setSelectAllYatulan(false);
+    }
+  }, [selectedYatulanItems, displayedYatulanTutar]);
+
   const thisMonthTotal = thisMonthRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
   const totalAmount = nakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
 
