@@ -1831,7 +1831,7 @@ function App() {
               {/* Toplam Bilgileri - Mobile */}
               {!loading && displayedRecords.length > 0 && (
                 <div className="border-t bg-slate-50 dark:bg-gray-700 p-4 mx-4 rounded-b-lg">
-                  <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="text-center">
                       <div className="text-slate-600 dark:text-gray-300 text-xs">Toplam</div>
                       <div className="font-bold text-slate-800 dark:text-gray-100">
@@ -1842,12 +1842,6 @@ function App() {
                       <div className="text-green-600 dark:text-green-400 text-xs">Sistem</div>
                       <div className="font-bold text-green-600 dark:text-green-400">
                         {formatCurrency(displayedRecords.reduce((sum, item) => sum + (item.sistem || 0), 0))}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-purple-600 dark:text-purple-400 text-xs">Yatan Tutar</div>
-                      <div className="font-bold text-purple-600 dark:text-purple-400">
-                        {formatCurrency(displayedRecords.reduce((sum, item) => sum + (item.yatan_tutar || 0), 0))}
                       </div>
                     </div>
                   </div>
