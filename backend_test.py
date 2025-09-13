@@ -9,17 +9,39 @@ import concurrent.futures
 from typing import List, Dict, Any
 
 class ComprehensiveCrossPlatformAPITester:
+    """Comprehensive Cross-Platform Backend API Tester for Arkas Lojistik System"""
+    
     def __init__(self, base_url="https://shipment-dash-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0
         self.access_token = None
+        self.created_nakliye_records = []
+        self.created_yatan_tutar_records = []
         self.created_users = []
-        self.verification_codes = {}  # Store codes from console output
+        self.test_results = {
+            'api_consistency': [],
+            'authentication': [],
+            'data_validation': [],
+            'error_handling': [],
+            'performance': [],
+            'mongodb_integration': [],
+            'turkish_locale': [],
+            'file_operations': []
+        }
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, params=None, headers=None):
-        """Run a single API test"""
-        url = f"{self.base_url}/{endpoint}"
+    def log_result(self, category: str, test_name: str, success: bool, details: str = ""):
+        """Log test result to appropriate category"""
+        self.test_results[category].append({
+            'test': test_name,
+            'success': success,
+            'details': details,
+            'timestamp': datetime.now().isoformat()
+        })
+
+    def run_test(self, name, method, endpoint, expected_status, data=None, params=None, headers=None, timeout=30):
+        """Run a single API test with enhanced error handling"""
+        url = f"{self.base_url}/{endpoint}" if endpoint else self.base_url
         default_headers = {'Content-Type': 'application/json'}
         if headers:
             default_headers.update(headers)
@@ -28,19 +50,23 @@ class ComprehensiveCrossPlatformAPITester:
         print(f"\n🔍 Testing {name}...")
         print(f"   URL: {url}")
         if data:
-            print(f"   Data: {json.dumps(data, indent=2)}")
+            print(f"   Data: {json.dumps(data, indent=2, default=str)}")
         
         try:
+            start_time = time.time()
+            
             if method == 'GET':
-                response = requests.get(url, headers=default_headers, params=params)
+                response = requests.get(url, headers=default_headers, params=params, timeout=timeout)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=default_headers)
+                response = requests.post(url, json=data, headers=default_headers, timeout=timeout)
             elif method == 'PUT':
-                response = requests.put(url, json=data, headers=default_headers)
+                response = requests.put(url, json=data, headers=default_headers, timeout=timeout)
             elif method == 'DELETE':
-                response = requests.delete(url, headers=default_headers)
+                response = requests.delete(url, headers=default_headers, timeout=timeout)
 
+            response_time = time.time() - start_time
             print(f"   Status Code: {response.status_code}")
+            print(f"   Response Time: {response_time:.3f}s")
             
             success = response.status_code == expected_status
             if success:
@@ -48,683 +74,943 @@ class ComprehensiveCrossPlatformAPITester:
                 print(f"✅ Passed - Expected {expected_status}, got {response.status_code}")
                 try:
                     response_data = response.json()
-                    print(f"   Response: {json.dumps(response_data, indent=2)}")
-                    return True, response_data
+                    print(f"   Response: {json.dumps(response_data, indent=2, default=str)}")
+                    return True, response_data, response_time
                 except:
-                    return True, {}
+                    return True, {}, response_time
             else:
                 print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
                 try:
                     error_detail = response.json()
                     print(f"   Error: {json.dumps(error_detail, indent=2)}")
+                    return False, error_detail, response_time
                 except:
                     print(f"   Error: {response.text}")
-                return False, {}
+                    return False, {'error': response.text}, response_time
 
+        except requests.exceptions.Timeout:
+            print(f"❌ Failed - Request timeout after {timeout}s")
+            return False, {'error': 'timeout'}, timeout
         except Exception as e:
             print(f"❌ Failed - Error: {str(e)}")
-            return False, {}
+            return False, {'error': str(e)}, 0
 
-    def test_register_email(self):
-        """Test user registration with email"""
-        # Use timestamp to ensure unique email
-        import time
+    # ========== API ENDPOINT CONSISTENCY TESTS ==========
+    
+    def test_root_endpoint(self):
+        """Test root API endpoint"""
+        success, response, time_taken = self.run_test("Root API Endpoint", "GET", "", 200)
+        self.log_result('api_consistency', 'Root Endpoint', success, f"Response time: {time_taken:.3f}s")
+        return success, response
+
+    def test_nakliye_crud_operations(self):
+        """Test all nakliye CRUD operations comprehensively"""
+        print("\n" + "="*70)
+        print("🚛 NAKLIYE CRUD OPERATIONS TESTING")
+        print("="*70)
+        
+        all_success = True
+        
+        # Test data with Turkish characters and various scenarios
+        test_records = [
+            {
+                "tarih": "2024-01-15T10:30:00Z",
+                "sira_no": "ARK001",
+                "kod": "İST-ANK",
+                "musteri": "Ahmet Yılmaz Nakliyat Ltd. Şti.",
+                "irsaliye_no": "İRS-2024-001",
+                "ithalat": True,
+                "ihracat": False,
+                "bos": False,
+                "bos_tasima": 1500.75,
+                "reefer": 2000.50,
+                "bekleme": 500.25,
+                "geceleme": 1000.00,
+                "pazar": 750.30,
+                "harcirah": 1250.80,
+                "toplam": 7000.60,
+                "sistem": 6500.55
+            },
+            {
+                "tarih": "2024-01-16T14:45:00Z",
+                "sira_no": "ARK002",
+                "kod": "İZM-BUR",
+                "musteri": "Mehmet Öztürk Lojistik A.Ş.",
+                "irsaliye_no": "İRS-2024-002",
+                "ithalat": False,
+                "ihracat": True,
+                "bos": False,
+                "bos_tasima": 3000.00,
+                "reefer": 0.0,
+                "bekleme": 250.75,
+                "geceleme": 0.0,
+                "pazar": 0.0,
+                "harcirah": 2000.25,
+                "toplam": 5250.00,
+                "sistem": 5000.00
+            }
+        ]
+        
+        # CREATE operations
+        print("\n📝 CREATE Operations")
+        for i, record in enumerate(test_records):
+            success, response, _ = self.run_test(
+                f"Create Nakliye Record {i+1}",
+                "POST",
+                "nakliye",
+                200,
+                data=record
+            )
+            if success and 'id' in response:
+                self.created_nakliye_records.append(response['id'])
+                self.log_result('api_consistency', f'Create Nakliye {i+1}', True, f"ID: {response['id']}")
+            else:
+                all_success = False
+                self.log_result('api_consistency', f'Create Nakliye {i+1}', False, "Failed to create")
+        
+        # READ operations
+        print("\n📋 READ Operations")
+        
+        # Get all records
+        success, response, time_taken = self.run_test("Get All Nakliye Records", "GET", "nakliye", 200)
+        self.log_result('api_consistency', 'Get All Nakliye', success, f"Count: {len(response) if success else 0}, Time: {time_taken:.3f}s")
+        if not success:
+            all_success = False
+        
+        # Get individual records
+        for record_id in self.created_nakliye_records[:2]:
+            success, response, _ = self.run_test(
+                f"Get Nakliye by ID",
+                "GET",
+                f"nakliye/{record_id}",
+                200
+            )
+            self.log_result('api_consistency', f'Get Nakliye by ID', success, f"ID: {record_id}")
+            if not success:
+                all_success = False
+        
+        # UPDATE operations
+        print("\n✏️ UPDATE Operations")
+        if self.created_nakliye_records:
+            update_data = {
+                "musteri": "Güncellenen Müşteri Adı - Çağlar Transport",
+                "toplam": 8500.75,
+                "sistem": 8000.50
+            }
+            success, response, _ = self.run_test(
+                "Update Nakliye Record",
+                "PUT",
+                f"nakliye/{self.created_nakliye_records[0]}",
+                200,
+                data=update_data
+            )
+            self.log_result('api_consistency', 'Update Nakliye', success, f"Updated fields: {list(update_data.keys())}")
+            if not success:
+                all_success = False
+        
+        # SEARCH operations
+        print("\n🔍 SEARCH Operations")
+        search_queries = ["Ahmet", "Yılmaz", "İST", "ARK001", "İRS-2024"]
+        for query in search_queries:
+            success, response, time_taken = self.run_test(
+                f"Search Nakliye: '{query}'",
+                "GET",
+                f"nakliye/search/{query}",
+                200
+            )
+            result_count = len(response) if success and isinstance(response, list) else 0
+            self.log_result('api_consistency', f'Search: {query}', success, f"Results: {result_count}, Time: {time_taken:.3f}s")
+            if not success:
+                all_success = False
+        
+        return all_success
+
+    def test_yatan_tutar_crud_operations(self):
+        """Test all yatan-tutar CRUD operations"""
+        print("\n" + "="*70)
+        print("💰 YATAN TUTAR CRUD OPERATIONS TESTING")
+        print("="*70)
+        
+        all_success = True
+        
+        # Test data with Turkish date formats and various scenarios
+        test_records = [
+            {
+                "tutar": 15000.75,
+                "yatan_tarih": "2024-01-15",
+                "baslangic_tarih": "2024-01-10",
+                "bitis_tarih": "2024-01-20",
+                "aciklama": "İstanbul-Ankara güzergahı ödeme - Ocak ayı"
+            },
+            {
+                "tutar": 25500.50,
+                "yatan_tarih": "2024-01-16",
+                "baslangic_tarih": "2024-01-12",
+                "bitis_tarih": "2024-01-22",
+                "aciklama": "İzmir-Bursa nakliye ödemesi - Şubat dönemi"
+            },
+            {
+                "tutar": 8750.25,
+                "yatan_tarih": "2024-01-17",
+                "baslangic_tarih": "2024-01-15",
+                "bitis_tarih": "2024-01-25",
+                "aciklama": "Ek ödeme - geceleme ve bekleme ücretleri"
+            }
+        ]
+        
+        # CREATE operations
+        print("\n📝 CREATE Operations")
+        for i, record in enumerate(test_records):
+            success, response, _ = self.run_test(
+                f"Create Yatan Tutar Record {i+1}",
+                "POST",
+                "yatan-tutar",
+                200,
+                data=record
+            )
+            if success and 'id' in response:
+                self.created_yatan_tutar_records.append(response['id'])
+                self.log_result('api_consistency', f'Create Yatan Tutar {i+1}', True, f"ID: {response['id']}, Amount: {record['tutar']}")
+            else:
+                all_success = False
+                self.log_result('api_consistency', f'Create Yatan Tutar {i+1}', False, "Failed to create")
+        
+        # READ operations
+        print("\n📋 READ Operations")
+        
+        # Get all records
+        success, response, time_taken = self.run_test("Get All Yatan Tutar Records", "GET", "yatan-tutar", 200)
+        self.log_result('api_consistency', 'Get All Yatan Tutar', success, f"Count: {len(response) if success else 0}, Time: {time_taken:.3f}s")
+        if not success:
+            all_success = False
+        
+        # Get individual records
+        for record_id in self.created_yatan_tutar_records[:2]:
+            success, response, _ = self.run_test(
+                f"Get Yatan Tutar by ID",
+                "GET",
+                f"yatan-tutar/{record_id}",
+                200
+            )
+            self.log_result('api_consistency', f'Get Yatan Tutar by ID', success, f"ID: {record_id}")
+            if not success:
+                all_success = False
+        
+        # UPDATE operations
+        print("\n✏️ UPDATE Operations")
+        if self.created_yatan_tutar_records:
+            update_data = {
+                "tutar": 18750.90,
+                "aciklama": "Güncellenen ödeme - ek masraflar dahil"
+            }
+            success, response, _ = self.run_test(
+                "Update Yatan Tutar Record",
+                "PUT",
+                f"yatan-tutar/{self.created_yatan_tutar_records[0]}",
+                200,
+                data=update_data
+            )
+            self.log_result('api_consistency', 'Update Yatan Tutar', success, f"Updated amount: {update_data['tutar']}")
+            if not success:
+                all_success = False
+        
+        return all_success
+
+    # ========== AUTHENTICATION SYSTEM TESTS ==========
+    
+    def test_authentication_system(self):
+        """Test authentication system (Note: Simple login not available, testing full auth system)"""
+        print("\n" + "="*70)
+        print("🔐 AUTHENTICATION SYSTEM TESTING")
+        print("="*70)
+        
+        all_success = True
+        
+        # Note: The review request mentions username: "Arkas", password: "1234"
+        # But the backend has a full registration/login system, not simple auth
+        print("⚠️  Note: Backend uses full registration/login system, not simple Arkas/1234 auth")
+        
+        # Test user registration
         timestamp = str(int(time.time()))
-        test_data = {
-            "email": f"test{timestamp}@example.com",
-            "password": "test123",
-            "full_name": "Test User"
+        test_user = {
+            "email": f"test{timestamp}@arkastest.com",
+            "password": "TestPass123!",
+            "full_name": "Arkas Test Kullanıcısı"
         }
-        success, response = self.run_test(
-            "Register User with Email",
+        
+        success, response, _ = self.run_test(
+            "User Registration",
             "POST",
             "auth/register",
             200,
-            data=test_data
+            data=test_user
         )
-        if success:
-            self.created_users.append(test_data["email"])
-        return success, response, test_data["email"]
-
-    def test_register_phone(self):
-        """Test user registration with phone"""
-        # Use timestamp to ensure unique phone (Turkish format: +905XXXXXXXXX - 10 digits after +90)
-        import time
-        timestamp = str(int(time.time()))[-9:]  # Last 9 digits after the "5"
-        test_data = {
-            "phone": f"+905{timestamp}",  # Turkish format: +905XXXXXXXXX (10 digits total)
-            "password": "test123",
-            "full_name": "Test User Phone"
+        self.log_result('authentication', 'User Registration', success, f"Email: {test_user['email']}")
+        if not success:
+            all_success = False
+        else:
+            self.created_users.append(test_user['email'])
+        
+        # Test user login
+        login_data = {
+            "identifier": test_user['email'],
+            "password": test_user['password']
         }
-        success, response = self.run_test(
-            "Register User with Phone",
-            "POST",
-            "auth/register",
-            200,
-            data=test_data
-        )
-        if success:
-            self.created_users.append(test_data["phone"])
-        return success, response, test_data["phone"]
-
-
-
-    def test_verify_user(self, identifier, code):
-        """Test user verification"""
-        test_data = {
-            "identifier": identifier,
-            "code": code
-        }
-        success, response = self.run_test(
-            f"Verify User ({identifier})",
-            "POST",
-            "auth/verify",
-            200,
-            data=test_data
-        )
-        return success, response
-
-    def test_verify_invalid_code(self, identifier):
-        """Test verification with invalid code"""
-        test_data = {
-            "identifier": identifier,
-            "code": "000000"
-        }
-        success, response = self.run_test(
-            f"Verify with Invalid Code (should fail)",
-            "POST",
-            "auth/verify",
-            400,
-            data=test_data
-        )
-        return success, response
-
-    def test_login_email(self, email):
-        """Test login with email"""
-        test_data = {
-            "identifier": email,
-            "password": "test123"
-        }
-        success, response = self.run_test(
-            "Login with Email",
+        success, response, _ = self.run_test(
+            "User Login",
             "POST",
             "auth/login",
             200,
-            data=test_data
+            data=login_data
         )
         if success and 'access_token' in response:
             self.access_token = response['access_token']
-            print(f"   🔑 Access token obtained: {self.access_token[:20]}...")
-        return success, response
-
-    def test_login_phone(self, phone):
-        """Test login with phone"""
-        test_data = {
-            "identifier": phone,
-            "password": "test123"
-        }
-        success, response = self.run_test(
-            "Login with Phone",
-            "POST",
-            "auth/login",
-            200,
-            data=test_data
-        )
-        return success, response
-
-
-
-    def test_get_user_info(self):
-        """Test getting current user info with token"""
-        if not self.access_token:
-            print("❌ No access token available for user info test")
-            return False, {}
+            self.log_result('authentication', 'User Login', True, "Token obtained")
+        else:
+            all_success = False
+            self.log_result('authentication', 'User Login', False, "Failed to get token")
         
-        headers = {"Authorization": f"Bearer {self.access_token}"}
-        success, response = self.run_test(
-            "Get Current User Info",
-            "GET",
-            "auth/me",
-            200,
-            headers=headers
-        )
-        return success, response
-
-    def test_get_user_info_invalid_token(self):
-        """Test getting user info with invalid token"""
+        # Test protected endpoint
+        if self.access_token:
+            headers = {"Authorization": f"Bearer {self.access_token}"}
+            success, response, _ = self.run_test(
+                "Get User Info (Protected)",
+                "GET",
+                "auth/me",
+                200,
+                headers=headers
+            )
+            self.log_result('authentication', 'Protected Endpoint', success, "User info retrieved")
+            if not success:
+                all_success = False
+        
+        # Test invalid token
         headers = {"Authorization": "Bearer invalid_token_here"}
-        success, response = self.run_test(
-            "Get User Info with Invalid Token (should fail)",
+        success, response, _ = self.run_test(
+            "Invalid Token Test",
             "GET",
             "auth/me",
             401,
             headers=headers
         )
-        return success, response
-
-    def test_forgot_password(self, identifier):
-        """Test forgot password"""
-        test_data = {
-            "identifier": identifier
-        }
-        success, response = self.run_test(
-            f"Forgot Password ({identifier})",
-            "POST",
-            "auth/forgot-password",
-            200,
-            data=test_data
-        )
-        return success, response
-
-    def test_reset_password(self, identifier, code):
-        """Test password reset"""
-        test_data = {
-            "identifier": identifier,
-            "code": code,
-            "new_password": "newpass123"
-        }
-        success, response = self.run_test(
-            f"Reset Password ({identifier})",
-            "POST",
-            "auth/reset-password",
-            200,
-            data=test_data
-        )
-        return success, response
-
-    def test_reset_password_invalid_code(self, identifier):
-        """Test password reset with invalid code"""
-        test_data = {
-            "identifier": identifier,
-            "code": "000000",
-            "new_password": "newpass123"
-        }
-        success, response = self.run_test(
-            f"Reset Password with Invalid Code (should fail)",
-            "POST",
-            "auth/reset-password",
-            400,
-            data=test_data
-        )
-        return success, response
-
-    def print_summary(self):
-        """Print test summary"""
-        print(f"\n📊 Authentication Test Results:")
-        print(f"   Tests Run: {self.tests_run}")
-        print(f"   Tests Passed: {self.tests_passed}")
-        print(f"   Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        self.log_result('authentication', 'Invalid Token Rejection', success, "Properly rejected invalid token")
+        if not success:
+            all_success = False
         
-        if self.tests_passed == self.tests_run:
-            print("🎉 All authentication tests passed!")
-            return True
-        else:
-            print("❌ Some authentication tests failed!")
-            return False
+        return all_success
 
-class NakliyeAPITester:
-    def __init__(self, base_url="https://shipment-dash-1.preview.emergentagent.com/api"):
-        self.base_url = base_url
-        self.tests_run = 0
-        self.tests_passed = 0
-        self.created_records = []
-
-    def run_test(self, name, method, endpoint, expected_status, data=None, params=None):
-        """Run a single API test"""
-        url = f"{self.base_url}/{endpoint}"
-        headers = {'Content-Type': 'application/json'}
-
-        self.tests_run += 1
-        print(f"\n🔍 Testing {name}...")
-        print(f"   URL: {url}")
-        
-        try:
-            if method == 'GET':
-                response = requests.get(url, headers=headers, params=params)
-            elif method == 'POST':
-                response = requests.post(url, json=data, headers=headers)
-            elif method == 'PUT':
-                response = requests.put(url, json=data, headers=headers)
-            elif method == 'DELETE':
-                response = requests.delete(url, headers=headers)
-
-            print(f"   Status Code: {response.status_code}")
-            
-            success = response.status_code == expected_status
-            if success:
-                self.tests_passed += 1
-                print(f"✅ Passed - Expected {expected_status}, got {response.status_code}")
-                try:
-                    response_data = response.json()
-                    if method == 'POST' and 'id' in response_data:
-                        self.created_records.append(response_data['id'])
-                    return True, response_data
-                except:
-                    return True, {}
-            else:
-                print(f"❌ Failed - Expected {expected_status}, got {response.status_code}")
-                try:
-                    error_detail = response.json()
-                    print(f"   Error: {error_detail}")
-                except:
-                    print(f"   Error: {response.text}")
-                return False, {}
-
-        except Exception as e:
-            print(f"❌ Failed - Error: {str(e)}")
-            return False, {}
-
-    def test_root_endpoint(self):
-        """Test root API endpoint"""
-        return self.run_test("Root API Endpoint", "GET", "", 200)
-
-    def test_create_nakliye(self, test_data):
-        """Test creating a new nakliye record"""
-        success, response = self.run_test(
-            "Create Nakliye Record",
-            "POST",
-            "nakliye",
-            200,
-            data=test_data
-        )
-        return response.get('id') if success else None
-
-    def test_get_nakliye_list(self):
-        """Test getting nakliye list"""
-        success, response = self.run_test(
-            "Get Nakliye List",
-            "GET",
-            "nakliye",
-            200
-        )
-        return response if success else []
-
-    def test_get_nakliye_by_id(self, nakliye_id):
-        """Test getting a specific nakliye record"""
-        success, response = self.run_test(
-            f"Get Nakliye by ID ({nakliye_id})",
-            "GET",
-            f"nakliye/{nakliye_id}",
-            200
-        )
-        return success, response
-
-    def test_update_nakliye(self, nakliye_id, update_data):
-        """Test updating a nakliye record"""
-        success, response = self.run_test(
-            f"Update Nakliye ({nakliye_id})",
-            "PUT",
-            f"nakliye/{nakliye_id}",
-            200,
-            data=update_data
-        )
-        return success, response
-
-    def test_search_nakliye(self, query):
-        """Test searching nakliye records"""
-        success, response = self.run_test(
-            f"Search Nakliye ('{query}')",
-            "GET",
-            f"nakliye/search/{query}",
-            200
-        )
-        return success, response
-
-    def test_delete_nakliye(self, nakliye_id):
-        """Test deleting a nakliye record"""
-        success, response = self.run_test(
-            f"Delete Nakliye ({nakliye_id})",
-            "DELETE",
-            f"nakliye/{nakliye_id}",
-            200
-        )
-        return success
-
-    def cleanup_created_records(self):
-        """Clean up any records created during testing"""
-        print(f"\n🧹 Cleaning up {len(self.created_records)} created records...")
-        for record_id in self.created_records:
-            try:
-                self.test_delete_nakliye(record_id)
-            except:
-                pass
-
-def test_yatan_tutar_integration():
-    """Comprehensive test suite for yatan_tutar field integration"""
-    print("🚀 Starting Yatan Tutar Field Integration Tests...")
+    # ========== DATA VALIDATION & SERIALIZATION TESTS ==========
     
-    nakliye_tester = NakliyeAPITester()
-    print(f"Backend URL: {nakliye_tester.base_url}")
-    
-    all_tests_passed = True
-    created_record_ids = []
-    
-    try:
+    def test_data_validation_serialization(self):
+        """Test MongoDB integration, UUID handling, and datetime serialization"""
         print("\n" + "="*70)
-        print("💰 YATAN TUTAR FIELD INTEGRATION TESTS")
+        print("🗄️ DATA VALIDATION & SERIALIZATION TESTING")
         print("="*70)
         
-        # Test 1: CRUD Operations with Yatan Tutar Field
-        print("\n📝 CRUD OPERATIONS WITH YATAN TUTAR FIELD")
+        all_success = True
         
-        # Test 1a: POST /api/nakliye - Create new records with yatan_tutar field
-        test_records = [
-            {
-                "tarih": "2024-01-15T10:30:00Z",
-                "sira_no": "YT001",
-                "kod": "TEST001",
-                "musteri": "Ahmet Yılmaz Transport",
-                "irsaliye_no": "IRS-2024-001",
-                "ithalat": True,
-                "ihracat": False,
-                "bos": False,
-                "bos_tasima": 150.0,
-                "reefer": 200.0,
-                "bekleme": 50.0,
-                "geceleme": 100.0,
-                "pazar": 75.0,
-                "harcirah": 125.0,
-                "toplam": 700.0,
-                "sistem": 650.0,
-                "yatan_tutar": 50.0  # New field with positive value
-            },
-            {
-                "tarih": "2024-01-16T14:45:00Z",
-                "sira_no": "YT002",
-                "kod": "TEST002",
-                "musteri": "Mehmet Kaya Lojistik",
-                "irsaliye_no": "IRS-2024-002",
-                "ithalat": False,
-                "ihracat": True,
-                "bos": False,
-                "bos_tasima": 300.0,
-                "reefer": 0.0,
-                "bekleme": 25.0,
-                "geceleme": 0.0,
-                "pazar": 0.0,
-                "harcirah": 200.0,
-                "toplam": 525.0,
-                "sistem": 500.0,
-                "yatan_tutar": 25.5  # New field with decimal value
-            },
-            {
-                "tarih": "2024-01-17T09:15:00Z",
-                "sira_no": "YT003",
-                "kod": "TEST003",
-                "musteri": "Fatma Demir Nakliyat",
-                "irsaliye_no": "IRS-2024-003",
-                "ithalat": False,
-                "ihracat": False,
-                "bos": True,
-                "bos_tasima": 100.0,
-                "reefer": 0.0,
-                "bekleme": 0.0,
-                "geceleme": 0.0,
-                "pazar": 0.0,
-                "harcirah": 50.0,
-                "toplam": 150.0,
-                "sistem": 150.0,
-                "yatan_tutar": 0.0  # New field with zero value
-            }
-        ]
-        
-        for i, record in enumerate(test_records):
-            print(f"\n🔸 Creating test record {i+1} with yatan_tutar: {record['yatan_tutar']}")
-            record_id = nakliye_tester.test_create_nakliye(record)
-            if record_id:
-                created_record_ids.append(record_id)
-                print(f"   ✅ Created record with ID: {record_id}")
-            else:
-                print(f"   ❌ Failed to create record {i+1}")
-                all_tests_passed = False
-        
-        # Test 1b: GET /api/nakliye - Verify yatan_tutar field returned in response
-        print("\n📋 GET OPERATIONS - VERIFY YATAN TUTAR IN RESPONSES")
-        nakliye_list = nakliye_tester.test_get_nakliye_list()
-        if nakliye_list:
-            print(f"   📊 Retrieved {len(nakliye_list)} records")
-            yatan_tutar_found = 0
-            for record in nakliye_list:
-                if 'yatan_tutar' in record:
-                    yatan_tutar_found += 1
-                    print(f"   ✅ Record {record.get('sira_no', 'N/A')} has yatan_tutar: {record['yatan_tutar']}")
-                else:
-                    print(f"   ❌ Record {record.get('sira_no', 'N/A')} missing yatan_tutar field")
-                    all_tests_passed = False
-            print(f"   📈 Found yatan_tutar field in {yatan_tutar_found}/{len(nakliye_list)} records")
-        else:
-            print("   ❌ Failed to retrieve nakliye list")
-            all_tests_passed = False
-        
-        # Test 1c: GET /api/nakliye/{id} - Individual record retrieval
-        print("\n🔍 INDIVIDUAL RECORD RETRIEVAL")
-        for record_id in created_record_ids[:2]:  # Test first 2 records
-            success, record = nakliye_tester.test_get_nakliye_by_id(record_id)
-            if success and record:
-                if 'yatan_tutar' in record:
-                    print(f"   ✅ Record {record_id} has yatan_tutar: {record['yatan_tutar']}")
-                else:
-                    print(f"   ❌ Record {record_id} missing yatan_tutar field")
-                    all_tests_passed = False
-            else:
-                print(f"   ❌ Failed to retrieve record {record_id}")
-                all_tests_passed = False
-        
-        # Test 1d: PUT /api/nakliye/{id} - Update records including yatan_tutar field
-        print("\n✏️ UPDATE OPERATIONS WITH YATAN TUTAR")
-        if created_record_ids:
-            update_tests = [
-                {"yatan_tutar": 75.25, "musteri": "Updated Ahmet Yılmaz Transport"},
-                {"yatan_tutar": 0.0, "toplam": 600.0},
-                {"yatan_tutar": 150.75, "sistem": 800.0, "harcirah": 175.0}
-            ]
-            
-            for i, update_data in enumerate(update_tests):
-                if i < len(created_record_ids):
-                    record_id = created_record_ids[i]
-                    print(f"   🔸 Updating record {record_id} with yatan_tutar: {update_data['yatan_tutar']}")
-                    success, updated_record = nakliye_tester.test_update_nakliye(record_id, update_data)
-                    if success and updated_record:
-                        if updated_record.get('yatan_tutar') == update_data['yatan_tutar']:
-                            print(f"   ✅ Successfully updated yatan_tutar to {update_data['yatan_tutar']}")
-                        else:
-                            print(f"   ❌ yatan_tutar not updated correctly. Expected: {update_data['yatan_tutar']}, Got: {updated_record.get('yatan_tutar')}")
-                            all_tests_passed = False
-                    else:
-                        print(f"   ❌ Failed to update record {record_id}")
-                        all_tests_passed = False
-        
-        # Test 2: Data Validation Tests
-        print("\n🔍 DATA VALIDATION TESTS")
-        
-        # Test 2a: Valid yatan_tutar values
-        print("\n   📊 Testing valid yatan_tutar values")
-        valid_test_cases = [
-            {"yatan_tutar": 0, "description": "zero value"},
-            {"yatan_tutar": 100.50, "description": "positive decimal"},
-            {"yatan_tutar": 1000, "description": "positive integer"},
-            {"yatan_tutar": 0.01, "description": "small decimal"}
-        ]
-        
-        for case in valid_test_cases:
-            test_record = {
-                "tarih": "2024-01-18T12:00:00Z",
-                "sira_no": f"VAL{case['yatan_tutar']}",
-                "musteri": f"Validation Test {case['description']}",
-                "irsaliye_no": f"VAL-{case['yatan_tutar']}",
-                "toplam": 500.0,
-                "sistem": 450.0,
-                "yatan_tutar": case['yatan_tutar']
-            }
-            print(f"   🔸 Testing {case['description']}: {case['yatan_tutar']}")
-            record_id = nakliye_tester.test_create_nakliye(test_record)
-            if record_id:
-                created_record_ids.append(record_id)
-                print(f"   ✅ Valid value accepted: {case['yatan_tutar']}")
-            else:
-                print(f"   ❌ Valid value rejected: {case['yatan_tutar']}")
-                all_tests_passed = False
-        
-        # Test 2b: Missing yatan_tutar (should default to 0.0)
-        print("\n   📊 Testing missing yatan_tutar field (should default to 0.0)")
-        test_record_no_yatan = {
-            "tarih": "2024-01-19T12:00:00Z",
-            "sira_no": "NO_YATAN",
-            "musteri": "Test Missing Yatan Tutar",
-            "irsaliye_no": "NO-YATAN-001",
-            "toplam": 300.0,
-            "sistem": 300.0
-            # yatan_tutar intentionally omitted
+        # Test UUID handling
+        print("\n🆔 UUID Handling Tests")
+        test_record = {
+            "tarih": "2024-01-20T15:30:00Z",
+            "sira_no": "UUID_TEST",
+            "musteri": "UUID Test Müşteri",
+            "irsaliye_no": "UUID-TEST-001",
+            "toplam": 1000.0,
+            "sistem": 950.0
         }
         
-        record_id = nakliye_tester.test_create_nakliye(test_record_no_yatan)
-        if record_id:
-            created_record_ids.append(record_id)
-            # Verify the record has default yatan_tutar
-            success, record = nakliye_tester.test_get_nakliye_by_id(record_id)
-            if success and record:
-                yatan_tutar_value = record.get('yatan_tutar', 'MISSING')
-                if yatan_tutar_value == 0.0:
-                    print(f"   ✅ Missing yatan_tutar defaulted to 0.0")
-                else:
-                    print(f"   ❌ Missing yatan_tutar not defaulted correctly. Got: {yatan_tutar_value}")
-                    all_tests_passed = False
-            else:
-                print(f"   ❌ Failed to retrieve record to verify default")
-                all_tests_passed = False
+        success, response, _ = self.run_test(
+            "Create Record (UUID Generation)",
+            "POST",
+            "nakliye",
+            200,
+            data=test_record
+        )
+        
+        if success and 'id' in response:
+            record_id = response['id']
+            # Verify UUID format
+            try:
+                uuid.UUID(record_id)
+                print(f"✅ Valid UUID generated: {record_id}")
+                self.log_result('mongodb_integration', 'UUID Generation', True, f"Valid UUID: {record_id}")
+                self.created_nakliye_records.append(record_id)
+            except ValueError:
+                print(f"❌ Invalid UUID format: {record_id}")
+                self.log_result('mongodb_integration', 'UUID Generation', False, f"Invalid UUID: {record_id}")
+                all_success = False
         else:
-            print(f"   ❌ Failed to create record without yatan_tutar")
-            all_tests_passed = False
+            all_success = False
+            self.log_result('mongodb_integration', 'UUID Generation', False, "Failed to create record")
         
-        # Test 3: Search Functionality
-        print("\n🔍 SEARCH FUNCTIONALITY WITH YATAN TUTAR")
-        
-        # Test 3a: Search by customer name (should still work with new field)
-        search_queries = ["Ahmet", "Mehmet", "Transport", "Lojistik"]
-        for query in search_queries:
-            print(f"   🔸 Searching for: '{query}'")
-            success, search_results = nakliye_tester.test_search_nakliye(query)
-            if success:
-                print(f"   ✅ Search returned {len(search_results)} results")
-                # Verify yatan_tutar field is present in search results
-                for result in search_results:
-                    if 'yatan_tutar' not in result:
-                        print(f"   ❌ Search result missing yatan_tutar field")
-                        all_tests_passed = False
-                        break
-                else:
-                    print(f"   ✅ All search results contain yatan_tutar field")
-            else:
-                print(f"   ❌ Search failed for query: '{query}'")
-                all_tests_passed = False
-        
-        # Test 4: Backward Compatibility
-        print("\n🔄 BACKWARD COMPATIBILITY TESTS")
-        
-        # Test 4a: Verify API responses include new field with appropriate defaults
-        print("   📊 Verifying all API responses include yatan_tutar field")
-        all_records = nakliye_tester.test_get_nakliye_list()
-        if all_records:
-            missing_yatan_tutar = 0
-            for record in all_records:
-                if 'yatan_tutar' not in record:
-                    missing_yatan_tutar += 1
+        # Test datetime serialization/deserialization
+        print("\n📅 Datetime Serialization Tests")
+        if self.created_nakliye_records:
+            success, response, _ = self.run_test(
+                "Get Record (Datetime Deserialization)",
+                "GET",
+                f"nakliye/{self.created_nakliye_records[-1]}",
+                200
+            )
             
-            if missing_yatan_tutar == 0:
-                print(f"   ✅ All {len(all_records)} records have yatan_tutar field")
-            else:
-                print(f"   ❌ {missing_yatan_tutar}/{len(all_records)} records missing yatan_tutar field")
-                all_tests_passed = False
-        else:
-            print("   ❌ Failed to retrieve records for compatibility check")
-            all_tests_passed = False
-        
-        # Test 5: Model Validation
-        print("\n🏗️ MODEL VALIDATION TESTS")
-        
-        # Test 5a: Verify MongoDB serialization/deserialization
-        print("   📊 Testing MongoDB serialization/deserialization")
-        if created_record_ids:
-            test_record_id = created_record_ids[0]
-            success, record = nakliye_tester.test_get_nakliye_by_id(test_record_id)
-            if success and record:
-                # Check that yatan_tutar is properly serialized as float
-                yatan_tutar = record.get('yatan_tutar')
-                if isinstance(yatan_tutar, (int, float)):
-                    print(f"   ✅ yatan_tutar properly serialized as numeric: {yatan_tutar} ({type(yatan_tutar).__name__})")
-                else:
-                    print(f"   ❌ yatan_tutar not properly serialized. Type: {type(yatan_tutar)}, Value: {yatan_tutar}")
-                    all_tests_passed = False
-            else:
-                print("   ❌ Failed to retrieve record for serialization test")
-                all_tests_passed = False
-        
-        # Test 6: DELETE operations (ensure they still work)
-        print("\n🗑️ DELETE OPERATIONS TEST")
-        if created_record_ids:
-            # Test deleting one record to ensure delete still works
-            test_delete_id = created_record_ids[-1]  # Delete the last created record
-            print(f"   🔸 Testing delete operation on record: {test_delete_id}")
-            success = nakliye_tester.test_delete_nakliye(test_delete_id)
-            if success:
-                print(f"   ✅ Successfully deleted record with yatan_tutar field")
-                created_record_ids.remove(test_delete_id)  # Remove from cleanup list
-            else:
-                print(f"   ❌ Failed to delete record with yatan_tutar field")
-                all_tests_passed = False
-        
-        # Print test summary
-        print(f"\n📊 Yatan Tutar Integration Test Results:")
-        print(f"   Tests Run: {nakliye_tester.tests_run}")
-        print(f"   Tests Passed: {nakliye_tester.tests_passed}")
-        print(f"   Success Rate: {(nakliye_tester.tests_passed/nakliye_tester.tests_run)*100:.1f}%")
-        
-        if nakliye_tester.tests_passed == nakliye_tester.tests_run and all_tests_passed:
-            print("🎉 All yatan_tutar integration tests passed!")
-        else:
-            print("❌ Some yatan_tutar integration tests failed!")
-            all_tests_passed = False
-        
-    except Exception as e:
-        print(f"❌ Yatan tutar test suite failed with error: {str(e)}")
-        all_tests_passed = False
-    
-    finally:
-        # Cleanup created records
-        if created_record_ids:
-            print(f"\n🧹 Cleaning up {len(created_record_ids)} test records...")
-            for record_id in created_record_ids:
+            if success and 'tarih' in response:
+                tarih_value = response['tarih']
                 try:
-                    nakliye_tester.test_delete_nakliye(record_id)
+                    # Try to parse the datetime
+                    if isinstance(tarih_value, str):
+                        datetime.fromisoformat(tarih_value.replace('Z', '+00:00'))
+                    print(f"✅ Datetime properly serialized: {tarih_value}")
+                    self.log_result('mongodb_integration', 'Datetime Serialization', True, f"Format: {type(tarih_value)}")
                 except:
-                    pass
+                    print(f"❌ Invalid datetime format: {tarih_value}")
+                    self.log_result('mongodb_integration', 'Datetime Serialization', False, f"Invalid format: {tarih_value}")
+                    all_success = False
+            else:
+                all_success = False
+                self.log_result('mongodb_integration', 'Datetime Serialization', False, "No datetime field found")
+        
+        # Test data type validation
+        print("\n🔢 Data Type Validation Tests")
+        
+        # Test float values
+        float_test_record = {
+            "tarih": "2024-01-21T10:00:00Z",
+            "sira_no": "FLOAT_TEST",
+            "musteri": "Float Test Müşteri",
+            "irsaliye_no": "FLOAT-001",
+            "toplam": 1234.56,
+            "sistem": 1200.75,
+            "bos_tasima": 500.25,
+            "reefer": 750.50
+        }
+        
+        success, response, _ = self.run_test(
+            "Float Values Test",
+            "POST",
+            "nakliye",
+            200,
+            data=float_test_record
+        )
+        
+        if success:
+            self.log_result('data_validation', 'Float Values', True, "Float values accepted")
+            if 'id' in response:
+                self.created_nakliye_records.append(response['id'])
+        else:
+            all_success = False
+            self.log_result('data_validation', 'Float Values', False, "Float values rejected")
+        
+        return all_success
+
+    # ========== TURKISH LOCALE HANDLING TESTS ==========
     
-    return all_tests_passed
+    def test_turkish_locale_handling(self):
+        """Test Turkish locale handling (dates, currency, characters)"""
+        print("\n" + "="*70)
+        print("🇹🇷 TURKISH LOCALE HANDLING TESTING")
+        print("="*70)
+        
+        all_success = True
+        
+        # Test Turkish characters
+        print("\n🔤 Turkish Character Tests")
+        turkish_test_record = {
+            "tarih": "2024-01-22T12:00:00Z",
+            "sira_no": "TR_ÇĞİÖŞÜ",
+            "kod": "İSTANBUL-ÇANAKKALE",
+            "musteri": "Çağlar Öztürk Nakliyat Ltd. Şti. - Ğüneş Lojistik",
+            "irsaliye_no": "İRSALİYE-2024-ÇĞİÖŞÜ",
+            "toplam": 5000.0,
+            "sistem": 4750.0
+        }
+        
+        success, response, _ = self.run_test(
+            "Turkish Characters Test",
+            "POST",
+            "nakliye",
+            200,
+            data=turkish_test_record
+        )
+        
+        if success:
+            self.log_result('turkish_locale', 'Turkish Characters', True, "Turkish characters accepted")
+            if 'id' in response:
+                self.created_nakliye_records.append(response['id'])
+                
+                # Verify Turkish characters are preserved
+                success2, response2, _ = self.run_test(
+                    "Turkish Characters Retrieval",
+                    "GET",
+                    f"nakliye/{response['id']}",
+                    200
+                )
+                
+                if success2 and response2.get('musteri') == turkish_test_record['musteri']:
+                    print("✅ Turkish characters preserved in database")
+                    self.log_result('turkish_locale', 'Turkish Characters Preservation', True, "Characters preserved")
+                else:
+                    print("❌ Turkish characters not preserved")
+                    self.log_result('turkish_locale', 'Turkish Characters Preservation', False, "Characters corrupted")
+                    all_success = False
+        else:
+            all_success = False
+            self.log_result('turkish_locale', 'Turkish Characters', False, "Turkish characters rejected")
+        
+        # Test Turkish currency format (using Turkish Lira amounts)
+        print("\n💰 Turkish Currency Tests")
+        currency_test_record = {
+            "tutar": 15750.25,  # 15,750.25 TL
+            "yatan_tarih": "2024-01-22",
+            "baslangic_tarih": "2024-01-20",
+            "bitis_tarih": "2024-01-30",
+            "aciklama": "Türk Lirası ödeme - 15.750,25 TL"
+        }
+        
+        success, response, _ = self.run_test(
+            "Turkish Currency Test",
+            "POST",
+            "yatan-tutar",
+            200,
+            data=currency_test_record
+        )
+        
+        if success:
+            self.log_result('turkish_locale', 'Turkish Currency', True, f"Amount: {currency_test_record['tutar']} TL")
+            if 'id' in response:
+                self.created_yatan_tutar_records.append(response['id'])
+        else:
+            all_success = False
+            self.log_result('turkish_locale', 'Turkish Currency', False, "Currency format rejected")
+        
+        # Test search with Turkish characters
+        print("\n🔍 Turkish Search Tests")
+        search_queries = ["Çağlar", "Öztürk", "İSTANBUL", "ÇĞİÖŞÜ"]
+        for query in search_queries:
+            success, response, _ = self.run_test(
+                f"Turkish Search: '{query}'",
+                "GET",
+                f"nakliye/search/{query}",
+                200
+            )
+            result_count = len(response) if success and isinstance(response, list) else 0
+            self.log_result('turkish_locale', f'Turkish Search: {query}', success, f"Results: {result_count}")
+            if not success:
+                all_success = False
+        
+        return all_success
+
+    # ========== ERROR HANDLING TESTS ==========
+    
+    def test_error_handling(self):
+        """Test error handling and edge cases"""
+        print("\n" + "="*70)
+        print("⚠️ ERROR HANDLING & EDGE CASES TESTING")
+        print("="*70)
+        
+        all_success = True
+        
+        # Test invalid requests
+        print("\n❌ Invalid Request Tests")
+        
+        # Test invalid nakliye creation (missing required fields)
+        invalid_record = {
+            "sira_no": "INVALID_TEST"
+            # Missing required fields like tarih, musteri, irsaliye_no
+        }
+        
+        success, response, _ = self.run_test(
+            "Invalid Nakliye Creation (Missing Fields)",
+            "POST",
+            "nakliye",
+            422,  # Expecting validation error
+            data=invalid_record
+        )
+        self.log_result('error_handling', 'Missing Required Fields', success, "Properly rejected invalid data")
+        if not success:
+            all_success = False
+        
+        # Test invalid ID format
+        success, response, _ = self.run_test(
+            "Invalid ID Format",
+            "GET",
+            "nakliye/invalid-id-format",
+            404
+        )
+        self.log_result('error_handling', 'Invalid ID Format', success, "Properly handled invalid ID")
+        if not success:
+            all_success = False
+        
+        # Test non-existent record
+        fake_uuid = str(uuid.uuid4())
+        success, response, _ = self.run_test(
+            "Non-existent Record",
+            "GET",
+            f"nakliye/{fake_uuid}",
+            404
+        )
+        self.log_result('error_handling', 'Non-existent Record', success, "Properly returned 404")
+        if not success:
+            all_success = False
+        
+        # Test invalid data types
+        print("\n🔢 Invalid Data Type Tests")
+        invalid_type_record = {
+            "tarih": "invalid-date-format",
+            "sira_no": "TYPE_TEST",
+            "musteri": "Type Test",
+            "irsaliye_no": "TYPE-001",
+            "toplam": "not-a-number",  # Should be float
+            "sistem": "also-not-a-number"
+        }
+        
+        success, response, _ = self.run_test(
+            "Invalid Data Types",
+            "POST",
+            "nakliye",
+            422,  # Expecting validation error
+            data=invalid_type_record
+        )
+        self.log_result('error_handling', 'Invalid Data Types', success, "Properly rejected invalid types")
+        if not success:
+            all_success = False
+        
+        # Test empty data
+        success, response, _ = self.run_test(
+            "Empty Data",
+            "POST",
+            "nakliye",
+            422,
+            data={}
+        )
+        self.log_result('error_handling', 'Empty Data', success, "Properly rejected empty data")
+        if not success:
+            all_success = False
+        
+        return all_success
+
+    # ========== PERFORMANCE & STABILITY TESTS ==========
+    
+    def test_performance_stability(self):
+        """Test performance and stability with concurrent requests"""
+        print("\n" + "="*70)
+        print("⚡ PERFORMANCE & STABILITY TESTING")
+        print("="*70)
+        
+        all_success = True
+        
+        # Test response times
+        print("\n⏱️ Response Time Tests")
+        start_time = time.time()
+        success, response, response_time = self.run_test(
+            "Response Time Test",
+            "GET",
+            "nakliye",
+            200
+        )
+        
+        if success:
+            if response_time < 5.0:  # Should respond within 5 seconds
+                print(f"✅ Good response time: {response_time:.3f}s")
+                self.log_result('performance', 'Response Time', True, f"{response_time:.3f}s")
+            else:
+                print(f"⚠️ Slow response time: {response_time:.3f}s")
+                self.log_result('performance', 'Response Time', False, f"Slow: {response_time:.3f}s")
+                all_success = False
+        else:
+            all_success = False
+            self.log_result('performance', 'Response Time', False, "Request failed")
+        
+        # Test concurrent requests
+        print("\n🔄 Concurrent Request Tests")
+        def make_concurrent_request():
+            try:
+                response = requests.get(f"{self.base_url}/nakliye", timeout=10)
+                return response.status_code == 200
+            except:
+                return False
+        
+        # Run 5 concurrent requests
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            futures = [executor.submit(make_concurrent_request) for _ in range(5)]
+            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+        
+        successful_requests = sum(results)
+        if successful_requests >= 4:  # At least 4 out of 5 should succeed
+            print(f"✅ Concurrent requests: {successful_requests}/5 successful")
+            self.log_result('performance', 'Concurrent Requests', True, f"{successful_requests}/5 successful")
+        else:
+            print(f"❌ Concurrent requests: {successful_requests}/5 successful")
+            self.log_result('performance', 'Concurrent Requests', False, f"Only {successful_requests}/5 successful")
+            all_success = False
+        
+        return all_success
+
+    # ========== FILE OPERATIONS SUPPORT TESTS ==========
+    
+    def test_file_operations_support(self):
+        """Test endpoints that support PDF generation and backup/restore data"""
+        print("\n" + "="*70)
+        print("📄 FILE OPERATIONS SUPPORT TESTING")
+        print("="*70)
+        
+        all_success = True
+        
+        # Test large data handling (simulate PDF generation data)
+        print("\n📊 Large Data Handling Tests")
+        
+        # Create multiple records to simulate large dataset
+        large_dataset = []
+        for i in range(10):
+            record = {
+                "tarih": f"2024-01-{20+i:02d}T10:00:00Z",
+                "sira_no": f"LARGE_{i:03d}",
+                "kod": f"TEST-{i}",
+                "musteri": f"Büyük Veri Test Müşteri {i} - PDF Export",
+                "irsaliye_no": f"LARGE-{i:03d}",
+                "toplam": 1000.0 + i * 100,
+                "sistem": 950.0 + i * 95
+            }
+            large_dataset.append(record)
+        
+        # Create records
+        created_large_records = []
+        for i, record in enumerate(large_dataset):
+            success, response, _ = self.run_test(
+                f"Create Large Dataset Record {i+1}",
+                "POST",
+                "nakliye",
+                200,
+                data=record
+            )
+            if success and 'id' in response:
+                created_large_records.append(response['id'])
+                self.created_nakliye_records.append(response['id'])
+        
+        # Test retrieving large dataset (simulates backup/export)
+        success, response, response_time = self.run_test(
+            "Retrieve Large Dataset",
+            "GET",
+            "nakliye?limit=100",
+            200
+        )
+        
+        if success:
+            record_count = len(response) if isinstance(response, list) else 0
+            if record_count >= 10 and response_time < 10.0:  # Should handle at least 10 records in under 10s
+                print(f"✅ Large data handling: {record_count} records in {response_time:.3f}s")
+                self.log_result('file_operations', 'Large Data Handling', True, f"{record_count} records, {response_time:.3f}s")
+            else:
+                print(f"⚠️ Large data handling issues: {record_count} records in {response_time:.3f}s")
+                self.log_result('file_operations', 'Large Data Handling', False, f"Performance issues")
+                all_success = False
+        else:
+            all_success = False
+            self.log_result('file_operations', 'Large Data Handling', False, "Failed to retrieve large dataset")
+        
+        # Test data consistency for backup/restore scenarios
+        print("\n🔄 Data Consistency Tests")
+        if created_large_records:
+            # Verify all created records can be retrieved individually
+            consistency_success = 0
+            for record_id in created_large_records[:5]:  # Test first 5
+                success, response, _ = self.run_test(
+                    f"Data Consistency Check",
+                    "GET",
+                    f"nakliye/{record_id}",
+                    200
+                )
+                if success:
+                    consistency_success += 1
+            
+            if consistency_success >= 4:  # At least 4 out of 5 should be consistent
+                print(f"✅ Data consistency: {consistency_success}/5 records consistent")
+                self.log_result('file_operations', 'Data Consistency', True, f"{consistency_success}/5 consistent")
+            else:
+                print(f"❌ Data consistency issues: {consistency_success}/5 records consistent")
+                self.log_result('file_operations', 'Data Consistency', False, f"Only {consistency_success}/5 consistent")
+                all_success = False
+        
+        return all_success
+
+    # ========== CORS AND SECURITY HEADERS TESTS ==========
+    
+    def test_cors_security_headers(self):
+        """Test CORS and security headers"""
+        print("\n" + "="*70)
+        print("🔒 CORS & SECURITY HEADERS TESTING")
+        print("="*70)
+        
+        all_success = True
+        
+        # Test CORS headers
+        print("\n🌐 CORS Headers Test")
+        try:
+            response = requests.options(f"{self.base_url}/nakliye", timeout=10)
+            cors_headers = {
+                'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
+            }
+            
+            print(f"   CORS Headers: {cors_headers}")
+            
+            # Check if CORS is properly configured
+            if cors_headers['Access-Control-Allow-Origin']:
+                print("✅ CORS headers present")
+                self.log_result('authentication', 'CORS Headers', True, "CORS configured")
+            else:
+                print("⚠️ CORS headers missing")
+                self.log_result('authentication', 'CORS Headers', False, "CORS not configured")
+                all_success = False
+                
+        except Exception as e:
+            print(f"❌ CORS test failed: {str(e)}")
+            self.log_result('authentication', 'CORS Headers', False, f"Error: {str(e)}")
+            all_success = False
+        
+        return all_success
+
+    # ========== CLEANUP METHODS ==========
+    
+    def cleanup_test_data(self):
+        """Clean up all test data created during testing"""
+        print(f"\n🧹 Cleaning up test data...")
+        
+        # Clean up nakliye records
+        for record_id in self.created_nakliye_records:
+            try:
+                self.run_test(
+                    f"Cleanup Nakliye {record_id}",
+                    "DELETE",
+                    f"nakliye/{record_id}",
+                    200
+                )
+            except:
+                pass
+        
+        # Clean up yatan tutar records
+        for record_id in self.created_yatan_tutar_records:
+            try:
+                self.run_test(
+                    f"Cleanup Yatan Tutar {record_id}",
+                    "DELETE",
+                    f"yatan-tutar/{record_id}",
+                    200
+                )
+            except:
+                pass
+        
+        print(f"   Cleaned up {len(self.created_nakliye_records)} nakliye records")
+        print(f"   Cleaned up {len(self.created_yatan_tutar_records)} yatan tutar records")
+
+    # ========== MAIN TEST RUNNER ==========
+    
+    def run_comprehensive_tests(self):
+        """Run all comprehensive cross-platform API tests"""
+        print("🚀 Starting Comprehensive Cross-Platform Backend API Tests...")
+        print(f"Backend URL: {self.base_url}")
+        
+        test_results = {}
+        
+        try:
+            # 1. API Endpoint Consistency Tests
+            print("\n" + "="*80)
+            print("🔗 API ENDPOINT CONSISTENCY TESTS")
+            print("="*80)
+            
+            test_results['root_endpoint'] = self.test_root_endpoint()[0]
+            test_results['nakliye_crud'] = self.test_nakliye_crud_operations()
+            test_results['yatan_tutar_crud'] = self.test_yatan_tutar_crud_operations()
+            
+            # 2. Authentication System Tests
+            test_results['authentication'] = self.test_authentication_system()
+            
+            # 3. Data Validation & Serialization Tests
+            test_results['data_validation'] = self.test_data_validation_serialization()
+            
+            # 4. Turkish Locale Handling Tests
+            test_results['turkish_locale'] = self.test_turkish_locale_handling()
+            
+            # 5. Error Handling Tests
+            test_results['error_handling'] = self.test_error_handling()
+            
+            # 6. Performance & Stability Tests
+            test_results['performance'] = self.test_performance_stability()
+            
+            # 7. File Operations Support Tests
+            test_results['file_operations'] = self.test_file_operations_support()
+            
+            # 8. CORS & Security Tests
+            test_results['cors_security'] = self.test_cors_security_headers()
+            
+        except Exception as e:
+            print(f"❌ Test suite failed with error: {str(e)}")
+            test_results['suite_error'] = False
+        
+        finally:
+            # Cleanup
+            self.cleanup_test_data()
+        
+        return test_results
+
+    def print_comprehensive_summary(self, test_results):
+        """Print comprehensive test summary"""
+        print("\n" + "="*80)
+        print("📋 COMPREHENSIVE CROSS-PLATFORM API TEST RESULTS")
+        print("="*80)
+        
+        print(f"\n📊 Overall Statistics:")
+        print(f"   Total Tests Run: {self.tests_run}")
+        print(f"   Total Tests Passed: {self.tests_passed}")
+        print(f"   Overall Success Rate: {(self.tests_passed/self.tests_run)*100:.1f}%")
+        
+        print(f"\n🎯 Test Category Results:")
+        for category, success in test_results.items():
+            status = "✅ PASSED" if success else "❌ FAILED"
+            print(f"   {category.replace('_', ' ').title()}: {status}")
+        
+        # Detailed results by category
+        for category, results in self.test_results.items():
+            if results:
+                print(f"\n📋 {category.replace('_', ' ').title()} Details:")
+                for result in results:
+                    status = "✅" if result['success'] else "❌"
+                    print(f"   {status} {result['test']}: {result['details']}")
+        
+        # Overall assessment
+        passed_categories = sum(1 for success in test_results.values() if success)
+        total_categories = len(test_results)
+        
+        print(f"\n🏆 FINAL ASSESSMENT:")
+        print(f"   Categories Passed: {passed_categories}/{total_categories}")
+        print(f"   Category Success Rate: {(passed_categories/total_categories)*100:.1f}%")
+        
+        if passed_categories == total_categories and self.tests_passed == self.tests_run:
+            print("\n🎉 ALL CROSS-PLATFORM API TESTS PASSED!")
+            print("✅ Backend is ready for cross-platform deployment")
+            return True
+        else:
+            print("\n❌ SOME CROSS-PLATFORM API TESTS FAILED")
+            print("⚠️ Review failed tests before cross-platform deployment")
+            return False
+
 
 def main():
-    """Main test runner focusing on yatan_tutar field integration"""
-    print("🚀 Starting Arkas Lojistik Yatan Tutar Integration Tests...")
+    """Main test runner for comprehensive cross-platform API testing"""
+    print("🚀 Arkas Lojistik - Comprehensive Cross-Platform Backend API Testing")
+    print("="*80)
     
-    # Run comprehensive yatan_tutar integration tests
-    yatan_tutar_success = test_yatan_tutar_integration()
+    tester = ComprehensiveCrossPlatformAPITester()
     
-    # Final summary
-    print("\n" + "="*70)
-    print("📋 FINAL TEST SUMMARY")
-    print("="*70)
-    print(f"💰 Yatan Tutar Integration: {'✅ PASSED' if yatan_tutar_success else '❌ FAILED'}")
+    # Run comprehensive tests
+    test_results = tester.run_comprehensive_tests()
     
-    if yatan_tutar_success:
-        print("\n🎉 YATAN TUTAR INTEGRATION WORKING CORRECTLY!")
-        print("✅ All CRUD operations support yatan_tutar field")
-        print("✅ Data validation working properly")
-        print("✅ Search functionality maintained")
-        print("✅ Backward compatibility ensured")
-        print("✅ Model serialization/deserialization working")
-        return 0
-    else:
-        print("\n❌ YATAN TUTAR INTEGRATION TESTS FAILED - CHECK LOGS ABOVE")
-        return 1
+    # Print summary
+    overall_success = tester.print_comprehensive_summary(test_results)
+    
+    return 0 if overall_success else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())
