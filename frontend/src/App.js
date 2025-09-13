@@ -1871,6 +1871,174 @@ function App() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Yatan Tutar Özet Tablosu */}
+        {yatulanTutarList.length > 0 && (
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 shadow-lg border-0 hover:shadow-xl transition-all duration-200">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-2">
+                    💰 Yatan Tutar Kayıtları
+                  </CardTitle>
+                  <CardDescription className="text-purple-600 dark:text-purple-400">
+                    Para yatış bilgileri ve çalışma dönemleri
+                  </CardDescription>
+                </div>
+                <Button 
+                  onClick={() => openYatulanTutarDialog()} 
+                  variant="outline"
+                  className="border-purple-300 text-purple-600 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-400"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Yeni Ekle
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {/* Desktop Görünüm */}
+              <div className="hidden lg:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="font-semibold text-purple-700 dark:text-purple-300">Tutar</TableHead>
+                      <TableHead className="font-semibold text-purple-700 dark:text-purple-300">Yatış Tarihi</TableHead>
+                      <TableHead className="font-semibold text-purple-700 dark:text-purple-300">Çalışma Dönemi</TableHead>
+                      <TableHead className="font-semibold text-purple-700 dark:text-purple-300">Açıklama</TableHead>
+                      <TableHead className="font-semibold text-purple-700 dark:text-purple-300 text-center">İşlemler</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {yatulanTutarList.slice(0, 5).map((item) => (
+                      <TableRow key={item.id} className="hover:bg-purple-50/50 dark:hover:bg-purple-900/10">
+                        <TableCell className="font-semibold text-purple-700 dark:text-purple-300">
+                          {formatCurrency(item.tutar)}
+                        </TableCell>
+                        <TableCell className="text-slate-600 dark:text-gray-300">
+                          {new Date(item.yatan_tarih).toLocaleDateString('tr-TR')}
+                        </TableCell>
+                        <TableCell className="text-slate-600 dark:text-gray-300">
+                          <div className="text-sm">
+                            {new Date(item.baslangic_tarih).toLocaleDateString('tr-TR')} - 
+                            {new Date(item.bitis_tarih).toLocaleDateString('tr-TR')}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-600 dark:text-gray-300 max-w-32 truncate">
+                          {item.aciklama || '-'}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex gap-1 justify-center">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => openYatulanTutarDialog(item)}
+                              className="h-6 w-6 p-0 text-purple-600 hover:text-purple-700"
+                            >
+                              <Edit3 className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteYatulanTutar(item.id)}
+                              className="h-6 w-6 p-0 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                
+                {yatulanTutarList.length > 5 && (
+                  <div className="text-center mt-4">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => openYatulanTutarDialog()}
+                      className="border-purple-300 text-purple-600 hover:bg-purple-50"
+                    >
+                      Tümünü Görüntüle ({yatulanTutarList.length} kayıt)
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Görünüm */}
+              <div className="lg:hidden space-y-3">
+                {yatulanTutarList.slice(0, 3).map((item) => (
+                  <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-purple-200 dark:border-purple-700">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="font-bold text-lg text-purple-700 dark:text-purple-300">
+                        {formatCurrency(item.tutar)}
+                      </div>
+                      <div className="flex gap-1">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => openYatulanTutarDialog(item)}
+                          className="h-6 w-6 p-0 text-purple-600"
+                        >
+                          <Edit3 className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => deleteYatulanTutar(item.id)}
+                          className="h-6 w-6 p-0 text-red-600"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-sm text-slate-600 dark:text-gray-300 space-y-1">
+                      <div><strong>Yatış:</strong> {new Date(item.yatan_tarih).toLocaleDateString('tr-TR')}</div>
+                      <div><strong>Dönem:</strong> {new Date(item.baslangic_tarih).toLocaleDateString('tr-TR')} - {new Date(item.bitis_tarih).toLocaleDateString('tr-TR')}</div>
+                      {item.aciklama && <div><strong>Not:</strong> {item.aciklama}</div>}
+                    </div>
+                  </div>
+                ))}
+                
+                {yatulanTutarList.length > 3 && (
+                  <div className="text-center">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => openYatulanTutarDialog()}
+                      className="border-purple-300 text-purple-600 hover:bg-purple-50 w-full"
+                    >
+                      Tümünü Görüntüle ({yatulanTutarList.length} kayıt)
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Toplam Özet */}
+              <div className="border-t border-purple-200 dark:border-purple-700 mt-6 pt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
+                    <div className="text-sm text-purple-600 dark:text-purple-400">Toplam Yatan</div>
+                    <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
+                      {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0))}
+                    </div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
+                    <div className="text-sm text-purple-600 dark:text-purple-400">Ortalama</div>
+                    <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
+                      {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0) / yatulanTutarList.length)}
+                    </div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
+                    <div className="text-sm text-purple-600 dark:text-purple-400">Kayıt Sayısı</div>
+                    <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
+                      {yatulanTutarList.length}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
       </div>
       <Toaster />
 
