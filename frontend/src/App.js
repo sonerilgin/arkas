@@ -750,7 +750,72 @@ function App() {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
       };
 
-      await html2pdf().set(opt).from(element).save();
+      // Android uyumlu PDF indirme
+      try {
+        const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
+        
+        // Mobil uyumlu indirme fonksiyonu
+        const downloadPdfBlob = (blob, filename) => {
+          try {
+            // Modern Web Share API denemesi (Android'de çok iyi çalışır)
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'application/pdf' })] })) {
+              const file = new File([blob], filename, { type: 'application/pdf' });
+              navigator.share({
+                title: 'Arkas Lojistik PDF Raporu',
+                files: [file]
+              }).catch(err => {
+                console.log('PDF paylaşım iptal edildi:', err);
+                traditionalPdfDownload();
+              });
+              return;
+            }
+            
+            // Geleneksel indirme yöntemi
+            traditionalPdfDownload();
+            
+            function traditionalPdfDownload() {
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.style.display = 'none';
+              link.href = url;
+              link.download = filename;
+              link.target = '_blank';
+              
+              // Mobil uyumluluk için body'ye ekle
+              document.body.appendChild(link);
+              
+              setTimeout(() => {
+                link.click();
+                
+                setTimeout(() => {
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+                }, 150);
+              }, 100);
+            }
+          } catch (error) {
+            console.error('PDF indirme hatası:', error);
+            
+            // Son çare - yeni sekmede aç
+            const url = URL.createObjectURL(blob);
+            const newWindow = window.open(url, '_blank');
+            if (!newWindow) {
+              toast({
+                title: "PDF İndirme Sorunu",
+                description: "PDF açılamadı. Lütfen tarayıcı ayarlarınızı kontrol edin.",
+                variant: "destructive"
+              });
+            }
+            setTimeout(() => URL.revokeObjectURL(url), 2000);
+          }
+        };
+
+        downloadPdfBlob(pdf, fileName);
+      } catch (error) {
+        // Eski yöntemle dene
+        console.warn('Blob PDF oluşturulamadı, geleneksel yöntem deneniyor:', error);
+        await html2pdf().set(opt).from(element).save();
+      }
       
       // Geçici elementi kaldır
       document.body.removeChild(element);
