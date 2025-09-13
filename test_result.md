@@ -219,6 +219,9 @@ frontend:
       - working: false
         agent: "user"
         comment: "ANDROID PDF DOWNLOAD ISSUE: bağlantıya basılı tutunca farklı kaydet açılmıyor ve geriye dönmem için bir yol yada düğme yok o ekranda kalıyor (Long-press on link doesn't show save option and no back button available, user gets stuck on the screen). The new tab PDF approach is not working properly on Android - user cannot save file and cannot navigate back."
+      - working: "NA"
+        agent: "main"
+        comment: "ANDROID DOWNLOAD APPROACH REVISED: Completely changed Android download strategy based on user feedback. 1) BACKUP: Now uses Base64 Data URL instead of encodeURIComponent for better Android compatibility, enhanced error handling, 2) PDF: Removed problematic new tab approach, now uses FileReader to convert PDF Blob to Data URL for direct download, fallback to html2pdf native save method, 3) Both methods now have simplified Android-specific paths with better error recovery. No more stuck screens or navigation issues."
 
   - task: "Dark/Light Theme Consistency"
     implemented: true
