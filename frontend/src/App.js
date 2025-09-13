@@ -64,6 +64,8 @@ function App() {
   const [userEditDialogOpen, setUserEditDialogOpen] = useState(false);
   const [pdfYearDialogOpen, setPdfYearDialogOpen] = useState(false);
   const [selectedPdfYear, setSelectedPdfYear] = useState(new Date().getFullYear());
+  const [selectedPdfMonth, setSelectedPdfMonth] = useState(new Date().getMonth());
+  const [pdfReportType, setPdfReportType] = useState('yearly'); // 'yearly' or 'monthly'
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [displayMonth, setDisplayMonth] = useState(new Date().getMonth());
