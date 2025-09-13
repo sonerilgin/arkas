@@ -160,6 +160,105 @@ function App() {
     setIsLoggedIn(false);
   };
 
+  // Yatan Tutar CRUD Functions
+  const fetchYatulanTutarList = async () => {
+    try {
+      const response = await axios.get(`${API}/yatan-tutar`);
+      setYatulanTutarList(response.data);
+    } catch (error) {
+      console.error("Yatan tutar listesi yüklenirken hata:", error);
+      toast({
+        title: "Hata",
+        description: "Yatan tutar listesi yüklenemedi",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const openYatulanTutarDialog = (item = null) => {
+    if (item) {
+      setYatulanTutarFormData({
+        tutar: item.tutar,
+        yatan_tarih: item.yatan_tarih,
+        baslangic_tarih: item.baslangic_tarih,
+        bitis_tarih: item.bitis_tarih,
+        aciklama: item.aciklama || ""
+      });
+      setEditingYatulanTutar(item);
+    } else {
+      setYatulanTutarFormData({
+        tutar: 0,
+        yatan_tarih: new Date().toISOString().split('T')[0],
+        baslangic_tarih: new Date().toISOString().split('T')[0],
+        bitis_tarih: new Date().toISOString().split('T')[0],
+        aciklama: ""
+      });
+      setEditingYatulanTutar(null);
+    }
+    setYatulanTutarDialogOpen(true);
+  };
+
+  const submitYatulanTutar = async () => {
+    try {
+      setLoading(true);
+      
+      const data = {
+        tutar: parseFloat(yatulanTutarFormData.tutar) || 0,
+        yatan_tarih: yatulanTutarFormData.yatan_tarih,
+        baslangic_tarih: yatulanTutarFormData.baslangic_tarih,
+        bitis_tarih: yatulanTutarFormData.bitis_tarih,
+        aciklama: yatulanTutarFormData.aciklama
+      };
+
+      if (editingYatulanTutar) {
+        await axios.put(`${API}/yatan-tutar/${editingYatulanTutar.id}`, data);
+        toast({
+          title: "Başarılı",
+          description: "Yatan tutar kaydı güncellendi"
+        });
+      } else {
+        await axios.post(`${API}/yatan-tutar`, data);
+        toast({
+          title: "Başarılı",
+          description: "Yeni yatan tutar kaydı eklendi"
+        });
+      }
+
+      await fetchYatulanTutarList();
+      setYatulanTutarDialogOpen(false);
+    } catch (error) {
+      console.error("Yatan tutar kaydetme hatası:", error);
+      toast({
+        title: "Hata",
+        description: "Yatan tutar kaydedilemedi",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteYatulanTutar = async (id) => {
+    try {
+      setLoading(true);
+      await axios.delete(`${API}/yatan-tutar/${id}`);
+      await fetchYatulanTutarList();
+      toast({
+        title: "Başarılı",
+        description: "Yatan tutar kaydı silindi"
+      });
+    } catch (error) {
+      console.error("Yatan tutar silme hatası:", error);
+      toast({
+        title: "Hata",
+        description: "Yatan tutar kaydı silinemedi",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchNakliyeList = async () => {
     try {
       setLoading(true);
