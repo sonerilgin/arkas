@@ -697,15 +697,39 @@ function App() {
           </div>
 
           ${filteredYatulanData.length > 0 ? `
-          <div style="background-color: #faf5ff; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
-            <h3 style="color: #8b5cf6; margin-bottom: 10px;">💰 YATAN TUTAR DETAYLARI</h3>
+          <div style="background-color: #faf5ff; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6; margin-bottom: 20px;">
+            <h3 style="color: #8b5cf6; margin-bottom: 15px;">💰 YATAN TUTAR DETAYLARI</h3>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
+              <thead>
+                <tr style="background-color: #8b5cf6; color: white;">
+                  <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Tutar</th>
+                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Yatış Tarihi</th>
+                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Çalışma Başlangıç</th>
+                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Çalışma Bitiş</th>
+                  <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Açıklama</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredYatulanData.map(item => `
+                  <tr style="border-bottom: 1px solid #f1f5f9;">
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #8b5cf6;">${formatCurrency(item.tutar)}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${new Date(item.yatan_tarih).toLocaleDateString('tr-TR')}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${new Date(item.baslangic_tarih).toLocaleDateString('tr-TR')}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${new Date(item.bitis_tarih).toLocaleDateString('tr-TR')}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px;">${item.aciklama || '-'}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            
             <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 10px;">
               <div><strong>Yatan İşlem Sayısı:</strong> ${filteredYatulanData.length} adet</div>
               <div><strong>Toplam Yatan Tutar:</strong> <span style="color: #8b5cf6;">${formatCurrency(toplamYatulanTutar)}</span></div>
               <div><strong>Ortalama Yatan Tutar:</strong> ${formatCurrency(toplamYatulanTutar / filteredYatulanData.length)}</div>
             </div>
             <p style="font-size: 11px; color: #6b7280; margin: 0;">
-              <strong>Kapsanan Dönem:</strong> ${formatDate(enEskiTarih.toISOString())} - ${formatDate(enYeniTarih.toISOString())} 
+              <strong>Dönem Analizi:</strong> ${formatDate(enEskiTarih.toISOString())} - ${formatDate(enYeniTarih.toISOString())} 
               (${Math.ceil((enYeniTarih - enEskiTarih) / (1000 * 60 * 60 * 24))} gün)
             </p>
           </div>
