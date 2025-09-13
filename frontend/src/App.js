@@ -631,7 +631,7 @@ function App() {
   };
 
   const confirmPdfExport = () => {
-    exportToPDF(selectedPdfYear);
+    exportToPDF();
     setPdfYearDialogOpen(false);
   };
 
