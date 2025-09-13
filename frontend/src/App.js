@@ -1877,16 +1877,16 @@ function App() {
         </Card>
 
         {/* Yatan Tutar Özet Tablosu */}
-        {yatulanTutarList.length > 0 && (
+        {displayedYatulanTutar.length > 0 && (
           <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 shadow-lg border-0 hover:shadow-xl transition-all duration-200">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-lg font-semibold text-purple-700 dark:text-purple-300 flex items-center gap-2">
-                    💰 Yatan Tutar Kayıtları
+                    💰 {monthNames[displayMonth]} {displayYear} - Yatan Tutar Kayıtları
                   </CardTitle>
                   <CardDescription className="text-purple-600 dark:text-purple-400">
-                    Para yatış bilgileri ve çalışma dönemleri
+                    Bu aya ait para yatış bilgileri ve çalışma dönemleri
                   </CardDescription>
                 </div>
                 <Button 
@@ -1913,7 +1913,7 @@ function App() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {yatulanTutarList.slice(0, 5).map((item) => (
+                    {displayedYatulanTutar.slice(0, 5).map((item) => (
                       <TableRow key={item.id} className="hover:bg-purple-50/50 dark:hover:bg-purple-900/10">
                         <TableCell className="font-semibold text-purple-700 dark:text-purple-300">
                           {formatCurrency(item.tutar)}
@@ -1955,14 +1955,14 @@ function App() {
                   </TableBody>
                 </Table>
                 
-                {yatulanTutarList.length > 5 && (
+                {displayedYatulanTutar.length > 5 && (
                   <div className="text-center mt-4">
                     <Button 
                       variant="outline" 
                       onClick={() => openYatulanTutarDialog()}
                       className="border-purple-300 text-purple-600 hover:bg-purple-50"
                     >
-                      Tümünü Görüntüle ({yatulanTutarList.length} kayıt)
+                      Bu Ayın Tümünü Görüntüle ({displayedYatulanTutar.length} kayıt)
                     </Button>
                   </div>
                 )}
@@ -1970,7 +1970,7 @@ function App() {
 
               {/* Mobile Görünüm */}
               <div className="lg:hidden space-y-3">
-                {yatulanTutarList.slice(0, 3).map((item) => (
+                {displayedYatulanTutar.slice(0, 3).map((item) => (
                   <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-purple-200 dark:border-purple-700">
                     <div className="flex justify-between items-start mb-2">
                       <div className="font-bold text-lg text-purple-700 dark:text-purple-300">
@@ -2003,14 +2003,14 @@ function App() {
                   </div>
                 ))}
                 
-                {yatulanTutarList.length > 3 && (
+                {displayedYatulanTutar.length > 3 && (
                   <div className="text-center">
                     <Button 
                       variant="outline" 
                       onClick={() => openYatulanTutarDialog()}
                       className="border-purple-300 text-purple-600 hover:bg-purple-50 w-full"
                     >
-                      Tümünü Görüntüle ({yatulanTutarList.length} kayıt)
+                      Bu Ayın Tümünü Görüntüle ({displayedYatulanTutar.length} kayıt)
                     </Button>
                   </div>
                 )}
@@ -2020,21 +2020,34 @@ function App() {
               <div className="border-t border-purple-200 dark:border-purple-700 mt-6 pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                   <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
-                    <div className="text-sm text-purple-600 dark:text-purple-400">Toplam Yatan</div>
+                    <div className="text-sm text-purple-600 dark:text-purple-400">{monthNames[displayMonth]} Yatan</div>
                     <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
-                      {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0))}
+                      {formatCurrency(displayedYatulanTotal)}
                     </div>
                   </div>
                   <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
                     <div className="text-sm text-purple-600 dark:text-purple-400">Ortalama</div>
                     <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
-                      {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0) / yatulanTutarList.length)}
+                      {displayedYatulanTutar.length > 0 ? formatCurrency(displayedYatulanTotal / displayedYatulanTutar.length) : formatCurrency(0)}
                     </div>
                   </div>
                   <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
-                    <div className="text-sm text-purple-600 dark:text-purple-400">Kayıt Sayısı</div>
+                    <div className="text-sm text-purple-600 dark:text-purple-400">Bu Ay Kayıt</div>
                     <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
-                      {yatulanTutarList.length}
+                      {displayedYatulanTutar.length}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Tüm Aylar Özeti */}
+                <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-700">
+                  <div className="text-center">
+                    <div className="text-sm text-slate-600 dark:text-gray-400">Tüm Zamanlar Toplamı</div>
+                    <div className="text-2xl font-bold text-slate-700 dark:text-gray-200">
+                      {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0))}
+                    </div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">
+                      {yatulanTutarList.length} toplam kayıt
                     </div>
                   </div>
                 </div>
