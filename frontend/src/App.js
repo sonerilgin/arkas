@@ -615,6 +615,15 @@ function App() {
         reportPeriod = `${monthNames[selectedPdfMonth]} ${selectedPdfYear}`;
       }
 
+      if (filteredData.length === 0 && filteredYatulanData.length === 0) {
+        toast({
+          title: "Uyarı",
+          description: `${reportPeriod} döneminde kayıt bulunamadı`,
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Yatan tutar analizi
       const toplamYatulanTutar = filteredYatulanData.reduce((sum, item) => sum + (item.tutar || 0), 0);
       
