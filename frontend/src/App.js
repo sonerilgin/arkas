@@ -887,7 +887,8 @@ function App() {
         
         toast({
           title: "PDF İndirme",
-          description: `${reportPeriod} raporu indirildi`
+          description: `${reportPeriod} raporu indirildi\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${fileName}`,
+          duration: 6000
         });
       }
       
