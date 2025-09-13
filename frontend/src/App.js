@@ -1087,17 +1087,54 @@ function App() {
           </DialogContent>
         </Dialog>
 
-        {/* PDF Year Selection Dialog */}
+        {/* PDF Report Selection Dialog */}
         <Dialog open={pdfYearDialogOpen} onOpenChange={setPdfYearDialogOpen}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>PDF Raporu İçin Yıl Seçin</DialogTitle>
+              <DialogTitle>📊 Nakliye Raporu Oluştur</DialogTitle>
               <DialogDescription>
-                Hangi yılın nakliye raporunu PDF olarak indirmek istiyorsunuz?
+                Hangi dönemin nakliye raporunu PDF olarak indirmek istiyorsunuz?<br/>
+                Yatan tutar detayları ve tarih aralığı bilgileri dahil edilecektir.
               </DialogDescription>
             </DialogHeader>
             
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Rapor Türü Seçimi */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Rapor Türü</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div 
+                    className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      pdfReportType === 'yearly' 
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'
+                    }`}
+                    onClick={() => setPdfReportType('yearly')}
+                  >
+                    <div className="text-center">
+                      <Calendar className="h-6 w-6 mx-auto mb-2 text-blue-600" />
+                      <div className="font-medium text-sm">Yıllık Rapor</div>
+                      <div className="text-xs text-gray-500">Tüm yıl</div>
+                    </div>
+                  </div>
+                  <div 
+                    className={`p-3 border-2 rounded-lg cursor-pointer transition-all ${
+                      pdfReportType === 'monthly' 
+                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
+                        : 'border-gray-200 dark:border-gray-600 hover:border-gray-300'
+                    }`}
+                    onClick={() => setPdfReportType('monthly')}
+                  >
+                    <div className="text-center">
+                      <Calendar className="h-6 w-6 mx-auto mb-2 text-green-600" />
+                      <div className="font-medium text-sm">Aylık Rapor</div>
+                      <div className="text-xs text-gray-500">Belirli ay</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Yıl Seçimi */}
               <div className="space-y-2">
                 <Label>Yıl</Label>
                 <Select value={selectedPdfYear.toString()} onValueChange={(value) => setSelectedPdfYear(parseInt(value))}>
@@ -1113,15 +1150,50 @@ function App() {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Ay Seçimi (Sadece aylık rapor için) */}
+              {pdfReportType === 'monthly' && (
+                <div className="space-y-2">
+                  <Label>Ay</Label>
+                  <Select value={selectedPdfMonth.toString()} onValueChange={(value) => setSelectedPdfMonth(parseInt(value))}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {monthNames.map((month, index) => (
+                        <SelectItem key={index} value={index.toString()}>
+                          {month}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {/* Rapor Önizleme */}
+              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  📄 Oluşturulacak Rapor:
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  {pdfReportType === 'yearly' 
+                    ? `${selectedPdfYear} Yılı Tüm Kayıtlar` 
+                    : `${monthNames[selectedPdfMonth]} ${selectedPdfYear} Aylık Rapor`
+                  }
+                </div>
+                <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                  ✨ Yatan tutar detayları ve tarih aralığı bilgileri dahil
+                </div>
+              </div>
             </div>
             
             <DialogFooter>
               <Button variant="outline" onClick={() => setPdfYearDialogOpen(false)}>
                 İptal
               </Button>
-              <Button onClick={confirmPdfExport} className="bg-green-600 hover:bg-green-700 text-white">
+              <Button onClick={confirmPdfExport} className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white">
                 <FileDown className="mr-2 h-4 w-4" />
-                PDF İndir
+                PDF Raporu İndir
               </Button>
             </DialogFooter>
           </DialogContent>
