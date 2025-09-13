@@ -654,8 +654,6 @@ function App() {
                 <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Toplam</th>
                 <th style="border: 1px solid #ddd; padding: 8px; text-align: right; color: #22c55e;">Sistem</th>
                 <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Karşılaştırma</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: right; color: #8b5cf6;">Yatan Tutar</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: center; color: #8b5cf6;">Yatış Tarihi</th>
               </tr>
             </thead>
             <tbody>
