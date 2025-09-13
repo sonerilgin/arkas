@@ -239,7 +239,8 @@ test_plan:
     - "Touch and Keyboard Navigation"
     - "PWA Functionality"
     - "Dark/Light Theme Consistency"
-  stuck_tasks: []
+  stuck_tasks:
+    - "File Operations (PDF Export/Backup)"
   test_all: true
   test_priority: "high_first"
 
