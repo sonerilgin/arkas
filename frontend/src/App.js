@@ -702,7 +702,7 @@ function App() {
             <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 10px;">
               <div><strong>Yatan İşlem Sayısı:</strong> ${filteredYatulanData.length} adet</div>
               <div><strong>Toplam Yatan Tutar:</strong> <span style="color: #8b5cf6;">${formatCurrency(toplamYatulanTutar)}</span></div>
-              <div><strong>Ortalama Yatan Tutar:</strong> ${formatCurrency(toplamYatulanTutar / yatulanTutarData.length)}</div>
+              <div><strong>Ortalama Yatan Tutar:</strong> ${formatCurrency(toplamYatulanTutar / filteredYatulanData.length)}</div>
             </div>
             <p style="font-size: 11px; color: #6b7280; margin: 0;">
               <strong>Kapsanan Dönem:</strong> ${formatDate(enEskiTarih.toISOString())} - ${formatDate(enYeniTarih.toISOString())} 
