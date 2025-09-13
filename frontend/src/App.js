@@ -877,7 +877,8 @@ function App() {
         
         toast({
           title: "PDF İndirme Başarılı",
-          description: `${reportPeriod} raporu indirildi (${filteredData.length} kayıt)`
+          description: `${reportPeriod} raporu indirildi (${filteredData.length} kayıt)\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${fileName}`,
+          duration: 6000
         });
       } catch (error) {
         // Fallback: HTML2PDF'in kendi save metodunu kullan
