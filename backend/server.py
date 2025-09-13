@@ -82,8 +82,15 @@ class NakliyeKayit(BaseModel):
     harcirah: Optional[float] = 0.0
     toplam: Optional[float] = 0.0
     sistem: Optional[float] = 0.0
-    yatan_tutar: Optional[float] = 0.0
-    yatan_tarih: Optional[str] = ""
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class YatanTutar(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    tutar: float
+    yatan_tarih: str  # Paranın yattığı tarih
+    baslangic_tarih: str  # Çalışmanın başlangıç tarihi
+    bitis_tarih: str  # Çalışmanın bitiş tarihi
+    aciklama: Optional[str] = ""  # Ek açıklama
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
