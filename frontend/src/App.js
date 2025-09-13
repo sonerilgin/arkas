@@ -704,6 +704,7 @@ function App() {
               <thead>
                 <tr style="background-color: #8b5cf6; color: white;">
                   <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Tutar</th>
+                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Yatış Tarihi</th>
                   <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Çalışma Başlangıç</th>
                   <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Çalışma Bitiş</th>
                   <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Açıklama</th>
@@ -713,6 +714,7 @@ function App() {
                 ${filteredYatulanData.map(item => `
                   <tr style="border-bottom: 1px solid #f1f5f9;">
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #8b5cf6;">${formatCurrency(item.tutar)}</td>
+                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${new Date(item.yatan_tarih).toLocaleDateString('tr-TR')}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${new Date(item.baslangic_tarih).toLocaleDateString('tr-TR')}</td>
                     <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${new Date(item.bitis_tarih).toLocaleDateString('tr-TR')}</td>
                     <td style="border: 1px solid #ddd; padding: 8px;">${item.aciklama || '-'}</td>
