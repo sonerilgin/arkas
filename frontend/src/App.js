@@ -1067,10 +1067,10 @@ function App() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
-                {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0))}
+                {formatCurrency(displayedYatulanTotal)}
               </div>
               <p className="text-xs text-purple-500 dark:text-purple-400">
-                {yatulanTutarList.length} kayıt • Yönetim için tıklayın
+                {displayedYatulanTutar.length} kayıt • {monthNames[displayMonth]} {displayYear}
               </p>
             </CardContent>
           </Card>
