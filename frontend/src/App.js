@@ -2048,17 +2048,11 @@ function App() {
 
               {/* Toplam Özet */}
               <div className="border-t border-purple-200 dark:border-purple-700 mt-6 pt-4">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
                   <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
                     <div className="text-sm text-purple-600 dark:text-purple-400">{monthNames[displayMonth]} Yatan</div>
                     <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
                       {formatCurrency(displayedYatulanTotal)}
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
-                    <div className="text-sm text-purple-600 dark:text-purple-400">Ortalama</div>
-                    <div className="text-xl font-bold text-purple-700 dark:text-purple-300">
-                      {displayedYatulanTutar.length > 0 ? formatCurrency(displayedYatulanTotal / displayedYatulanTutar.length) : formatCurrency(0)}
                     </div>
                   </div>
                   <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-purple-200 dark:border-purple-700">
