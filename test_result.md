@@ -251,7 +251,7 @@ test_plan:
     implemented: true
     working: false
     file: "App.js"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: false
     status_history:
@@ -261,6 +261,9 @@ test_plan:
       - working: false
         agent: "testing"
         comment: "CRITICAL ISSUES FOUND: 1) Header checkbox (select all) not functioning - clicks but remains unchecked, 2) Visual highlighting missing - selected rows should have bg-blue-50 class but only show default hover styling, 3) Delete button text duplicated ('Seçilenleri Sil (1)Sil (1)' instead of 'Seçilenleri Sil (1)'). WORKING: Individual row checkboxes work correctly, delete button appears when items selected, dialog opens/closes properly. The core multi-select logic needs fixes for header checkbox state management and visual feedback."
+      - working: false
+        agent: "testing"
+        comment: "COMPREHENSIVE RE-TEST COMPLETED AFTER FIXES: ✅ WORKING: Dialog opens correctly, Yatan Tutar table structure correct, checkboxes use modern UI components (button[role='checkbox'] with data-state attributes). ❌ CRITICAL ISSUES STILL PRESENT: 1) Header checkbox missing from table header (no checkbox in thead), 2) Individual row checkboxes found but not responding to clicks properly, 3) Visual highlighting (bg-blue-50) missing on selected rows, 4) Delete button not appearing when items selected. The implementation uses modern Radix UI components but the multi-select functionality is not working. Main agent needs to fix: header checkbox implementation, row selection state management, visual feedback system, and delete button visibility logic."
 
 agent_communication:
   - agent: "main"
