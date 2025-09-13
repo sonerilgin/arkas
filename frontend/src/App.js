@@ -860,69 +860,81 @@ function App() {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
       };
 
-      // Android-specific PDF download - Simplified approach
+      // Android ve PWA detection  
       const isAndroid = /Android/i.test(navigator.userAgent);
+      const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone === true;
       
       try {
-        if (isAndroid) {
-          // Android için basit yaklaşım - PDF'i direkt download dene
-          const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
-          
-          // Android için Data URL yaklaşımı (JSON backup gibi)
-          const reader = new FileReader();
-          reader.onload = function() {
-            const dataUrl = reader.result;
-            const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = fileName;
-            link.style.display = 'none';
-            
-            document.body.appendChild(link);
-            
-            // Android için zorla tıklama
-            setTimeout(() => {
-              link.click();
-              setTimeout(() => {
-                document.body.removeChild(link);
-              }, 100);
-            }, 100);
-            
-            toast({
-              title: "PDF İndirme (Android)",
-              description: "PDF indirme işlemi başlatıldı"
-            });
-          };
-          
-          reader.onerror = function() {
-            // Hata durumunda basit blob download dene
-            const url = URL.createObjectURL(pdf);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = fileName;
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-            
-            toast({
-              title: "PDF İndirme",
-              description: "PDF indirme deneniyor..."
-            });
-          };
-          
-          // PDF'i Data URL'e çevir
-          reader.readAsDataURL(pdf);
-          return;
-        }
-        
-        // Masaüstü ve iOS için normal işlem
         const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
         
-        // Masaüstü ve iOS için gelişmiş PDF indirme
+        // Android PWA için Web Share API (PDF)
+        if (isAndroid && navigator.share) {
+          try {
+            const file = new File([pdf], fileName, { type: 'application/pdf' });
+            
+            await navigator.share({
+              title: 'Arkas Lojistik PDF Raporu',
+              text: `${reportPeriod} dönemi nakliye raporu`,
+              files: [file]
+            });
+            
+            toast({
+              title: "PDF Paylaşım Başarılı (Android)",
+              description: `${reportPeriod} raporu paylaşıldı (${filteredData.length} kayıt)`
+            });
+            return;
+          } catch (shareError) {
+            console.log('PDF Web Share error:', shareError);
+            if (shareError.name === 'AbortError') {
+              toast({
+                title: "PDF Paylaşımı İptal Edildi",
+                description: "PDF paylaşımı kullanıcı tarafından iptal edildi"
+              });
+              return;
+            }
+            // Fallback'e geç
+          }
+        }
+        
+        // Android PWA için alternatif çözüm - PDF'i Base64 olarak kopyala
+        if (isAndroid && isPWA) {
+          try {
+            const reader = new FileReader();
+            reader.onload = function() {
+              const base64Data = reader.result;
+              navigator.clipboard.writeText(base64Data).then(() => {
+                toast({
+                  title: "Android PWA - PDF Data Kopyalandı",
+                  description: "PDF verisi panoya kopyalandı. Bir text editöründe .pdf uzantısıyla kaydedin.",
+                  duration: 8000
+                });
+              }).catch(() => {
+                toast({
+                  title: "Android PWA PDF Kısıtlaması",
+                  description: "PWA modunda PDF indirme kısıtlı. Lütfen uygulamayı normal tarayıcıda açmayı deneyin.",
+                  variant: "destructive",
+                  duration: 8000
+                });
+              });
+            };
+            reader.readAsDataURL(pdf);
+            return;
+          } catch (readerError) {
+            console.error('FileReader error:', readerError);
+            toast({
+              title: "Android PWA PDF Hatası",
+              description: "PDF işlenirken hata oluştu. Normal tarayıcıda deneyin.",
+              variant: "destructive"
+            });
+            return;
+          }
+        }
+        
+        // Masaüstü ve normal tarayıcı için PDF indirme
         const downloadPdfBlob = (blob, filename) => {
           try {
-            // Modern Web Share API (Android hariç)
+            // Web Share API (desktop için)
             if (navigator.share && !isAndroid) {
               try {
                 const file = new File([blob], filename, { type: 'application/pdf' });
@@ -934,12 +946,12 @@ function App() {
                   return;
                 }
               } catch (shareError) {
-                console.log('PDF paylaşım hatası:', shareError);
+                console.log('Desktop PDF paylaşım hatası:', shareError);
                 // Fallback'e geç
               }
             }
             
-            // Geleneksel indirme yöntemi
+            // Geleneksel PDF indirme
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.style.display = 'none';
@@ -964,19 +976,20 @@ function App() {
 
         downloadPdfBlob(pdf, fileName);
       } catch (error) {
-        // Eski yöntemle dene
-        console.warn('PDF oluşturulamadı, geleneksel yöntem deneniyor:', error);
+        // Fallback: HTML2PDF'in kendi save metodunu kullan
+        console.warn('PDF blob oluşturulamadı, geleneksel yöntem deneniyor:', error);
         
-        if (isAndroid) {
-          // Android için HTML2PDF'in kendi save metodunu kullan
-          await html2pdf().set(opt).from(element).save();
+        if (isAndroid && isPWA) {
           toast({
-            title: "PDF İndirme",
-            description: "PDF indirme işlemi başlatıldı"
+            title: "Android PWA PDF Kısıtlaması", 
+            description: "PWA modunda PDF oluşturulamadı. Lütfen uygulamayı normal tarayıcıda açın.",
+            variant: "destructive",
+            duration: 8000
           });
-        } else {
-          await html2pdf().set(opt).from(element).save();
+          return;
         }
+        
+        await html2pdf().set(opt).from(element).save();
       }
       
       // Geçici elementi kaldır
