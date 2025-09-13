@@ -860,63 +860,101 @@ function App() {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
       };
 
-      // Android uyumlu PDF indirme
+      // Android-specific PDF download
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      
       try {
         const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
         
-        // Mobil uyumlu indirme fonksiyonu
+        if (isAndroid) {
+          // Android için özel PDF indirme çözümü
+          const url = URL.createObjectURL(pdf);
+          
+          // Android'de yeni sekme açarak PDF göster
+          const newWindow = window.open('', '_blank');
+          if (newWindow) {
+            newWindow.document.write(`
+              <html>
+                <head>
+                  <title>${fileName}</title>
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                </head>
+                <body style="margin:0; padding:0;">
+                  <div style="text-align:center; padding:20px; background:#f5f5f5;">
+                    <h3>PDF Hazır - Kaydedmek için aşağıdaki linke dokunun</h3>
+                    <a href="${url}" download="${fileName}" 
+                       style="display:inline-block; padding:15px 30px; background:#007bff; color:white; text-decoration:none; border-radius:5px; margin:10px;">
+                       📥 ${fileName} İndir
+                    </a>
+                    <p style="color:#666; font-size:14px;">
+                      Not: İndirme başlamazsa, linka uzun basarak "Bağlantıyı kaydet" seçeneğini deneyin.
+                    </p>
+                  </div>
+                  <embed src="${url}" type="application/pdf" width="100%" height="600px" />
+                </body>
+              </html>
+            `);
+          } else {
+            // Popup engellenirse direkt download dene
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+          
+          // Cleanup
+          setTimeout(() => URL.revokeObjectURL(url), 30000);
+          
+          toast({
+            title: "PDF Hazır (Android)",
+            description: "PDF yeni sekmede açıldı. İndirme linkine dokunun."
+          });
+          return;
+        }
+        
+        // Masaüstü ve iOS için gelişmiş PDF indirme
         const downloadPdfBlob = (blob, filename) => {
           try {
-            // Modern Web Share API denemesi (Android'de çok iyi çalışır)
-            if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: 'application/pdf' })] })) {
-              const file = new File([blob], filename, { type: 'application/pdf' });
-              navigator.share({
-                title: 'Arkas Lojistik PDF Raporu',
-                files: [file]
-              }).catch(err => {
-                console.log('PDF paylaşım iptal edildi:', err);
-                traditionalPdfDownload();
-              });
-              return;
+            // Modern Web Share API (Android hariç)
+            if (navigator.share && !isAndroid) {
+              try {
+                const file = new File([blob], filename, { type: 'application/pdf' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                  navigator.share({
+                    title: 'Arkas Lojistik PDF Raporu',
+                    files: [file]
+                  });
+                  return;
+                }
+              } catch (shareError) {
+                console.log('PDF paylaşım hatası:', shareError);
+                // Fallback'e geç
+              }
             }
             
             // Geleneksel indirme yöntemi
-            traditionalPdfDownload();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.style.display = 'none';
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
             
-            function traditionalPdfDownload() {
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.style.display = 'none';
-              link.href = url;
-              link.download = filename;
-              link.target = '_blank';
-              
-              // Mobil uyumluluk için body'ye ekle
-              document.body.appendChild(link);
-              
-              setTimeout(() => {
-                link.click();
-                
-                setTimeout(() => {
-                  document.body.removeChild(link);
-                  URL.revokeObjectURL(url);
-                }, 150);
-              }, 100);
-            }
+            setTimeout(() => {
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+            }, 100);
           } catch (error) {
             console.error('PDF indirme hatası:', error);
-            
-            // Son çare - yeni sekmede aç
-            const url = URL.createObjectURL(blob);
-            const newWindow = window.open(url, '_blank');
-            if (!newWindow) {
-              toast({
-                title: "PDF İndirme Sorunu",
-                description: "PDF açılamadı. Lütfen tarayıcı ayarlarınızı kontrol edin.",
-                variant: "destructive"
-              });
-            }
-            setTimeout(() => URL.revokeObjectURL(url), 2000);
+            toast({
+              title: "PDF İndirme Sorunu",
+              description: "PDF açılamadı. Lütfen tarayıcı ayarlarınızı kontrol edin.",
+              variant: "destructive"
+            });
           }
         };
 
