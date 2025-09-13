@@ -273,10 +273,15 @@ function App() {
 
   // Yatan Tutar çoklu seçim fonksiyonları
   const handleSelectYatulanItem = (id) => {
+    console.log('handleSelectYatulanItem called with id:', id);
+    console.log('Current selectedYatulanItems:', selectedYatulanItems);
+    
     setSelectedYatulanItems(prev => {
       if (prev.includes(id)) {
+        console.log('Removing item from selection');
         return prev.filter(itemId => itemId !== id);
       } else {
+        console.log('Adding item to selection');
         return [...prev, id];
       }
     });
