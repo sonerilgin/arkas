@@ -1,6 +1,8 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "arkas-lojistik",
+  "version": "1.0.0",
+  "description": "Arkas Lojistik - Nakliye Takip ve Yönetim Sistemi",
+  "author": "Arkas Lojistik",
   "private": true,
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
