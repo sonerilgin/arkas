@@ -2207,18 +2207,10 @@ function App() {
               {/* Bu Ay Toplam Özeti */}
               {displayedYatulanTutar.length > 0 && (
                 <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg mt-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-purple-600 font-medium">{monthNames[displayMonth]} Yatan Tutar:</span>
-                      <div className="text-lg font-bold text-purple-700">
-                        {formatCurrency(displayedYatulanTotal)}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-purple-600 font-medium">Bu Ay Ortalama:</span>
-                      <div className="text-lg font-bold text-purple-700">
-                        {formatCurrency(displayedYatulanTotal / displayedYatulanTutar.length)}
-                      </div>
+                  <div className="text-center">
+                    <span className="text-purple-600 font-medium">{monthNames[displayMonth]} Yatan Tutar:</span>
+                    <div className="text-lg font-bold text-purple-700">
+                      {formatCurrency(displayedYatulanTotal)}
                     </div>
                   </div>
                 </div>
