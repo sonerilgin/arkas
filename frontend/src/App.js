@@ -146,19 +146,6 @@ function App() {
     setSelectAllYatulan(false);
   }, [displayMonth, displayYear, searchTerm, yatulanTutarDialogOpen]);
 
-  // Yatan Tutar header checkbox otomatik güncelleme
-  useEffect(() => {
-    if (displayedYatulanTutar.length === 0) {
-      setSelectAllYatulan(false);
-    } else if (selectedYatulanItems.length === displayedYatulanTutar.length && displayedYatulanTutar.length > 0) {
-      setSelectAllYatulan(true);
-    } else if (selectedYatulanItems.length === 0) {
-      setSelectAllYatulan(false);
-    } else {
-      setSelectAllYatulan(false);
-    }
-  }, [selectedYatulanItems, displayedYatulanTutar]);
-
   // Theme yönetimi
   useEffect(() => {
     if (isDarkMode) {
