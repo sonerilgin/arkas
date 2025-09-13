@@ -785,27 +785,96 @@ function App() {
   const exportBackup = async () => {
     try {
       const response = await axios.get(`${API}/nakliye`);
+      const yatulanResponse = await axios.get(`${API}/yatan-tutar`);
+      
       const backupData = {
         timestamp: new Date().toISOString(),
-        version: "1.0",
+        version: "2.0",
         userInfo: userInfo,
-        nakliyeData: response.data
+        nakliyeData: response.data,
+        yatulanTutarData: yatulanResponse.data
       };
 
       const dataStr = JSON.stringify(backupData, null, 2);
       const dataBlob = new Blob([dataStr], {type: 'application/json'});
-      const url = URL.createObjectURL(dataBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
-      link.click();
-      URL.revokeObjectURL(url);
+      
+      // Improved download function for better mobile compatibility
+      const downloadBlob = (blob, filename) => {
+        try {
+          // Try modern approach first
+          if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: blob.type })] })) {
+            const file = new File([blob], filename, { type: blob.type });
+            navigator.share({
+              title: 'Arkas Lojistik Yedek Dosyası',
+              files: [file]
+            }).catch(err => {
+              console.log('Paylaşım iptal edildi:', err);
+              // Fallback to traditional download
+              traditionalDownload();
+            });
+            return;
+          }
+          
+          // Traditional download method
+          traditionalDownload();
+          
+          function traditionalDownload() {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.style.display = 'none';
+            link.href = url;
+            link.download = filename;
+            link.target = '_blank'; // Android compatibility
+            
+            // Append to body for mobile compatibility
+            document.body.appendChild(link);
+            
+            // Trigger download
+            setTimeout(() => {
+              link.click();
+              
+              // Cleanup
+              setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+              }, 100);
+            }, 100);
+          }
+        } catch (error) {
+          console.error('Download error:', error);
+          
+          // Final fallback - open in new tab
+          const url = URL.createObjectURL(blob);
+          const newWindow = window.open(url, '_blank');
+          if (!newWindow) {
+            // If popup blocked, copy to clipboard as fallback
+            navigator.clipboard.writeText(dataStr).then(() => {
+              toast({
+                title: "İndirme Sorunu",
+                description: "Dosya pano'ya kopyalandı. Bir metin editöründe yapıştırarak kaydedebilirsiniz.",
+                variant: "destructive"
+              });
+            }).catch(() => {
+              toast({
+                title: "İndirme Hatası",
+                description: "Dosya indirilemedi. Lütfen farklı bir tarayıcı deneyin.",
+                variant: "destructive"
+              });
+            });
+          }
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+      };
+
+      const filename = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
+      downloadBlob(dataBlob, filename);
 
       toast({
         title: "Yedekleme Başarılı",
-        description: `${response.data.length} kayıt yedeklendi`
+        description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı yedeklendi`
       });
     } catch (error) {
+      console.error('Backup error:', error);
       toast({
         title: "Hata",
         description: "Yedekleme sırasında hata oluştu",
