@@ -869,6 +869,7 @@ function App() {
   useEffect(() => {
     if (isLoggedIn) {
       fetchNakliyeList();
+      fetchYatulanTutarList();
     }
   }, [isLoggedIn]);
 
