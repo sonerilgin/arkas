@@ -1660,7 +1660,7 @@ function App() {
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={12} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={11} className="text-center py-8 text-slate-500">
                         Yükleniyor...
                       </TableCell>
                     </TableRow>
