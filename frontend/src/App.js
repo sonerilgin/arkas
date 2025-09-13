@@ -943,11 +943,11 @@ function App() {
                     title: 'Arkas Lojistik PDF Raporu',
                     files: [file]
                   });
-                  return;
+                  return; // Sadece başarılı Web Share'de return
                 }
               } catch (shareError) {
                 console.log('Desktop PDF paylaşım hatası:', shareError);
-                // Fallback'e geç
+                // Fallback'e geç - return yok!
               }
             }
             
