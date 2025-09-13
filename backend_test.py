@@ -4,8 +4,11 @@ import json
 from datetime import datetime, timezone
 import uuid
 import time
+import threading
+import concurrent.futures
+from typing import List, Dict, Any
 
-class AuthAPITester:
+class ComprehensiveCrossPlatformAPITester:
     def __init__(self, base_url="https://shipment-dash-1.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
