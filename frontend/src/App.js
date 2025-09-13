@@ -967,7 +967,8 @@ function App() {
 
       toast({
         title: "Yedekleme Tamamlandı",
-        description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı`
+        description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${filename}`,
+        duration: 6000
       });
       
     } catch (error) {
