@@ -860,136 +860,34 @@ function App() {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
       };
 
-      // Android ve PWA detection  
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
-                   window.navigator.standalone === true;
-      
+      // Basit ve direkt PDF indirme
       try {
         const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
         
-        // Android PWA için Web Share API (PDF)
-        if (isAndroid && navigator.share) {
-          try {
-            const file = new File([pdf], fileName, { type: 'application/pdf' });
-            
-            await navigator.share({
-              title: 'Arkas Lojistik PDF Raporu',
-              text: `${reportPeriod} dönemi nakliye raporu`,
-              files: [file]
-            });
-            
-            toast({
-              title: "PDF Paylaşım Başarılı (Android)",
-              description: `${reportPeriod} raporu paylaşıldı (${filteredData.length} kayıt)`
-            });
-            return;
-          } catch (shareError) {
-            console.log('PDF Web Share error:', shareError);
-            if (shareError.name === 'AbortError') {
-              toast({
-                title: "PDF Paylaşımı İptal Edildi",
-                description: "PDF paylaşımı kullanıcı tarafından iptal edildi"
-              });
-              return;
-            }
-            // Fallback'e geç
-          }
-        }
+        const url = URL.createObjectURL(pdf);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        link.style.display = 'none';
         
-        // Android PWA için alternatif çözüm - PDF'i Base64 olarak kopyala
-        if (isAndroid && isPWA) {
-          try {
-            const reader = new FileReader();
-            reader.onload = function() {
-              const base64Data = reader.result;
-              navigator.clipboard.writeText(base64Data).then(() => {
-                toast({
-                  title: "Android PWA - PDF Data Kopyalandı",
-                  description: "PDF verisi panoya kopyalandı. Bir text editöründe .pdf uzantısıyla kaydedin.",
-                  duration: 8000
-                });
-              }).catch(() => {
-                toast({
-                  title: "Android PWA PDF Kısıtlaması",
-                  description: "PWA modunda PDF indirme kısıtlı. Lütfen uygulamayı normal tarayıcıda açmayı deneyin.",
-                  variant: "destructive",
-                  duration: 8000
-                });
-              });
-            };
-            reader.readAsDataURL(pdf);
-            return;
-          } catch (readerError) {
-            console.error('FileReader error:', readerError);
-            toast({
-              title: "Android PWA PDF Hatası",
-              description: "PDF işlenirken hata oluştu. Normal tarayıcıda deneyin.",
-              variant: "destructive"
-            });
-            return;
-          }
-        }
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
         
-        // Masaüstü ve normal tarayıcı için PDF indirme
-        const downloadPdfBlob = (blob, filename) => {
-          try {
-            // Web Share API (desktop için)
-            if (navigator.share && !isAndroid) {
-              try {
-                const file = new File([blob], filename, { type: 'application/pdf' });
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                  navigator.share({
-                    title: 'Arkas Lojistik PDF Raporu',
-                    files: [file]
-                  });
-                  return; // Sadece başarılı Web Share'de return
-                }
-              } catch (shareError) {
-                console.log('Desktop PDF paylaşım hatası:', shareError);
-                // Fallback'e geç - return yok!
-              }
-            }
-            
-            // Geleneksel PDF indirme
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.style.display = 'none';
-            link.href = url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            
-            setTimeout(() => {
-              document.body.removeChild(link);
-              URL.revokeObjectURL(url);
-            }, 100);
-          } catch (error) {
-            console.error('PDF indirme hatası:', error);
-            toast({
-              title: "PDF İndirme Sorunu",
-              description: "PDF açılamadı. Lütfen tarayıcı ayarlarınızı kontrol edin.",
-              variant: "destructive"
-            });
-          }
-        };
-
-        downloadPdfBlob(pdf, fileName);
+        toast({
+          title: "PDF İndirme Başarılı",
+          description: `${reportPeriod} raporu indirildi (${filteredData.length} kayıt)`
+        });
       } catch (error) {
         // Fallback: HTML2PDF'in kendi save metodunu kullan
-        console.warn('PDF blob oluşturulamadı, geleneksel yöntem deneniyor:', error);
-        
-        if (isAndroid && isPWA) {
-          toast({
-            title: "Android PWA PDF Kısıtlaması", 
-            description: "PWA modunda PDF oluşturulamadı. Lütfen uygulamayı normal tarayıcıda açın.",
-            variant: "destructive",
-            duration: 8000
-          });
-          return;
-        }
-        
+        console.warn('PDF blob oluşturulamadı, HTML2PDF save kullanılıyor:', error);
         await html2pdf().set(opt).from(element).save();
+        
+        toast({
+          title: "PDF İndirme",
+          description: `${reportPeriod} raporu indirildi`
+        });
       }
       
       // Geçici elementi kaldır
