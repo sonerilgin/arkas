@@ -971,83 +971,82 @@ function App() {
       };
 
       const dataStr = JSON.stringify(backupData, null, 2);
-      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const filename = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
       
-      // Improved download function for better mobile compatibility
-      const downloadBlob = (blob, filename) => {
+      // Android-specific download function
+      const downloadForAndroid = () => {
+        // Android için özel çözüm: Data URL kullan
+        const dataUrl = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = filename;
+        link.style.display = 'none';
+        
+        // Android için kritik: body'ye ekle ve user interaction context'i sağla
+        document.body.appendChild(link);
+        
+        // Android için zorla tıklama
+        setTimeout(() => {
+          link.click();
+          setTimeout(() => {
+            document.body.removeChild(link);
+          }, 100);
+        }, 100);
+      };
+      
+      // Android detection
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      
+      if (isAndroid) {
+        // Android için direkt data URL çözümü
+        downloadForAndroid();
+        toast({
+          title: "Android Yedekleme",
+          description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı hazırlandı`
+        });
+        return;
+      }
+      
+      // Masaüstü ve iOS için gelişmiş çözüm
+      const dataBlob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+      
+      // Modern Web Share API test (sadece Android değilse)
+      if (navigator.share && !isAndroid) {
         try {
-          // Try modern approach first
-          if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([blob], filename, { type: blob.type })] })) {
-            const file = new File([blob], filename, { type: blob.type });
-            navigator.share({
+          // File objesi oluşturma ve test etme ayrı adımlarda
+          const file = new File([dataBlob], filename, { type: 'application/json' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
               title: 'Arkas Lojistik Yedek Dosyası',
               files: [file]
-            }).catch(err => {
-              console.log('Paylaşım iptal edildi:', err);
-              // Fallback to traditional download
-              traditionalDownload();
             });
             return;
           }
-          
-          // Traditional download method
-          traditionalDownload();
-          
-          function traditionalDownload() {
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.style.display = 'none';
-            link.href = url;
-            link.download = filename;
-            link.target = '_blank'; // Android compatibility
-            
-            // Append to body for mobile compatibility
-            document.body.appendChild(link);
-            
-            // Trigger download
-            setTimeout(() => {
-              link.click();
-              
-              // Cleanup
-              setTimeout(() => {
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-              }, 100);
-            }, 100);
-          }
-        } catch (error) {
-          console.error('Download error:', error);
-          
-          // Final fallback - open in new tab
-          const url = URL.createObjectURL(blob);
-          const newWindow = window.open(url, '_blank');
-          if (!newWindow) {
-            // If popup blocked, copy to clipboard as fallback
-            navigator.clipboard.writeText(dataStr).then(() => {
-              toast({
-                title: "İndirme Sorunu",
-                description: "Dosya pano'ya kopyalandı. Bir metin editöründe yapıştırarak kaydedebilirsiniz.",
-                variant: "destructive"
-              });
-            }).catch(() => {
-              toast({
-                title: "İndirme Hatası",
-                description: "Dosya indirilemedi. Lütfen farklı bir tarayıcı deneyin.",
-                variant: "destructive"
-              });
-            });
-          }
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        } catch (shareError) {
+          console.log('Web Share hatası:', shareError);
+          // Fallback'e geç
         }
-      };
-
-      const filename = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
-      downloadBlob(dataBlob, filename);
+      }
+      
+      // Geleneksel download yöntemi (masaüstü için)
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
 
       toast({
         title: "Yedekleme Başarılı",
         description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı yedeklendi`
       });
+      
     } catch (error) {
       console.error('Backup error:', error);
       toast({
