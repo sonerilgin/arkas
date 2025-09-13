@@ -1666,7 +1666,7 @@ function App() {
                     </TableRow>
                   ) : displayedRecords.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={12} className="text-center py-8 text-slate-500">
+                      <TableCell colSpan={11} className="text-center py-8 text-slate-500">
                         {monthNames[displayMonth]} {displayYear} ayında nakliye kaydı bulunamadı
                       </TableCell>
                     </TableRow>
