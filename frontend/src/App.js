@@ -2456,7 +2456,13 @@ function App() {
                     </TableHeader>
                     <TableBody>
                       {displayedYatulanTutar.map((item) => (
-                        <TableRow key={item.id} className={selectedYatulanItems.includes(item.id) ? "bg-blue-50" : ""}>
+                        <TableRow 
+                          key={item.id} 
+                          className={selectedYatulanItems.includes(item.id) 
+                            ? "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700" 
+                            : "hover:bg-slate-50 dark:hover:bg-slate-700"
+                          }
+                        >
                           <TableCell>
                             <Checkbox
                               checked={selectedYatulanItems.includes(item.id)}
