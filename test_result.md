@@ -221,7 +221,7 @@ frontend:
         comment: "ANDROID PDF DOWNLOAD ISSUE: bağlantıya basılı tutunca farklı kaydet açılmıyor ve geriye dönmem için bir yol yada düğme yok o ekranda kalıyor (Long-press on link doesn't show save option and no back button available, user gets stuck on the screen). The new tab PDF approach is not working properly on Android - user cannot save file and cannot navigate back."
       - working: "NA"
         agent: "main"
-        comment: "REGRESSION FIX APPLIED: Troubleshoot agent identified the issue - early return statements in Web Share API blocks prevented desktop users from reaching traditional download fallback. Fixed by removing blocking return statements at lines 946 (PDF) and 1108 (backup). Desktop Web Share API failures now properly fall through to traditional download (URL.createObjectURL + link.click()). Android PWA functionality preserved. Both desktop and Android should now work correctly with appropriate fallback mechanisms."
+        comment: "SIMPLIFIED DIRECT DOWNLOAD: Removed all complex mechanisms (Web Share API, PWA detection, Android-specific logic) per user request 'tıklanınca direk indirsin' (should download directly when clicked). Both exportBackup and exportToPDF functions now use simple, direct download approach: Blob creation -> URL.createObjectURL -> link.click() -> cleanup. No conditionals, no fallbacks, just straightforward file download for all platforms. This should work universally across all browsers and devices."
 
   - task: "Dark/Light Theme Consistency"
     implemented: true
