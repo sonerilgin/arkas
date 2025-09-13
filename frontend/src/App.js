@@ -2068,19 +2068,6 @@ function App() {
                     </div>
                   </div>
                 </div>
-                
-                {/* Tüm Aylar Özeti */}
-                <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded-lg border border-purple-200 dark:border-purple-700">
-                  <div className="text-center">
-                    <div className="text-sm text-slate-600 dark:text-gray-400">Tüm Zamanlar Toplamı</div>
-                    <div className="text-2xl font-bold text-slate-700 dark:text-gray-200">
-                      {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0))}
-                    </div>
-                    <div className="text-xs text-slate-500 dark:text-gray-400">
-                      {yatulanTutarList.length} toplam kayıt
-                    </div>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
