@@ -584,7 +584,10 @@ function App() {
       
       // Seçilen tarih aralığına göre verileri al
       const response = await axios.get(`${API}/nakliye`);
+      const yatulanResponse = await axios.get(`${API}/yatan-tutar`);
+      
       let filteredData = response.data;
+      let filteredYatulanData = yatulanResponse.data;
       let reportTitle = "";
       let reportPeriod = "";
 
@@ -593,34 +596,32 @@ function App() {
           const itemDate = new Date(item.tarih);
           return itemDate.getFullYear() === selectedPdfYear;
         });
-        reportTitle = `${selectedPdfYear} YILI NAKLİYE RAPORU`;
+        filteredYatulanData = yatulanResponse.data.filter(item => {
+          const yatanDate = new Date(item.yatan_tarih);
+          return yatanDate.getFullYear() === selectedPdfYear;
+        });
+        reportTitle = `${selectedPdfYear} YILI NAKLİYE VE YATAN TUTAR RAPORU`;
         reportPeriod = `${selectedPdfYear} Yılı Tümü`;
       } else {
         filteredData = response.data.filter(item => {
           const itemDate = new Date(item.tarih);
           return itemDate.getFullYear() === selectedPdfYear && itemDate.getMonth() === selectedPdfMonth;
         });
-        reportTitle = `${monthNames[selectedPdfMonth]} ${selectedPdfYear} NAKLİYE RAPORU`;
+        filteredYatulanData = yatulanResponse.data.filter(item => {
+          const yatanDate = new Date(item.yatan_tarih);
+          return yatanDate.getFullYear() === selectedPdfYear && yatanDate.getMonth() === selectedPdfMonth;
+        });
+        reportTitle = `${monthNames[selectedPdfMonth]} ${selectedPdfYear} NAKLİYE VE YATAN TUTAR RAPORU`;
         reportPeriod = `${monthNames[selectedPdfMonth]} ${selectedPdfYear}`;
       }
 
-      if (filteredData.length === 0) {
-        toast({
-          title: "Uyarı",
-          description: `${reportPeriod} döneminde kayıt bulunamadı`,
-          variant: "destructive"
-        });
-        return;
-      }
-
       // Yatan tutar analizi
-      const yatulanTutarData = filteredData.filter(item => (item.yatan_tutar || 0) > 0);
-      const toplamYatulanTutar = yatulanTutarData.reduce((sum, item) => sum + (item.yatan_tutar || 0), 0);
+      const toplamYatulanTutar = filteredYatulanData.reduce((sum, item) => sum + (item.tutar || 0), 0);
       
       // Tarih aralığı hesaplama
       const tarihler = filteredData.map(item => new Date(item.tarih)).sort((a, b) => a - b);
-      const enEskiTarih = tarihler[0];
-      const enYeniTarih = tarihler[tarihler.length - 1];
+      const enEskiTarih = tarihler.length > 0 ? tarihler[0] : new Date();
+      const enYeniTarih = tarihler.length > 0 ? tarihler[tarihler.length - 1] : new Date();
 
       // HTML tablo oluştur
       const tableHTML = `
