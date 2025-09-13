@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Kullanıcıdan 3 önemli UI/UX ve veri gösterim iyileştirmesi: 1. Ekran küçülünce isim kısaltma yapılmaması, 2. Toplam ve Sistem sütunlarının altında aylık toplamların gösterilmesi, 3. Karşılaştırma sütununun yanına Yatan Tutar sütunu eklenmesi ve altında toplamının gösterilmesi."
+user_problem_statement: "Cross-platform compatibility testing for Arkas Lojistik application across all operating systems (Android, Windows, Mac, etc.) to ensure proper functionality, responsive design, and user experience consistency."
 
 backend:
   - task: "Yatan Tutar Field - Backend Model Updates"
