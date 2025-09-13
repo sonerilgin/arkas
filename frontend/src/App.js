@@ -283,13 +283,19 @@ function App() {
   };
 
   const handleSelectAllYatulan = () => {
+    console.log('handleSelectAllYatulan called, current selectAllYatulan:', selectAllYatulan);
+    console.log('displayedYatulanTutar:', displayedYatulanTutar);
+    console.log('selectedYatulanItems:', selectedYatulanItems);
+    
     if (selectAllYatulan) {
       setSelectedYatulanItems([]);
       setSelectAllYatulan(false);
+      console.log('Clearing all selections');
     } else {
       const allYatulanIds = displayedYatulanTutar.map(item => item.id);
       setSelectedYatulanItems(allYatulanIds);
       setSelectAllYatulan(true);
+      console.log('Selecting all:', allYatulanIds);
     }
   };
 
