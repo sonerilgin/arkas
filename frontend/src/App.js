@@ -522,7 +522,20 @@ function App() {
     return itemDate.getMonth() === displayMonth && itemDate.getFullYear() === displayYear;
   });
 
+  // Yatan tutar kayıtlarını da aynı ay/yıl filtresine tabi tut
+  const displayedYatulanTutar = yatulanTutarList.filter(item => {
+    // Eğer arama terimi varsa, tüm yatan tutar kayıtlarını göster
+    if (searchTerm.trim()) {
+      return true;
+    }
+    
+    // Yatan tarihine göre filtrele
+    const yatanDate = new Date(item.yatan_tarih);
+    return yatanDate.getMonth() === displayMonth && yatanDate.getFullYear() === displayYear;
+  });
+
   const displayedTotal = displayedRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
+  const displayedYatulanTotal = displayedYatulanTutar.reduce((sum, item) => sum + (item.tutar || 0), 0);
 
   const thisMonthTotal = thisMonthRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
   const totalAmount = nakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
