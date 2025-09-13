@@ -247,6 +247,18 @@ test_plan:
   test_all: true
   test_priority: "high_first"
 
+  - task: "Yatan Tutar Multi-Delete Feature"
+    implemented: true
+    working: "NA"
+    file: "App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "New multi-delete feature implemented for Yatan Tutar management dialog. Includes header checkbox for select all, individual row checkboxes, visual highlighting of selected rows (blue background), and 'Seçilenleri Sil' button that appears when items are selected. Need to test checkbox functionality, multi-selection behavior, and visual feedback."
+
 agent_communication:
   - agent: "main"
     message: "🔍 CROSS-PLATFORM TESTING REQUEST: User requested comprehensive testing across all operating systems (Android, Windows, Mac, etc.). Need to verify: 1) Backend API consistency across platforms, 2) Frontend compatibility across browsers and devices, 3) Mobile responsiveness and touch interactions, 4) Desktop application functionality, 5) File operations and PDF generation, 6) PWA features, 7) Theme consistency, 8) Accessibility and navigation. All high-priority tasks need thorough testing to ensure production-ready cross-platform deployment."
@@ -256,3 +268,5 @@ agent_communication:
     message: "🚨 CRITICAL BUG REPORT: User reports file download issue on Android - 'Android te dosyaları indiremiyorum yada yedekleme dosyası inmiyor' (Cannot download files on Android or backup files not downloading). This affects the backup/restore functionality. Current implementation uses createObjectURL() and link.click() which may have compatibility issues on Android browsers. Need urgent investigation and fix for Android download functionality."
   - agent: "main"
     message: "🔧 ANDROID DOWNLOAD FIX IMPLEMENTED: Applied comprehensive Android-compatible download solution including: 1) Enhanced exportBackup() function with Web Share API support + traditional download fallback, 2) Improved PDF download with Blob-based approach, 3) Updated importBackup() to support new backup format with yatan-tutar data, 4) Mobile-friendly DOM manipulation (appendChild, setTimeout), 5) Multiple fallback options (clipboard, new tab). Ready for comprehensive testing to verify Android compatibility."
+  - agent: "user"
+    message: "🧪 SPECIFIC FEATURE TEST REQUEST: Test the new multi-delete feature in Yatan Tutar Yönetimi dialog. Login with Arkas/1234, click 'Yatan Tutar Yönetimi' button, verify: 1) Header checkbox for multi-selection works, 2) Each table row has checkbox, 3) Select 2-3 records and verify 'Seçilenleri Sil' button appears, 4) Selected rows are visually highlighted in blue, 5) Checkbox selections work properly. Focus on checkbox functionality and visual feedback."
