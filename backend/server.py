@@ -137,7 +137,13 @@ class NakliyeKayitUpdate(BaseModel):
     harcirah: Optional[float] = None
     toplam: Optional[float] = None
     sistem: Optional[float] = None
-    yatan_tutar: Optional[float] = None
+
+class YatanTutarUpdate(BaseModel):
+    tutar: Optional[float] = None
+    yatan_tarih: Optional[str] = None
+    baslangic_tarih: Optional[str] = None
+    bitis_tarih: Optional[str] = None
+    aciklama: Optional[str] = None
     yatan_tarih: Optional[str] = None
 
 
