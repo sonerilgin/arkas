@@ -1038,94 +1038,18 @@ function App() {
       const dataStr = JSON.stringify(backupData, null, 2);
       const filename = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
       
-      // Android ve PWA detection
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      const isPWA = window.matchMedia('(display-mode: standalone)').matches || 
-                   window.navigator.standalone === true;
-      
-      // Android PWA için Web Share API (tek çalışan yöntem)
-      if (isAndroid && navigator.share) {
-        try {
-          const file = new File([dataStr], filename, { type: 'application/json' });
-          
-          await navigator.share({
-            title: 'Arkas Lojistik Yedek Dosyası',
-            text: 'Nakliye ve yatan tutar verilerinizin yedeği',
-            files: [file]
-          });
-          
-          toast({
-            title: "Android Paylaşım Başarılı",
-            description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı paylaşıldı`
-          });
-          return;
-        } catch (shareError) {
-          console.log('Web Share error:', shareError);
-          if (shareError.name === 'AbortError') {
-            toast({
-              title: "Paylaşım İptal Edildi",
-              description: "Dosya paylaşımı kullanıcı tarafından iptal edildi"
-            });
-            return;
-          }
-          // Fallback'e geç
-        }
-      }
-      
-      // Android PWA için alternatif çözüm - kopyala ve talimat ver
-      if (isAndroid && isPWA) {
-        try {
-          await navigator.clipboard.writeText(dataStr);
-          toast({
-            title: "Android PWA - Veri Kopyalandı",
-            description: "Yedek veriler panoya kopyalandı. Bir metin editöründe yapıştırarak .json dosyası olarak kaydedin.",
-            duration: 8000
-          });
-          return;
-        } catch (clipboardError) {
-          toast({
-            title: "Android PWA Kısıtlaması",
-            description: "PWA modunda dosya indirme kısıtlı. Lütfen uygulamayı normal tarayıcıda açmayı deneyin.",
-            variant: "destructive",
-            duration: 8000
-          });
-          return;
-        }
-      }
-      
-      // Masaüstü ve normal tarayıcı için geleneksel yöntem
+      // Basit ve direkt indirme
       const dataBlob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
-      
-      // Web Share API (desktop için)
-      if (navigator.share && !isAndroid) {
-        try {
-          const file = new File([dataBlob], filename, { type: 'application/json' });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              title: 'Arkas Lojistik Yedek Dosyası',
-              files: [file]
-            });
-            return; // Sadece başarılı Web Share'de return
-          }
-        } catch (shareError) {
-          console.log('Desktop Web Share hatası:', shareError);
-          // Fallback'e geç - return yok!
-        }
-      }
-      
-      // Geleneksel download (masaüstü)
       const url = URL.createObjectURL(dataBlob);
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
       link.style.display = 'none';
+      
       document.body.appendChild(link);
       link.click();
-      
-      setTimeout(() => {
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      }, 100);
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
       toast({
         title: "Yedekleme Başarılı",
