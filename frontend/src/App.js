@@ -619,6 +619,9 @@ function App() {
   const displayedTotal = displayedRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
   const displayedYatulanTotal = displayedYatulanTutar.reduce((sum, item) => sum + (item.tutar || 0), 0);
 
+  const thisMonthTotal = thisMonthRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
+  const totalAmount = nakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
+
   // Yatan Tutar header checkbox otomatik güncelleme
   useEffect(() => {
     if (displayedYatulanTutar.length === 0) {
@@ -631,9 +634,6 @@ function App() {
       setSelectAllYatulan(false);
     }
   }, [selectedYatulanItems, displayedYatulanTutar]);
-
-  const thisMonthTotal = thisMonthRecords.reduce((sum, item) => sum + (item.toplam || 0), 0);
-  const totalAmount = nakliyeList.reduce((sum, item) => sum + (item.toplam || 0), 0);
 
   const showMonthSelector = () => {
     setMonthDialogOpen(true);
