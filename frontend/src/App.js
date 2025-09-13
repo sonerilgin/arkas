@@ -127,6 +127,10 @@ function App() {
     aciklama: ""
   });
   const [editingYatulanTutar, setEditingYatulanTutar] = useState(null);
+  
+  // Yatan Tutar çoklu seçim için state'ler
+  const [selectedYatulanItems, setSelectedYatulanItems] = useState([]);
+  const [selectAllYatulan, setSelectAllYatulan] = useState(false);
 
   const { toast } = useToast();
 
