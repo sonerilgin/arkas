@@ -922,6 +922,12 @@ function App() {
   // Yedekleme fonksiyonları
   const exportBackup = async () => {
     try {
+      // Önce user interaction göstergesi
+      toast({
+        title: "Yedekleme Başlatılıyor...",
+        description: "Lütfen bekleyin, veriler hazırlanıyor"
+      });
+
       const response = await axios.get(`${API}/nakliye`);
       const yatulanResponse = await axios.get(`${API}/yatan-tutar`);
       
@@ -936,29 +942,37 @@ function App() {
       const dataStr = JSON.stringify(backupData, null, 2);
       const filename = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
       
-      // Basit ve direkt indirme
-      const dataBlob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+      // Android için güçlü user interaction context
+      const dataBlob = new Blob([dataStr], { type: 'application/octet-stream' }); // Generic type for Android
       const url = URL.createObjectURL(dataBlob);
+      
+      // Android için daha agresif yaklaşım
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
+      link.target = '_self'; // Same window to maintain user context
       link.style.display = 'none';
       
+      // User interaction context'ini korumak için hemen ekle ve tıkla
       document.body.appendChild(link);
+      
+      // Direkt tıklama - timeout yok
       link.click();
+      
+      // Hemen temizle
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
       toast({
-        title: "Yedekleme Başarılı",
-        description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı yedeklendi`
+        title: "Yedekleme Tamamlandı",
+        description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı`
       });
       
     } catch (error) {
       console.error('Backup error:', error);
       toast({
-        title: "Hata",
-        description: "Yedekleme sırasında hata oluştu: " + error.message,
+        title: "Yedekleme Hatası",
+        description: "Hata: " + error.message,
         variant: "destructive"
       });
     }
