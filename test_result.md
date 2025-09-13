@@ -200,7 +200,7 @@ frontend:
     implemented: true
     working: "NA"
     file: "App.js"
-    stuck_count: 3
+    stuck_count: 4
     priority: "high"
     needs_retesting: true
     status_history:
