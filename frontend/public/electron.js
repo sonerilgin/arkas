@@ -17,7 +17,8 @@ function createWindow() {
       enableRemoteModule: false,
       webSecurity: false
     },
-    icon: path.join(__dirname, 'favicon.ico'),
+    icon: path.join(__dirname, 'logo512.png'), // Yüksek çözünürlüklü logo
+    title: 'Arkas Lojistik - Nakliye Takip Sistemi',
     titleBarStyle: 'default',
     show: false
   });
