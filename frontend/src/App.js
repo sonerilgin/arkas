@@ -251,11 +251,83 @@ function App() {
         title: "Başarılı",
         description: "Yatan tutar kaydı silindi"
       });
+      // Seçili listeden de kaldır
+      setSelectedYatulanItems(prev => prev.filter(itemId => itemId !== id));
     } catch (error) {
       console.error("Yatan tutar silme hatası:", error);
       toast({
         title: "Hata",
         description: "Yatan tutar kaydı silinemedi",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Yatan Tutar çoklu seçim fonksiyonları
+  const handleSelectYatulanItem = (id) => {
+    setSelectedYatulanItems(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(itemId => itemId !== id);
+      } else {
+        return [...prev, id];
+      }
+    });
+  };
+
+  const handleSelectAllYatulan = () => {
+    if (selectAllYatulan) {
+      setSelectedYatulanItems([]);
+      setSelectAllYatulan(false);
+    } else {
+      const allYatulanIds = displayedYatulanTutar.map(item => item.id);
+      setSelectedYatulanItems(allYatulanIds);
+      setSelectAllYatulan(true);
+    }
+  };
+
+  const handleDeleteSelectedYatulan = async () => {
+    if (selectedYatulanItems.length === 0) {
+      toast({
+        title: "Uyarı",
+        description: "Silinecek yatan tutar kaydı seçmediniz",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!window.confirm(`${selectedYatulanItems.length} yatan tutar kaydını silmek istediğinizden emin misiniz?`)) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      let successCount = 0;
+      let errorCount = 0;
+
+      for (const id of selectedYatulanItems) {
+        try {
+          await axios.delete(`${API}/yatan-tutar/${id}`);
+          successCount++;
+        } catch (error) {
+          console.error(`Yatan tutar kayıt silme hatası (${id}):`, error);
+          errorCount++;
+        }
+      }
+
+      toast({
+        title: "Silme İşlemi Tamamlandı",
+        description: `${successCount} yatan tutar kaydı silindi${errorCount > 0 ? `, ${errorCount} kayıt silinemedi` : ''}`
+      });
+
+      setSelectedYatulanItems([]);
+      setSelectAllYatulan(false);
+      await fetchYatulanTutarList();
+    } catch (error) {
+      toast({
+        title: "Hata",
+        description: "Toplu silme işlemi sırasında hata oluştu",
         variant: "destructive"
       });
     } finally {
