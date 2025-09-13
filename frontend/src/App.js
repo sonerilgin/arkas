@@ -1712,16 +1712,6 @@ function App() {
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right font-semibold text-purple-600">
-                            {(item.yatan_tutar || 0) > 0 ? (
-                              <div 
-                                className="cursor-help" 
-                                title={item.yatan_tarih ? `Yatış Tarihi: ${new Date(item.yatan_tarih).toLocaleDateString('tr-TR')}` : 'Yatış tarihi belirtilmemiş'}
-                              >
-                                {formatCurrency(item.yatan_tutar || 0)}
-                              </div>
-                            ) : '-'}
-                          </TableCell>
                           <TableCell className="text-center">
                             <div className="flex gap-1 justify-center">
                               <Button
