@@ -502,6 +502,10 @@ function App() {
   };
 
   const handleSelectAll = () => {
+    console.log('handleSelectAll called, current selectAll:', selectAll);
+    console.log('displayedRecords:', displayedRecords);
+    console.log('selectedItems:', selectedItems);
+    
     if (selectAll) {
       setSelectedItems([]);
       setSelectAll(false);
