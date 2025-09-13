@@ -251,7 +251,7 @@ test_plan:
     implemented: true
     working: false
     file: "App.js"
-    stuck_count: 2
+    stuck_count: 3
     priority: "high"
     needs_retesting: false
     status_history:
@@ -264,6 +264,9 @@ test_plan:
       - working: false
         agent: "testing"
         comment: "COMPREHENSIVE RE-TEST COMPLETED AFTER FIXES: ✅ WORKING: Dialog opens correctly, Yatan Tutar table structure correct, checkboxes use modern UI components (button[role='checkbox'] with data-state attributes). ❌ CRITICAL ISSUES STILL PRESENT: 1) Header checkbox missing from table header (no checkbox in thead), 2) Individual row checkboxes found but not responding to clicks properly, 3) Visual highlighting (bg-blue-50) missing on selected rows, 4) Delete button not appearing when items selected. The implementation uses modern Radix UI components but the multi-select functionality is not working. Main agent needs to fix: header checkbox implementation, row selection state management, visual feedback system, and delete button visibility logic."
+      - working: false
+        agent: "testing"
+        comment: "DEBUG MODE TESTING COMPLETED WITH CONSOLE MONITORING: ✅ WORKING: Dialog opens correctly, header checkbox found and clickable, individual row checkboxes work (state changes from unchecked to checked), delete button appears with correct count 'Seçilenleri Sil (1)'. ❌ CRITICAL ISSUES: 1) Header checkbox remains 'unchecked' after clicking (should change to 'checked'), 2) Visual highlighting missing - selected rows lack bg-blue-50 class, 3) NO CONSOLE LOGS - handleSelectAllYatulan and handleSelectYatulanItem functions NOT BEING CALLED, indicating event handlers are not properly connected to the React functions. The UI components render correctly but the onClick/onCheckedChange events are not wired to the actual state management functions. This is a critical event binding issue."
 
 agent_communication:
   - agent: "main"
