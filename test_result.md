@@ -198,9 +198,9 @@ frontend:
 
   - task: "File Operations (PDF Export/Backup)"
     implemented: true
-    working: "NA"
+    working: false
     file: "App.js"
-    stuck_count: 1
+    stuck_count: 2
     priority: "high"
     needs_retesting: true
     status_history:
@@ -213,6 +213,9 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "ANDROID DOWNLOAD FIX APPLIED: Comprehensive solution implemented with Web Share API, enhanced DOM manipulation, Blob-based downloads, mobile-friendly timeouts, and multiple fallback options. Also updated backup format to include yatan-tutar data. Ready for testing on Android devices."
+      - working: false
+        agent: "user"
+        comment: "USER FEEDBACK: android te hala pdf ve yedek dosyalarını indiremiyorum sorun nedir (Still cannot download PDF and backup files on Android, what is the problem?). The implemented solutions are not working. Android download functionality remains broken despite multiple fix attempts."
 
   - task: "Dark/Light Theme Consistency"
     implemented: true
