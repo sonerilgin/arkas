@@ -2158,13 +2158,13 @@ function App() {
             {/* Mevcut Yatan Tutar Kayıtları */}
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                📋 Mevcut Yatan Tutar Kayıtları
-                <span className="text-sm text-slate-500">({yatulanTutarList.length} kayıt)</span>
+                📋 {monthNames[displayMonth]} {displayYear} - Yatan Tutar Kayıtları
+                <span className="text-sm text-slate-500">({displayedYatulanTutar.length} kayıt)</span>
               </h3>
               
-              {yatulanTutarList.length === 0 ? (
+              {displayedYatulanTutar.length === 0 ? (
                 <div className="text-center py-8 text-slate-500">
-                  Henüz yatan tutar kaydı bulunmuyor
+                  {monthNames[displayMonth]} {displayYear} ayında yatan tutar kaydı bulunmuyor
                 </div>
               ) : (
                 <div className="max-h-64 overflow-y-auto border rounded-lg">
@@ -2179,7 +2179,7 @@ function App() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {yatulanTutarList.map((item) => (
+                      {displayedYatulanTutar.map((item) => (
                         <TableRow key={item.id}>
                           <TableCell className="font-semibold text-purple-600">
                             {formatCurrency(item.tutar)}
@@ -2223,21 +2223,32 @@ function App() {
                 </div>
               )}
 
-              {/* Toplam Özet */}
-              {yatulanTutarList.length > 0 && (
+              {/* Bu Ay Toplam Özeti */}
+              {displayedYatulanTutar.length > 0 && (
                 <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg mt-4">
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <span className="text-purple-600 font-medium">Toplam Yatan Tutar:</span>
+                      <span className="text-purple-600 font-medium">{monthNames[displayMonth]} Yatan Tutar:</span>
                       <div className="text-lg font-bold text-purple-700">
-                        {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0))}
+                        {formatCurrency(displayedYatulanTotal)}
                       </div>
                     </div>
                     <div>
-                      <span className="text-purple-600 font-medium">Ortalama Tutar:</span>
+                      <span className="text-purple-600 font-medium">Bu Ay Ortalama:</span>
                       <div className="text-lg font-bold text-purple-700">
-                        {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0) / yatulanTutarList.length)}
+                        {formatCurrency(displayedYatulanTotal / displayedYatulanTutar.length)}
                       </div>
+                    </div>
+                  </div>
+                  
+                  {/* Tüm Aylar Karşılaştırması */}
+                  <div className="border-t border-purple-200 mt-3 pt-3">
+                    <div className="text-center text-sm">
+                      <span className="text-slate-600">Tüm Zamanlar Toplamı: </span>
+                      <span className="font-bold text-slate-700">
+                        {formatCurrency(yatulanTutarList.reduce((sum, item) => sum + (item.tutar || 0), 0))}
+                      </span>
+                      <span className="text-slate-500 ml-2">({yatulanTutarList.length} toplam kayıt)</span>
                     </div>
                   </div>
                 </div>
