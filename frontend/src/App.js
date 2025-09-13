@@ -1105,11 +1105,11 @@ function App() {
               title: 'Arkas Lojistik Yedek Dosyası',
               files: [file]
             });
-            return;
+            return; // Sadece başarılı Web Share'de return
           }
         } catch (shareError) {
           console.log('Desktop Web Share hatası:', shareError);
-          // Fallback'e geç
+          // Fallback'e geç - return yok!
         }
       }
       
