@@ -265,6 +265,74 @@ async def search_nakliye(query: str, skip: int = 0, limit: int = 100):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+# ========== YATAN TUTAR ENDPOINTS ==========
+
+@api_router.post("/yatan-tutar", response_model=YatanTutar)
+async def create_yatan_tutar(input: YatanTutarCreate):
+    try:
+        yatan_tutar_dict = input.dict()
+        yatan_tutar_obj = YatanTutar(**yatan_tutar_dict)
+        prepared_data = prepare_for_mongo(yatan_tutar_obj.dict())
+        await db.yatan_tutar.insert_one(prepared_data)
+        return yatan_tutar_obj
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.get("/yatan-tutar", response_model=List[YatanTutar])
+async def get_yatan_tutar_list(skip: int = 0, limit: int = 100):
+    try:
+        yatan_tutar_kayitlari = await db.yatan_tutar.find().sort("yatan_tarih", -1).skip(skip).limit(limit).to_list(limit)
+        return [YatanTutar(**parse_from_mongo(kayit)) for kayit in yatan_tutar_kayitlari]
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.get("/yatan-tutar/{yatan_tutar_id}", response_model=YatanTutar)
+async def get_yatan_tutar_by_id(yatan_tutar_id: str):
+    try:
+        yatan_tutar_kayit = await db.yatan_tutar.find_one({"id": yatan_tutar_id})
+        if not yatan_tutar_kayit:
+            raise HTTPException(status_code=404, detail="Yatan tutar kaydı bulunamadı")
+        return YatanTutar(**parse_from_mongo(yatan_tutar_kayit))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.put("/yatan-tutar/{yatan_tutar_id}", response_model=YatanTutar)
+async def update_yatan_tutar(yatan_tutar_id: str, input: YatanTutarUpdate):
+    try:
+        update_data = {k: v for k, v in input.dict().items() if v is not None}
+        
+        if not update_data:
+            raise HTTPException(status_code=400, detail="Güncellenecek veri bulunamadı")
+        
+        prepared_data = prepare_for_mongo(update_data)
+        result = await db.yatan_tutar.update_one(
+            {"id": yatan_tutar_id},
+            {"$set": prepared_data}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Yatan tutar kaydı bulunamadı")
+        
+        updated_kayit = await db.yatan_tutar.find_one({"id": yatan_tutar_id})
+        return YatanTutar(**parse_from_mongo(updated_kayit))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.delete("/yatan-tutar/{yatan_tutar_id}")
+async def delete_yatan_tutar(yatan_tutar_id: str):
+    try:
+        result = await db.yatan_tutar.delete_one({"id": yatan_tutar_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Yatan tutar kaydı bulunamadı")
+        return {"message": "Yatan tutar kaydı başarıyla silindi"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 # ========== AUTHENTICATION ENDPOINTS ==========
 
 @api_router.post("/auth/register", response_model=dict)
