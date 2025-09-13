@@ -1465,15 +1465,6 @@ function App() {
                   style={{ display: 'none' }}
                 />
                 
-                {/* Yatan Tutar Yönetimi Butonu */}
-                <Button 
-                  onClick={() => openYatulanTutarDialog()} 
-                  className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white shadow-md hover:shadow-lg transition-all duration-200 text-sm sm:text-base"
-                >
-                  <Package className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  💰 Yatan Tutar Yönetimi
-                </Button>
-                
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <DialogTrigger asChild>
                     <Button onClick={handleNewRecord} className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md hover:shadow-lg transition-all duration-200 text-sm sm:text-base">
