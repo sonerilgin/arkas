@@ -2398,10 +2398,26 @@ function App() {
 
             {/* Mevcut Yatan Tutar Kayıtları */}
             <div className="border-t pt-6">
-              <h3 className="text-lg font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                📋 {monthNames[displayMonth]} {displayYear} - Yatan Tutar Kayıtları
-                <span className="text-sm text-slate-500">({displayedYatulanTutar.length} kayıt)</span>
-              </h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-slate-700 flex items-center gap-2">
+                  📋 {monthNames[displayMonth]} {displayYear} - Yatan Tutar Kayıtları
+                  <span className="text-sm text-slate-500">({displayedYatulanTutar.length} kayıt)</span>
+                </h3>
+                
+                {/* Çoklu silme butonu */}
+                {selectedYatulanItems.length > 0 && (
+                  <Button 
+                    onClick={handleDeleteSelectedYatulan} 
+                    variant="outline" 
+                    size="sm"
+                    className="border-red-300 text-red-600 hover:bg-red-50"
+                    disabled={loading}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Seçilenleri Sil ({selectedYatulanItems.length})
+                  </Button>
+                )}
+              </div>
               
               {displayedYatulanTutar.length === 0 ? (
                 <div className="text-center py-8 text-slate-500">
@@ -2412,6 +2428,12 @@ function App() {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-12">
+                          <Checkbox
+                            checked={selectAllYatulan}
+                            onCheckedChange={handleSelectAllYatulan}
+                          />
+                        </TableHead>
                         <TableHead>Tutar</TableHead>
                         <TableHead>Yatış Tarihi</TableHead>
                         <TableHead>Çalışma Dönemi</TableHead>
@@ -2421,7 +2443,13 @@ function App() {
                     </TableHeader>
                     <TableBody>
                       {displayedYatulanTutar.map((item) => (
-                        <TableRow key={item.id}>
+                        <TableRow key={item.id} className={selectedYatulanItems.includes(item.id) ? "bg-blue-50" : ""}>
+                          <TableCell>
+                            <Checkbox
+                              checked={selectedYatulanItems.includes(item.id)}
+                              onCheckedChange={() => handleSelectYatulanItem(item.id)}
+                            />
+                          </TableCell>
                           <TableCell className="font-semibold text-purple-600">
                             {formatCurrency(item.tutar)}
                           </TableCell>
