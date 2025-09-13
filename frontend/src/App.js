@@ -1025,47 +1025,55 @@ function App() {
       const dataStr = JSON.stringify(backupData, null, 2);
       const filename = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
       
-      // Android-specific download function
-      const downloadForAndroid = () => {
-        // Android için özel çözüm: Data URL kullan
-        const dataUrl = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+      // Android detection
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      
+      if (isAndroid) {
+        // Android için Data URL yaklaşımı - basit ve güvenilir
+        const dataUrl = 'data:application/json;charset=utf-8;base64,' + btoa(unescape(encodeURIComponent(dataStr)));
         const link = document.createElement('a');
         link.href = dataUrl;
         link.download = filename;
         link.style.display = 'none';
         
-        // Android için kritik: body'ye ekle ve user interaction context'i sağla
+        // Android için önemli: body'ye ekle ve zorla tıkla
         document.body.appendChild(link);
         
-        // Android için zorla tıklama
+        // Biraz bekle ve tıkla
         setTimeout(() => {
-          link.click();
-          setTimeout(() => {
-            document.body.removeChild(link);
-          }, 100);
-        }, 100);
-      };
-      
-      // Android detection
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      
-      if (isAndroid) {
-        // Android için direkt data URL çözümü
-        downloadForAndroid();
-        toast({
-          title: "Android Yedekleme",
-          description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı hazırlandı`
-        });
+          try {
+            link.click();
+            toast({
+              title: "Android Yedekleme",
+              description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı hazırlandı`
+            });
+          } catch (clickError) {
+            console.error('Android click error:', clickError);
+            toast({
+              title: "İndirme Sorunu",
+              description: "Dosya indirilemedi. Lütfen farklı bir tarayıcı deneyin.",
+              variant: "destructive"
+            });
+          } finally {
+            setTimeout(() => {
+              try {
+                document.body.removeChild(link);
+              } catch (removeError) {
+                console.warn('Link removal error:', removeError);
+              }
+            }, 500);
+          }
+        }, 200);
+        
         return;
       }
       
-      // Masaüstü ve iOS için gelişmiş çözüm
+      // Masaüstü ve iOS için - daha gelişmiş yaklaşım
       const dataBlob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
       
-      // Modern Web Share API test (sadece Android değilse)
+      // Modern Web Share API test (Android hariç)
       if (navigator.share && !isAndroid) {
         try {
-          // File objesi oluşturma ve test etme ayrı adımlarda
           const file = new File([dataBlob], filename, { type: 'application/json' });
           if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
@@ -1103,7 +1111,7 @@ function App() {
       console.error('Backup error:', error);
       toast({
         title: "Hata",
-        description: "Yedekleme sırasında hata oluştu",
+        description: "Yedekleme sırasında hata oluştu: " + error.message,
         variant: "destructive"
       });
     }
