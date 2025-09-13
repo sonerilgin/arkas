@@ -700,7 +700,7 @@ function App() {
           <div style="background-color: #faf5ff; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6;">
             <h3 style="color: #8b5cf6; margin-bottom: 10px;">💰 YATAN TUTAR DETAYLARI</h3>
             <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 10px;">
-              <div><strong>Yatan İşlem Sayısı:</strong> ${yatulanTutarData.length} adet</div>
+              <div><strong>Yatan İşlem Sayısı:</strong> ${filteredYatulanData.length} adet</div>
               <div><strong>Toplam Yatan Tutar:</strong> <span style="color: #8b5cf6;">${formatCurrency(toplamYatulanTutar)}</span></div>
               <div><strong>Ortalama Yatan Tutar:</strong> ${formatCurrency(toplamYatulanTutar / yatulanTutarData.length)}</div>
             </div>
