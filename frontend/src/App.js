@@ -860,42 +860,42 @@ function App() {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
       };
 
-      // Android-specific PDF download
+      // Android-specific PDF download - Simplified approach
       const isAndroid = /Android/i.test(navigator.userAgent);
       
       try {
-        const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
-        
         if (isAndroid) {
-          // Android için özel PDF indirme çözümü
-          const url = URL.createObjectURL(pdf);
+          // Android için basit yaklaşım - PDF'i direkt download dene
+          const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
           
-          // Android'de yeni sekme açarak PDF göster
-          const newWindow = window.open('', '_blank');
-          if (newWindow) {
-            newWindow.document.write(`
-              <html>
-                <head>
-                  <title>${fileName}</title>
-                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                </head>
-                <body style="margin:0; padding:0;">
-                  <div style="text-align:center; padding:20px; background:#f5f5f5;">
-                    <h3>PDF Hazır - Kaydedmek için aşağıdaki linke dokunun</h3>
-                    <a href="${url}" download="${fileName}" 
-                       style="display:inline-block; padding:15px 30px; background:#007bff; color:white; text-decoration:none; border-radius:5px; margin:10px;">
-                       📥 ${fileName} İndir
-                    </a>
-                    <p style="color:#666; font-size:14px;">
-                      Not: İndirme başlamazsa, linka uzun basarak "Bağlantıyı kaydet" seçeneğini deneyin.
-                    </p>
-                  </div>
-                  <embed src="${url}" type="application/pdf" width="100%" height="600px" />
-                </body>
-              </html>
-            `);
-          } else {
-            // Popup engellenirse direkt download dene
+          // Android için Data URL yaklaşımı (JSON backup gibi)
+          const reader = new FileReader();
+          reader.onload = function() {
+            const dataUrl = reader.result;
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = fileName;
+            link.style.display = 'none';
+            
+            document.body.appendChild(link);
+            
+            // Android için zorla tıklama
+            setTimeout(() => {
+              link.click();
+              setTimeout(() => {
+                document.body.removeChild(link);
+              }, 100);
+            }, 100);
+            
+            toast({
+              title: "PDF İndirme (Android)",
+              description: "PDF indirme işlemi başlatıldı"
+            });
+          };
+          
+          reader.onerror = function() {
+            // Hata durumunda basit blob download dene
+            const url = URL.createObjectURL(pdf);
             const link = document.createElement('a');
             link.href = url;
             link.download = fileName;
@@ -903,17 +903,21 @@ function App() {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-          }
+            URL.revokeObjectURL(url);
+            
+            toast({
+              title: "PDF İndirme",
+              description: "PDF indirme deneniyor..."
+            });
+          };
           
-          // Cleanup
-          setTimeout(() => URL.revokeObjectURL(url), 30000);
-          
-          toast({
-            title: "PDF Hazır (Android)",
-            description: "PDF yeni sekmede açıldı. İndirme linkine dokunun."
-          });
+          // PDF'i Data URL'e çevir
+          reader.readAsDataURL(pdf);
           return;
         }
+        
+        // Masaüstü ve iOS için normal işlem
+        const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
         
         // Masaüstü ve iOS için gelişmiş PDF indirme
         const downloadPdfBlob = (blob, filename) => {
@@ -961,8 +965,18 @@ function App() {
         downloadPdfBlob(pdf, fileName);
       } catch (error) {
         // Eski yöntemle dene
-        console.warn('Blob PDF oluşturulamadı, geleneksel yöntem deneniyor:', error);
-        await html2pdf().set(opt).from(element).save();
+        console.warn('PDF oluşturulamadı, geleneksel yöntem deneniyor:', error);
+        
+        if (isAndroid) {
+          // Android için HTML2PDF'in kendi save metodunu kullan
+          await html2pdf().set(opt).from(element).save();
+          toast({
+            title: "PDF İndirme",
+            description: "PDF indirme işlemi başlatıldı"
+          });
+        } else {
+          await html2pdf().set(opt).from(element).save();
+        }
       }
       
       // Geçici elementi kaldır
