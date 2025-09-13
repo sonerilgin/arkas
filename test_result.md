@@ -198,15 +198,18 @@ frontend:
 
   - task: "File Operations (PDF Export/Backup)"
     implemented: true
-    working: "NA"
+    working: false
     file: "App.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: true
     status_history:
       - working: "NA"
         agent: "main"
         comment: "File download, PDF generation, and backup/restore operations must work correctly on all operating systems and browsers."
+      - working: false
+        agent: "user"
+        comment: "User reports: Android te dosyaları indiremiyorum yada yedekleme dosyası inmiyor (Cannot download files on Android or backup files are not downloading). This is a critical bug affecting the backup/restore functionality specifically on Android devices."
 
   - task: "Dark/Light Theme Consistency"
     implemented: true
