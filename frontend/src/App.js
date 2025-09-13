@@ -1755,12 +1755,6 @@ function App() {
                         {formatCurrency(displayedRecords.reduce((sum, item) => sum + (item.sistem || 0), 0))}
                       </span>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <span className="text-purple-600 dark:text-purple-400">Yatan Tutar:</span>
-                      <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                        {formatCurrency(displayedRecords.reduce((sum, item) => sum + (item.yatan_tutar || 0), 0))}
-                      </span>
-                    </div>
                   </div>
                 </div>
               )}
