@@ -115,6 +115,18 @@ function App() {
     const savedTheme = localStorage.getItem('arkas_theme');
     return savedTheme === 'dark';
   });
+  
+  // Yatan Tutar management states
+  const [yatulanTutarList, setYatulanTutarList] = useState([]);
+  const [yatulanTutarDialogOpen, setYatulanTutarDialogOpen] = useState(false);
+  const [yatulanTutarFormData, setYatulanTutarFormData] = useState({
+    tutar: 0,
+    yatan_tarih: new Date().toISOString().split('T')[0],
+    baslangic_tarih: new Date().toISOString().split('T')[0],
+    bitis_tarih: new Date().toISOString().split('T')[0],
+    aciklama: ""
+  });
+  const [editingYatulanTutar, setEditingYatulanTutar] = useState(null);
 
   const { toast } = useToast();
 
