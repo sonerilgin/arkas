@@ -2,18 +2,215 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
-        "Helvetica Neue", sans-serif;
+/* Android PWA Optimizations */
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+  }
+  
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-overflow-scrolling: touch;
+    touch-action: manipulation;
+  }
+  
+  body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    overscroll-behavior: none;
+    user-select: none;
+  }
+  
+  input, textarea, select {
+    user-select: text;
+    -webkit-user-select: text;
+  }
 }
 
-code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-        monospace;
+@layer components {
+  /* Android Button Optimizations */
+  .btn-android {
+    @apply min-h-[44px] min-w-[44px] touch-manipulation;
+    -webkit-appearance: none;
+    border-radius: 8px;
+    transition: all 0.15s ease;
+  }
+  
+  .btn-android:active {
+    transform: scale(0.98);
+    opacity: 0.8;
+  }
+  
+  /* Android Card Touch */
+  .card-android {
+    @apply touch-manipulation;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+  
+  .card-android:active {
+    transform: scale(0.995) translateZ(0);
+  }
+  
+  /* Android Form Inputs */
+  .input-android {
+    @apply min-h-[44px] text-base;
+    -webkit-appearance: none;
+    border-radius: 8px;
+    transform: translateZ(0);
+  }
+  
+  .input-android:focus {
+    transform: translateZ(0);
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+  }
+  
+  /* Android Table Touch */
+  .table-android tbody tr {
+    @apply touch-manipulation;
+    transition: background-color 0.15s ease;
+  }
+  
+  .table-android tbody tr:active {
+    @apply bg-blue-50;
+  }
+  
+  /* Android Modal/Dialog */
+  .modal-android {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Android Checkbox/Radio */
+  .checkbox-android {
+    @apply min-w-[20px] min-h-[20px] touch-manipulation;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+  
+  /* Android Scroll Indicators */
+  .scroll-android {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #3b82f6 transparent;
+  }
+  
+  .scroll-android::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .scroll-android::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scroll-android::-webkit-scrollbar-thumb {
+    background: #3b82f6;
+    border-radius: 2px;
+  }
+  
+  /* Android Safe Area */
+  .safe-area-android {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Android Loading States */
+  .loading-android {
+    @apply flex items-center justify-center p-4;
+  }
+  
+  .spinner-android {
+    width: 24px;
+    height: 24px;
+    border: 2px solid #e5e7eb;
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  /* Android Toast/Notification */
+  .toast-android {
+    @apply fixed bottom-4 left-4 right-4 z-50;
+    max-width: calc(100vw - 32px);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  /* Android Pull-to-Refresh */
+  .pull-refresh-android {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Android Dark Mode Support */
+  @media (prefers-color-scheme: dark) {
+    .dark-android {
+      color-scheme: dark;
+    }
+  }
+  
+  /* Android Landscape Mode */
+  @media screen and (orientation: landscape) and (max-height: 500px) {
+    .android-landscape {
+      @apply text-sm;
+    }
+    
+    .android-landscape .btn-android {
+      @apply min-h-[40px] py-2;
+    }
+    
+    .android-landscape .input-android {
+      @apply min-h-[40px];
+    }
+  }
+  
+  /* Android High DPI */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .android-hidpi {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  }
+  
+  /* Android Performance Optimizations */
+  .android-gpu {
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+  
+  /* Android Focus Management */
+  .android-focus:focus-visible {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  
+  /* Android Swipe Gestures */
+  .android-swipe {
+    touch-action: pan-x pan-y;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 
 
