@@ -710,7 +710,7 @@ async def generate_pdf_download(request: dict):
         data = request.get('data', [])
         period = request.get('period', 'Unknown')
         
-        if not data:
+        if not data or len(data) == 0:
             raise HTTPException(status_code=400, detail="PDF için veri bulunamadı")
         
         # Basit HTML tablosu oluştur
@@ -898,7 +898,7 @@ async def generate_pdf_qr(request: dict):
         data = request.get('data', [])
         period = request.get('period', 'Unknown')
         
-        if not data:
+        if not data or len(data) == 0:
             raise HTTPException(status_code=400, detail="PDF için veri bulunamadı")
         
         # Benzersiz dosya ID'si oluştur
