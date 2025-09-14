@@ -640,6 +640,181 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.post("/api/generate-pdf", response_class=FileResponse)
+async def generate_pdf_download(request: dict):
+    """Android için server-side PDF oluşturma"""
+    try:
+        import tempfile
+        import os
+        from datetime import datetime
+        
+        # PDF verilerini al
+        data = request.get('data', [])
+        report_type = request.get('report_type', 'monthly')
+        period = request.get('period', 'Unknown')
+        
+        # Basit HTML oluştur
+        html_content = f"""
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Arkas Lojistik - {period} Raporu</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                table {{ border-collapse: collapse; width: 100%; }}
+                th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                th {{ background-color: #f2f2f2; }}
+                .header {{ text-align: center; margin-bottom: 20px; }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Arkas Lojistik</h1>
+                <h2>{period} Raporu</h2>
+                <p>Oluşturulma Tarihi: {datetime.now().strftime('%d.%m.%Y %H:%M')}</p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sıra No</th>
+                        <th>Müşteri</th>
+                        <th>İrsaliye No</th>
+                        <th>Tarih</th>
+                        <th>Toplam</th>
+                        <th>Sistem</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+        
+        total_amount = 0
+        for item in data:
+            html_content += f"""
+                    <tr>
+                        <td>{item.get('sira_no', '')}</td>
+                        <td>{item.get('musteri', '')}</td>
+                        <td>{item.get('irsaliye_no', '')}</td>
+                        <td>{item.get('tarih', '')}</td>
+                        <td>{item.get('toplam', 0):,.2f} ₺</td>
+                        <td>{item.get('sistem', 0):,.2f} ₺</td>
+                    </tr>
+            """
+            total_amount += item.get('toplam', 0)
+        
+        html_content += f"""
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold;">
+                        <td colspan="4">TOPLAM</td>
+                        <td>{total_amount:,.2f} ₺</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </body>
+        </html>
+        """
+        
+        # Geçici HTML dosyası oluştur
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as temp_file:
+            temp_file.write(html_content)
+            temp_html_path = temp_file.name
+        
+        # PDF dosya adı
+        pdf_filename = f"Arkas_Lojistik_{period}_Raporu.pdf"
+        pdf_path = f"/tmp/{pdf_filename}"
+        
+        try:
+            # wkhtmltopdf kullanarak PDF oluştur
+            import subprocess
+            cmd = [
+                'wkhtmltopdf',
+                '--page-size', 'A4',
+                '--orientation', 'Landscape',
+                '--margin-top', '0.75in',
+                '--margin-right', '0.75in',
+                '--margin-bottom', '0.75in',
+                '--margin-left', '0.75in',
+                '--encoding', 'UTF-8',
+                '--no-stop-slow-scripts',
+                temp_html_path,
+                pdf_path
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            
+            if result.returncode == 0 and os.path.exists(pdf_path):
+                # HTML dosyasını temizle
+                os.unlink(temp_html_path)
+                
+                return FileResponse(
+                    pdf_path,
+                    media_type='application/pdf',
+                    filename=pdf_filename,
+                    headers={
+                        "Content-Disposition": f"attachment; filename={pdf_filename}",
+                        "Cache-Control": "no-cache",
+                    }
+                )
+            else:
+                raise Exception(f"PDF oluşturma hatası: {result.stderr}")
+                
+        except Exception as pdf_error:
+            # PDF oluşturulamazsa HTML olarak döndür
+            os.unlink(temp_html_path)
+            raise HTTPException(status_code=500, detail=f"PDF oluşturulamadı: {str(pdf_error)}")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server PDF hatası: {str(e)}")
+
+@app.post("/api/generate-backup", response_class=FileResponse)
+async def generate_backup_download():
+    """Android için server-side yedek oluşturma"""
+    try:
+        import tempfile
+        import json
+        from datetime import datetime
+        
+        # Tüm verileri al
+        nakliye_data = await db.nakliye.find().to_list(length=None)
+        yatan_tutar_data = await db.yatan_tutar.find().to_list(length=None)
+        
+        # MongoDB ObjectId'leri string'e çevir
+        for item in nakliye_data:
+            if '_id' in item:
+                del item['_id']
+        
+        for item in yatan_tutar_data:
+            if '_id' in item:
+                del item['_id']
+        
+        backup_data = {
+            "timestamp": datetime.now().isoformat(),
+            "version": "2.0",
+            "nakliyeData": nakliye_data,
+            "yatulanTutarData": yatan_tutar_data
+        }
+        
+        # JSON dosyası oluştur
+        filename = f"Arkas_Yedek_{datetime.now().strftime('%Y-%m-%d')}.json"
+        json_path = f"/tmp/{filename}"
+        
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(backup_data, f, ensure_ascii=False, indent=2)
+        
+        return FileResponse(
+            json_path,
+            media_type='application/json',
+            filename=filename,
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "Cache-Control": "no-cache",
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Server yedek hatası: {str(e)}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
