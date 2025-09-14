@@ -846,6 +846,237 @@ async def generate_pdf_download(request: dict):
         logger.error(f"PDF generation hatası: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Server PDF hatası: {str(e)}")
 
+@app.get("/download-temp/{file_id}")
+async def download_temp_file(file_id: str):
+    """Geçici dosya indirme endpoint'i - QR kod için"""
+    try:
+        import os
+        
+        # Geçici dosya yolunu kontrol et
+        temp_path = f"/tmp/{file_id}"
+        
+        if not os.path.exists(temp_path):
+            raise HTTPException(status_code=404, detail="Dosya bulunamadı veya süresi dolmuş")
+        
+        # Dosya tipini belirle
+        if file_id.endswith('.pdf'):
+            media_type = 'application/pdf'
+        elif file_id.endswith('.json'):
+            media_type = 'application/json'
+        else:
+            media_type = 'application/octet-stream'
+        
+        return FileResponse(
+            temp_path,
+            media_type=media_type,
+            filename=file_id,
+            headers={
+                "Content-Disposition": f"attachment; filename={file_id}",
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"Geçici dosya indirme hatası: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Dosya indirme hatası: {str(e)}")
+
+@app.post("/api/generate-pdf-qr")
+async def generate_pdf_qr(request: dict):
+    """Android QR kod için PDF oluşturma - geçici URL döndürür"""
+    try:
+        from datetime import datetime
+        import uuid
+        import tempfile
+        import os
+        
+        # PDF verilerini al
+        data = request.get('data', [])
+        period = request.get('period', 'Unknown')
+        
+        if not data:
+            raise HTTPException(status_code=400, detail="PDF için veri bulunamadı")
+        
+        # Benzersiz dosya ID'si oluştur
+        file_id = f"Arkas_PDF_{uuid.uuid4().hex[:8]}.pdf"
+        
+        # HTML içeriği oluştur (aynı içerik)
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>Arkas Lojistik - {period} Raporu</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }}
+                .header {{ text-align: center; margin-bottom: 30px; }}
+                table {{ border-collapse: collapse; width: 100%; }}
+                th, td {{ border: 1px solid #333; padding: 6px; text-align: left; }}
+                th {{ background-color: #f0f0f0; font-weight: bold; }}
+                .right {{ text-align: right; }}
+                .center {{ text-align: center; }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>ARKAS LOJİSTİK</h1>
+                <h2>{period} RAPORU</h2>
+                <p>Rapor Tarihi: {datetime.now().strftime('%d.%m.%Y %H:%M')}</p>
+            </div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th class="center">Sıra No</th>
+                        <th>Müşteri</th>
+                        <th class="center">İrsaliye No</th>
+                        <th class="center">Tarih</th>
+                        <th class="right">Toplam (₺)</th>
+                        <th class="right">Sistem (₺)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+        
+        total_amount = 0
+        for item in data:
+            toplam = float(item.get('toplam', 0))
+            sistem = float(item.get('sistem', 0))
+            total_amount += toplam
+            
+            html_content += f"""
+                    <tr>
+                        <td class="center">{item.get('sira_no', '')}</td>
+                        <td>{item.get('musteri', '')}</td>
+                        <td class="center">{item.get('irsaliye_no', '')}</td>
+                        <td class="center">{item.get('tarih', '')}</td>
+                        <td class="right">{toplam:,.2f}</td>
+                        <td class="right">{sistem:,.2f}</td>
+                    </tr>
+            """
+        
+        html_content += f"""
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background-color: #f9f9f9;">
+                        <td colspan="4" class="right">TOPLAM:</td>
+                        <td class="right">{total_amount:,.2f} ₺</td>
+                        <td class="right">-</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </body>
+        </html>
+        """
+        
+        # HTML dosyasını geçici dosyaya yaz 
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as temp_html:
+            temp_html.write(html_content)
+            html_path = temp_html.name
+        
+        # PDF dosya yolu
+        pdf_path = f"/tmp/{file_id}"
+        
+        try:
+            # wkhtmltopdf ile PDF oluştur
+            import subprocess
+            cmd = [
+                'wkhtmltopdf',
+                '--page-size', 'A4',
+                '--orientation', 'Portrait',
+                '--margin-top', '15mm',
+                '--margin-right', '15mm', 
+                '--margin-bottom', '15mm',
+                '--margin-left', '15mm',
+                '--encoding', 'UTF-8',
+                '--print-media-type',
+                '--disable-smart-shrinking',
+                html_path,
+                pdf_path
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            
+            # HTML dosyasını temizle
+            os.unlink(html_path)
+            
+            if result.returncode == 0 and os.path.exists(pdf_path):
+                # İndirme URL'ini döndür
+                download_url = f"{BACKEND_URL}/download-temp/{file_id}"
+                
+                return {
+                    "success": True,
+                    "download_url": download_url,
+                    "file_id": file_id,
+                    "filename": f"Arkas_Lojistik_{period}_Raporu.pdf"
+                }
+            else:
+                raise Exception(f"wkhtmltopdf hatası: {result.stderr}")
+                
+        except subprocess.TimeoutExpired:
+            os.unlink(html_path)
+            raise HTTPException(status_code=500, detail="PDF oluşturma zaman aşımı")
+        except Exception as pdf_error:
+            if os.path.exists(html_path):
+                os.unlink(html_path)
+            raise HTTPException(status_code=500, detail=f"PDF oluşturulamadı: {str(pdf_error)}")
+            
+    except Exception as e:
+        logger.error(f"QR PDF generation hatası: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Server PDF QR hatası: {str(e)}")
+
+@app.post("/api/generate-backup-qr")
+async def generate_backup_qr():
+    """Android QR kod için yedek oluşturma - geçici URL döndürür"""
+    try:
+        import uuid
+        import json
+        from datetime import datetime
+        
+        # Benzersiz dosya ID'si oluştur
+        file_id = f"Arkas_Yedek_{uuid.uuid4().hex[:8]}.json"
+        
+        # Tüm verileri al
+        nakliye_data = await db.nakliye_kayitlari.find().to_list(length=None)
+        yatan_tutar_data = await db.yatan_tutar.find().to_list(length=None)
+        
+        # MongoDB ObjectId'leri string'e çevir
+        for item in nakliye_data:
+            if '_id' in item:
+                del item['_id']
+        
+        for item in yatan_tutar_data:
+            if '_id' in item:
+                del item['_id']
+        
+        backup_data = {
+            "timestamp": datetime.now().isoformat(),
+            "version": "2.0",
+            "nakliyeData": nakliye_data,
+            "yatulanTutarData": yatan_tutar_data
+        }
+        
+        # JSON dosyası oluştur
+        json_path = f"/tmp/{file_id}"
+        
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(backup_data, f, ensure_ascii=False, indent=2, default=str)
+        
+        # İndirme URL'ini döndür
+        download_url = f"{BACKEND_URL}/download-temp/{file_id}"
+        
+        return {
+            "success": True,
+            "download_url": download_url,
+            "file_id": file_id,
+            "filename": file_id
+        }
+        
+    except Exception as e:
+        logger.error(f"QR backup generation hatası: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Server yedek QR hatası: {str(e)}")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
