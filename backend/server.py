@@ -1006,7 +1006,7 @@ async def generate_pdf_qr(request: dict):
             
             if result.returncode == 0 and os.path.exists(pdf_path):
                 # İndirme URL'ini döndür
-                download_url = f"{BACKEND_URL}/download-temp/{file_id}"
+                download_url = f"{BACKEND_URL}/api/download-temp/{file_id}"
                 
                 return {
                     "success": True,
