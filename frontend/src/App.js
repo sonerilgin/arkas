@@ -696,6 +696,33 @@ function App() {
     try {
       setLoading(true);
       
+      // Seçilen tarih aralığına göre verileri al
+      const response = await axios.get(`${API}/nakliye`);
+      const yatulanResponse = await axios.get(`${API}/yatan-tutar`);
+      
+      let filteredData = response.data;
+      let filteredYatulanData = yatulanResponse.data;
+
+      if (pdfReportType === 'yearly') {
+        filteredData = response.data.filter(item => {
+          const itemDate = new Date(item.tarih);
+          return itemDate.getFullYear() === selectedPdfYear;
+        });
+        filteredYatulanData = yatulanResponse.data.filter(item => {
+          const yatanDate = new Date(item.yatan_tarih);
+          return yatanDate.getFullYear() === selectedPdfYear;
+        });
+      } else {
+        filteredData = response.data.filter(item => {
+          const itemDate = new Date(item.tarih);
+          return itemDate.getFullYear() === selectedPdfYear && itemDate.getMonth() === selectedPdfMonth;
+        });
+        filteredYatulanData = yatulanResponse.data.filter(item => {
+          const yatanDate = new Date(item.yatan_tarih);
+          return yatanDate.getFullYear() === selectedPdfYear && yatanDate.getMonth() === selectedPdfMonth;
+        });
+      }
+
       // Server-side PDF oluşturma (Android için)
       const reportPeriod = pdfReportType === 'yearly' 
         ? `${selectedPdfYear}_Yillik`
@@ -703,13 +730,14 @@ function App() {
 
       const requestData = {
         data: filteredData,
+        yatan_data: filteredYatulanData,
         report_type: pdfReportType,
         period: reportPeriod
       };
 
       console.log('Server-side PDF oluşturma başlıyor...');
       
-      const response = await axios.post(`${API}/generate-pdf`, requestData, {
+      const pdfResponse = await axios.post(`${API}/generate-pdf`, requestData, {
         responseType: 'blob',
         headers: {
           'Content-Type': 'application/json'
@@ -717,7 +745,7 @@ function App() {
       });
 
       // Blob'dan dosya oluştur ve indir
-      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const blob = new Blob([pdfResponse.data], { type: 'application/pdf' });
       const fileName = `Arkas_Lojistik_${reportPeriod}_Raporu.pdf`;
       
       // Modern dosya indirme
