@@ -276,14 +276,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Cross-Platform API Compatibility"
-    - "Cross-Browser Compatibility" 
-    - "Mobile Responsive Design (Android/iOS)"
-    - "Desktop Application (Windows/Mac/Linux)"
+    - "QR Code PDF Generation (Android)"
+    - "QR Code Backup Generation (Android)" 
+    - "Temporary File Download Endpoints"
+    - "Yatan Tutar Multi-Delete Event Handlers"
     - "File Operations (PDF Export/Backup)"
-    - "Touch and Keyboard Navigation"
-    - "PWA Functionality"
-    - "Dark/Light Theme Consistency"
   stuck_tasks:
     - "File Operations (PDF Export/Backup)"
   test_all: true
