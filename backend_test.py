@@ -11,7 +11,7 @@ from typing import List, Dict, Any
 class ComprehensiveCrossPlatformAPITester:
     """Comprehensive Cross-Platform Backend API Tester for Arkas Lojistik System"""
     
-    def __init__(self, base_url="https://logistics-tracker-9.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://shipmate-40.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.tests_run = 0
         self.tests_passed = 0

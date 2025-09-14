@@ -2,7 +2,7 @@
 
 ## PWA Kurulumu (Önerilen)
 
-1. Android Chrome'da şu adrese gidin: https://logistics-tracker-9.preview.emergentagent.com
+1. Android Chrome'da şu adrese gidin: https://shipmate-40.preview.emergentagent.com
 2. Chrome menüsünden "Ana ekrana ekle" seçin  
 3. "Arkas Lojistik" adıyla ana ekranınıza eklenir
 4. Uygulama gibi çalışır
@@ -15,7 +15,7 @@
 3. **Website to APK**: https://www.websitetoapk.co/
 
 Bu sitelerden birine:
-- URL: https://logistics-tracker-9.preview.emergentagent.com  
+- URL: https://shipmate-40.preview.emergentagent.com  
 - App Name: Arkas Lojistik
 - Package Name: com.arkas.lojistik
 
