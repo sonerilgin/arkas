@@ -796,179 +796,47 @@ function App() {
       // Önce user interaction göstergesi
       toast({
         title: "Yedekleme Başlatılıyor...",
-        description: "Lütfen bekleyin, veriler hazırlanıyor"
+        description: "Server'dan yedek dosyası hazırlanıyor"
       });
 
-      const response = await axios.get(`${API}/nakliye`);
-      const yatulanResponse = await axios.get(`${API}/yatan-tutar`);
+      console.log('Server-side yedek indirme başlıyor...');
       
-      const backupData = {
-        timestamp: new Date().toISOString(),
-        version: "2.0",
-        userInfo: userInfo,
-        nakliyeData: response.data,
-        yatulanTutarData: yatulanResponse.data
-      };
+      const response = await axios.post(`${API}/generate-backup`, {}, {
+        responseType: 'blob',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
-      const dataStr = JSON.stringify(backupData, null, 2);
+      // Blob'dan dosya oluştur ve indir
+      const blob = new Blob([response.data], { type: 'application/json' });
       const filename = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
       
-      // Capacitor native platform kontrolü
-      if (Capacitor.isNativePlatform()) {
-        try {
-          // Native Android/iOS için Filesystem API kullan
-          const result = await Filesystem.writeFile({
-            path: filename,
-            data: dataStr,
-            directory: Directory.Downloads,
-          });
-          
-          // Native paylaşım seçeneği sun
-          await Share.share({
-            title: 'Arkas Lojistik Yedek Dosyası',
-            text: 'Nakliye ve yatan tutar verilerinizin yedeği',
-            url: result.uri,
-            dialogTitle: 'Yedek dosyasını paylaş'
-          });
-          
-          toast({
-            title: "Yedekleme Başarılı (Native)",
-            description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı\n📁 İndirilenler klasöründe kaydedildi\n📄 ${filename}`,
-            duration: 6000
-          });
-          return;
-        } catch (nativeError) {
-          console.error('Native filesystem error:', nativeError);
-          // Web fallback'e geç
-        }
-      }
+      // Modern dosya indirme
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.style.display = 'none';
       
-      // Android için özelleştirilmiş yedek indirme
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      console.log('Android tespit edildi (yedek):', isAndroid);
-      
-      if (isAndroid) {
-        try {
-          console.log('Android yedek indirme başlıyor...');
-          
-          // Android için Base64 Data URL yaklaşımı
-          const base64Data = btoa(unescape(encodeURIComponent(dataStr)));
-          const dataUrl = `data:application/json;charset=utf-8;base64,${base64Data}`;
-          
-          const link = document.createElement('a');
-          link.href = dataUrl;
-          link.download = filename;
-          link.style.display = 'none';
-          
-          // Android için DOM'a ekle
-          document.body.appendChild(link);
-          
-          // Hemen tıkla (user gesture context'i korumak için)
-          link.click();
-          
-          // Temizlik
-          setTimeout(() => {
-            try {
-              document.body.removeChild(link);
-            } catch (removeError) {
-              console.warn('Link remove hatası:', removeError);
-            }
-          }, 1000);
-          
-          toast({
-            title: "Yedekleme Başarılı (Android Data URL)",
-            description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı\n📁 İndirilenler klasöründe\n📄 ${filename}`,
-            duration: 6000
-          });
-          
-          console.log('Android Data URL yedek indirme tamamlandı');
-          return;
-          
-        } catch (androidBackupError) {
-          console.error('Android yedek indirme hatası:', androidBackupError);
-          
-          // Android için Web Share API dene
-          try {
-            console.log('Android Web Share API yedek deneniyor...');
-            
-            if (navigator.share && navigator.canShare) {
-              const dataBlob = new Blob([dataStr], { type: 'application/json' });
-              const file = new File([dataBlob], filename, { type: 'application/json' });
-              
-              await navigator.share({
-                title: 'Arkas Lojistik Yedek Dosyası',
-                text: 'Nakliye ve yatan tutar verilerinizin yedeği',
-                files: [file]
-              });
-              
-              toast({
-                title: "Yedek Paylaşıldı (Android)",
-                description: `Yedek dosyasını paylaşım menüsünden kaydedebilirsiniz\n📄 ${filename}`,
-                duration: 8000
-              });
-              return;
-            }
-          } catch (androidShareError) {
-            console.error('Android Web Share yedek hatası:', androidShareError);
-          }
-          
-          // Android için son çare: Clipboard
-          try {
-            await navigator.clipboard.writeText(dataStr);
-            toast({
-              title: "Android Yedek (Clipboard)",
-              description: "Yedek veriler panoya kopyalandı. Bir metin editöründe .json dosyası olarak kaydedin.",
-              duration: 10000
-            });
-            return;
-          } catch (clipboardError) {
-            console.error('Android clipboard hatası:', clipboardError);
-          }
-        }
-      }
-      
-      // Web tarayıcı için FileSaver.js kullan (non-Android)
-      try {
-        const dataBlob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
-        
-        // FileSaver.js ile indirme
-        saveAs(dataBlob, filename);
-        
-        toast({
-          title: "Yedekleme Başarılı (FileSaver.js)",
-          description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${filename}`,
-          duration: 6000
-        });
-      } catch (saveError) {
-        console.error('FileSaver.js yedek indirme hatası:', saveError);
-        
-        // Fallback: Manuel blob download
-        const dataBlob = new Blob([dataStr], { type: 'application/octet-stream' });
-        const url = URL.createObjectURL(dataBlob);
-        
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = filename;
-        link.target = '_self';
-        link.style.display = 'none';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
 
-        toast({
-          title: "Yedekleme Tamamlandı (Manual)",
-          description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${filename}`,
-          duration: 6000
-        });
-      }
+      toast({
+        title: "Server-Side Yedekleme Başarılı",
+        description: `Yedek dosyası server'dan indirildi\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${filename}`,
+        duration: 6000
+      });
+
+      console.log('Server-side yedek indirme tamamlandı');
       
     } catch (error) {
-      console.error('Backup error:', error);
+      console.error('Server-side yedek indirme hatası:', error);
       toast({
         title: "Yedekleme Hatası",
-        description: "Hata: " + error.message,
+        description: "Server'dan yedek oluşturulamadı. Lütfen tekrar deneyin.",
         variant: "destructive"
       });
     }
