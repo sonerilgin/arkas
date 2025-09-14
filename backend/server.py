@@ -870,6 +870,8 @@ async def download_temp_file(file_id: str):
             }
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Geçici dosya indirme hatası: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Dosya indirme hatası: {str(e)}")
