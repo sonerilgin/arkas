@@ -696,293 +696,56 @@ function App() {
     try {
       setLoading(true);
       
-      // Seçilen tarih aralığına göre verileri al
-      const response = await axios.get(`${API}/nakliye`);
-      const yatulanResponse = await axios.get(`${API}/yatan-tutar`);
-      
-      let filteredData = response.data;
-      let filteredYatulanData = yatulanResponse.data;
-      let reportTitle = "";
-      let reportPeriod = "";
+      // Server-side PDF oluşturma (Android için)
+      const reportPeriod = pdfReportType === 'yearly' 
+        ? `${selectedPdfYear}_Yillik`
+        : `${monthNames[selectedPdfMonth]}_${selectedPdfYear}`;
 
-      if (pdfReportType === 'yearly') {
-        filteredData = response.data.filter(item => {
-          const itemDate = new Date(item.tarih);
-          return itemDate.getFullYear() === selectedPdfYear;
-        });
-        filteredYatulanData = yatulanResponse.data.filter(item => {
-          const yatanDate = new Date(item.yatan_tarih);
-          return yatanDate.getFullYear() === selectedPdfYear;
-        });
-        reportTitle = `${selectedPdfYear} YILI NAKLİYE VE YATAN TUTAR RAPORU`;
-        reportPeriod = `${selectedPdfYear} Yılı Tümü`;
-      } else {
-        filteredData = response.data.filter(item => {
-          const itemDate = new Date(item.tarih);
-          return itemDate.getFullYear() === selectedPdfYear && itemDate.getMonth() === selectedPdfMonth;
-        });
-        filteredYatulanData = yatulanResponse.data.filter(item => {
-          const yatanDate = new Date(item.yatan_tarih);
-          return yatanDate.getFullYear() === selectedPdfYear && yatanDate.getMonth() === selectedPdfMonth;
-        });
-        reportTitle = `${monthNames[selectedPdfMonth]} ${selectedPdfYear} NAKLİYE VE YATAN TUTAR RAPORU`;
-        reportPeriod = `${monthNames[selectedPdfMonth]} ${selectedPdfYear}`;
-      }
-
-      if (filteredData.length === 0 && filteredYatulanData.length === 0) {
-        toast({
-          title: "Uyarı",
-          description: `${reportPeriod} döneminde kayıt bulunamadı`,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Yatan tutar analizi
-      const toplamYatulanTutar = filteredYatulanData.reduce((sum, item) => sum + (item.tutar || 0), 0);
-      
-      // Tarih aralığı hesaplama
-      const tarihler = filteredData.map(item => new Date(item.tarih)).sort((a, b) => a - b);
-      const enEskiTarih = tarihler.length > 0 ? tarihler[0] : new Date();
-      const enYeniTarih = tarihler.length > 0 ? tarihler[tarihler.length - 1] : new Date();
-
-      // HTML tablo oluştur
-      const tableHTML = `
-        <div style="font-family: Arial, sans-serif; padding: 20px; font-size: 12px;">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <h1 style="color: #1e3a8a; margin-bottom: 5px;">ARKAS LOJİSTİK</h1>
-            <h2 style="color: #3b82f6; margin-bottom: 10px;">${reportTitle}</h2>
-            <p>Rapor Tarihi: ${new Date().toLocaleDateString('tr-TR')}</p>
-            <p><strong>Kapsanan Dönem:</strong> ${formatDate(enEskiTarih.toISOString())} - ${formatDate(enYeniTarih.toISOString())}</p>
-          </div>
-          
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <thead>
-              <tr style="background-color: #3b82f6; color: white;">
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Tarih</th>
-                <th style="border: 1px solid #ddd; padding: 8px;">Sıra No</th>
-                <th style="border: 1px solid #ddd; padding: 8px;">Kod</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Müşteri</th>
-                <th style="border: 1px solid #ddd; padding: 8px;">İrsaliye No</th>
-                <th style="border: 1px solid #ddd; padding: 8px;">Tür</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Toplam</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: right; color: #22c55e;">Sistem</th>
-                <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Karşılaştırma</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${filteredData.map(item => {
-                const toplam = item.toplam || 0;
-                const sistem = item.sistem || 0;
-                const fark = sistem - toplam;
-                const turu = [];
-                if (item.ithalat) turu.push('İthalat');
-                if (item.ihracat) turu.push('İhracat');
-                if (item.bos) turu.push('Boş');
-                const farkText = fark === 0 ? 'Eşit' : (fark > 0 ? `+${formatCurrency(Math.abs(fark))}` : `-${formatCurrency(Math.abs(fark))}`);
-                const farkColor = fark === 0 ? '#6b7280' : (fark > 0 ? '#22c55e' : '#ef4444');
-                
-                return `
-                  <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="border: 1px solid #ddd; padding: 8px;">${formatDate(item.tarih)}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.sira_no}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.kod || '-'}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${item.musteri}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${item.irsaliye_no}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${turu.join(', ') || '-'}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold;">${formatCurrency(toplam)}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #22c55e;">${formatCurrency(sistem)}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center; font-weight: bold; color: ${farkColor};">${farkText}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-          
-          <div style="display: flex; flex-wrap: wrap; gap: 20px; background-color: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <div><strong>Toplam Kayıt:</strong> ${filteredData.length} adet</div>
-            <div><strong>Toplam Tutar:</strong> ${formatCurrency(filteredData.reduce((sum, item) => sum + (item.toplam || 0), 0))}</div>
-            <div><strong>Toplam Sistem:</strong> <span style="color: #22c55e;">${formatCurrency(filteredData.reduce((sum, item) => sum + (item.sistem || 0), 0))}</span></div>
-            <div><strong>Toplam Yatan:</strong> <span style="color: #8b5cf6;">${formatCurrency(toplamYatulanTutar)}</span></div>
-          </div>
-
-          ${filteredYatulanData.length > 0 ? `
-          <div style="background-color: #faf5ff; padding: 15px; border-radius: 8px; border-left: 4px solid #8b5cf6; margin-bottom: 20px;">
-            <h3 style="color: #8b5cf6; margin-bottom: 15px;">💰 YATAN TUTAR DETAYLARI</h3>
-            
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px;">
-              <thead>
-                <tr style="background-color: #8b5cf6; color: white;">
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: right;">Tutar</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Yatış Tarihi</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Çalışma Başlangıç</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: center;">Çalışma Bitiş</th>
-                  <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Açıklama</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${filteredYatulanData.map(item => `
-                  <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: right; font-weight: bold; color: #8b5cf6;">${formatCurrency(item.tutar)}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${new Date(item.yatan_tarih).toLocaleDateString('tr-TR')}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${new Date(item.baslangic_tarih).toLocaleDateString('tr-TR')}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${new Date(item.bitis_tarih).toLocaleDateString('tr-TR')}</td>
-                    <td style="border: 1px solid #ddd; padding: 8px;">${item.aciklama || '-'}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-            
-            <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 10px;">
-              <div><strong>Yatan İşlem Sayısı:</strong> ${filteredYatulanData.length} adet</div>
-              <div><strong>Toplam Yatan Tutar:</strong> <span style="color: #8b5cf6;">${formatCurrency(toplamYatulanTutar)}</span></div>
-              <div><strong>Ortalama Yatan Tutar:</strong> ${formatCurrency(toplamYatulanTutar / filteredYatulanData.length)}</div>
-            </div>
-            <p style="font-size: 11px; color: #6b7280; margin: 0;">
-              <strong>Dönem Analizi:</strong> ${formatDate(enEskiTarih.toISOString())} - ${formatDate(enYeniTarih.toISOString())} 
-              (${Math.ceil((enYeniTarih - enEskiTarih) / (1000 * 60 * 60 * 24))} gün)
-            </p>
-          </div>
-          ` : ''}
-        </div>
-      `;
-
-      // HTML2PDF ile dönüştür
-      const element = document.createElement('div');
-      element.innerHTML = tableHTML;
-      document.body.appendChild(element);
-
-      const fileName = pdfReportType === 'yearly' 
-        ? `Arkas_Lojistik_${selectedPdfYear}_Yillik_Raporu.pdf`
-        : `Arkas_Lojistik_${monthNames[selectedPdfMonth]}_${selectedPdfYear}_Raporu.pdf`;
-
-      const opt = {
-        margin: 10,
-        filename: fileName,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      const requestData = {
+        data: filteredData,
+        report_type: pdfReportType,
+        period: reportPeriod
       };
 
-      // Android için özel çözüm - çoklu yaklaşım
-      const isAndroid = /Android/i.test(navigator.userAgent);
-      console.log('Android tespit edildi:', isAndroid);
+      console.log('Server-side PDF oluşturma başlıyor...');
       
-      if (isAndroid) {
-        // Android için özelleştirilmiş PDF indirme
-        try {
-          console.log('Android PDF indirme başlıyor...');
-          const pdf = await html2pdf().set(opt).from(element).outputPdf('arraybuffer');
-          console.log('PDF arraybuffer oluşturuldu, boyut:', pdf.byteLength);
-          
-          // Android için Data URL yaklaşımı
-          const uint8Array = new Uint8Array(pdf);
-          let binaryString = '';
-          for (let i = 0; i < uint8Array.length; i++) {
-            binaryString += String.fromCharCode(uint8Array[i]);
-          }
-          const base64String = btoa(binaryString);
-          const dataUrl = `data:application/pdf;base64,${base64String}`;
-          
-          // Android için zorla indirme
-          const link = document.createElement('a');
-          link.href = dataUrl;
-          link.download = fileName;
-          link.style.display = 'none';
-          
-          // Android için DOM'a ekle ve tıkla
-          document.body.appendChild(link);
-          
-          // User gesture context'ini korumak için hemen tıkla
-          link.click();
-          
-          // Temizlik
-          setTimeout(() => {
-            document.body.removeChild(link);
-          }, 1000);
-          
-          toast({
-            title: "PDF İndirme (Android Data URL)",
-            description: `${reportPeriod} raporu indirildi\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${fileName}`,
-            duration: 6000
-          });
-          
-          console.log('Android Data URL PDF indirme tamamlandı');
-          return;
-          
-        } catch (androidError) {
-          console.error('Android Data URL hatası:', androidError);
-          
-          // Android için Web Share API dene
-          try {
-            console.log('Android Web Share API deneniyor...');
-            const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
-            
-            if (navigator.share && navigator.canShare) {
-              const file = new File([pdf], fileName, { type: 'application/pdf' });
-              
-              await navigator.share({
-                title: 'Arkas Lojistik PDF Raporu',
-                text: `${reportPeriod} dönemi raporu`,
-                files: [file]
-              });
-              
-              toast({
-                title: "PDF Paylaşıldı (Android)",
-                description: `${reportPeriod} raporu paylaşım menüsünden kaydedebilirsiniz`,
-                duration: 8000
-              });
-              return;
-            }
-          } catch (shareError) {
-            console.error('Android Web Share hatası:', shareError);
-          }
+      const response = await axios.post(`${API}/generate-pdf`, requestData, {
+        responseType: 'blob',
+        headers: {
+          'Content-Type': 'application/json'
         }
-      }
-      
-      // Diğer platformlar için FileSaver.js
-      try {
-        console.log('PDF blob oluşturma başlıyor (non-Android)...');
-        const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
-        console.log('PDF blob oluşturuldu:', pdf);
-        
-        // FileSaver.js ile indirme
-        console.log('FileSaver.js saveAs çağrılıyor...');
-        saveAs(pdf, fileName);
-        console.log('FileSaver.js saveAs başarılı');
-        
-        toast({
-          title: "PDF İndirme Başarılı (FileSaver.js)",
-          description: `${reportPeriod} raporu indirildi (${filteredData.length} kayıt)\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${fileName}`,
-          duration: 6000
-        });
-      } catch (error) {
-        console.error('FileSaver.js PDF indirme hatası:', error);
-        
-        // Son çare: HTML2PDF'in kendi save metodunu kullan
-        console.warn('Son çare: HTML2PDF save kullanılıyor');
-        await html2pdf().set(opt).from(element).save();
-        
-        toast({
-          title: "PDF İndirme (Fallback)",
-          description: `${reportPeriod} raporu indirildi\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${fileName}`,
-          duration: 6000
-        });
-      }
-      
-      // Geçici elementi kaldır
-      document.body.removeChild(element);
-      
-      toast({
-        title: "Başarılı",
-        description: `${reportPeriod} raporu PDF olarak indirildi (${filteredData.length} kayıt)`
       });
 
-    } catch (error) {
-      console.error("PDF export hatası:", error);
+      // Blob'dan dosya oluştur ve indir
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const fileName = `Arkas_Lojistik_${reportPeriod}_Raporu.pdf`;
+      
+      // Modern dosya indirme
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.style.display = 'none';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
       toast({
-        title: "Hata",
-        description: "PDF oluşturulurken bir hata oluştu",
+        title: "PDF Server-Side İndirme Başarılı",
+        description: `${reportPeriod} raporu server'dan indirildi (${filteredData.length} kayıt)\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${fileName}`,
+        duration: 6000
+      });
+
+      console.log('Server-side PDF indirme tamamlandı');
+
+    } catch (error) {
+      console.error('Server-side PDF indirme hatası:', error);
+      
+      toast({
+        title: "PDF İndirme Hatası",
+        description: "Server'dan PDF oluşturulamadı. Lütfen tekrar deneyin.",
         variant: "destructive"
       });
     } finally {
