@@ -936,8 +936,8 @@ class ComprehensiveCrossPlatformAPITester:
         print("\n⬇️ Temporary File Download Tests")
         for file_id in generated_file_ids:
             if file_id:
-                # Use the base URL without /api prefix for download endpoint
-                download_url = f"{self.base_url.replace('/api', '')}/download-temp/{file_id}"
+                # Use the full API URL for download endpoint
+                download_url = f"{self.base_url}/download-temp/{file_id}"
                 print(f"\n🔍 Testing download for file: {file_id}")
                 print(f"   Download URL: {download_url}")
                 
