@@ -135,6 +135,9 @@ function App() {
   
   // Yatan Tutar çoklu seçim için state'ler
   const [selectedYatulanItems, setSelectedYatulanItems] = useState([]);
+  const [selectAllYatulan, setSelectAllYatulan] = useState(false);
+  
+  // QR Code states for Android file sharing
   const [qrCodeDialog, setQrCodeDialog] = useState(false);
   const [qrCodeData, setQrCodeData] = useState(null);
   const [qrCodeType, setQrCodeType] = useState(''); // 'pdf' or 'backup'
