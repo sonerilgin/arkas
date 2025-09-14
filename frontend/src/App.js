@@ -864,20 +864,12 @@ function App() {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
       };
 
-      // Basit ve direkt PDF indirme
+      // Android-compatible PDF download using FileSaver.js
       try {
         const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
         
-        const url = URL.createObjectURL(pdf);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName;
-        link.style.display = 'none';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        // Use FileSaver.js for cross-browser compatibility, especially Android
+        saveAs(pdf, fileName);
         
         toast({
           title: "PDF İndirme Başarılı",
