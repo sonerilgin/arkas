@@ -1691,7 +1691,7 @@ function App() {
                   <Button 
                     onClick={handlePdfExport} 
                     variant="outline" 
-                    className="flex-1 sm:flex-none border-green-300 text-green-600 hover:bg-green-50 text-xs sm:text-sm"
+                    className="flex-1 sm:flex-none border-green-300 text-green-600 hover:bg-green-50 text-xs sm:text-sm btn-android"
                     disabled={loading}
                   >
                     <FileDown className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
@@ -1702,7 +1702,7 @@ function App() {
                   <Button 
                     onClick={exportBackup} 
                     variant="outline" 
-                    className="flex-1 sm:flex-none border-orange-300 text-orange-600 hover:bg-orange-50 text-xs sm:text-sm"
+                    className="flex-1 sm:flex-none border-orange-300 text-orange-600 hover:bg-orange-50 text-xs sm:text-sm btn-android"
                     disabled={loading}
                   >
                     <Download className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
