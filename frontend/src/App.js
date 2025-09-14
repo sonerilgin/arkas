@@ -2281,6 +2281,87 @@ function App() {
         )}
 
       </div>
+
+      {/* QR Kod Dialog - Android Dosya İndirme */}
+      <Dialog open={qrCodeDialog} onOpenChange={setQrCodeDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">📱 Android Dosya İndirme</DialogTitle>
+            <DialogDescription className="text-center">
+              {qrCodeData?.fileType} için QR kod oluşturuldu
+            </DialogDescription>
+          </DialogHeader>
+          
+          {qrCodeData && (
+            <div className="flex flex-col items-center space-y-4 p-4">
+              {/* QR Kod */}
+              <div className="bg-white p-4 rounded-lg shadow-md">
+                <img 
+                  src={qrCodeData.qrCode} 
+                  alt="QR Kod" 
+                  className="w-64 h-64"
+                />
+              </div>
+              
+              {/* Dosya Bilgisi */}
+              <div className="text-center space-y-2">
+                <p className="font-semibold text-blue-600">
+                  {qrCodeData.fileName}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {qrCodeData.instruction}
+                </p>
+              </div>
+              
+              {/* Manuel Link */}
+              <div className="w-full space-y-2">
+                <Button 
+                  onClick={() => window.open(qrCodeData.downloadUrl, '_blank')}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  📥 Direkt İndir (Android)
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(qrCodeData.downloadUrl);
+                    toast({
+                      title: "Link Kopyalandı",
+                      description: "İndirme linki panoya kopyalandı"
+                    });
+                  }}
+                  variant="outline" 
+                  className="w-full"
+                >
+                  📋 Linki Kopyala
+                </Button>
+              </div>
+              
+              {/* WhatsApp Paylaşımı */}
+              <Button 
+                onClick={() => {
+                  const whatsappUrl = `https://wa.me/?text=Arkas Lojistik ${qrCodeData.fileType}: ${qrCodeData.downloadUrl}`;
+                  window.open(whatsappUrl, '_blank');
+                }}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+              >
+                📱 WhatsApp ile Paylaş
+              </Button>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              onClick={() => setQrCodeDialog(false)}
+              variant="outline"
+              className="w-full"
+            >
+              Kapat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Toaster />
 
       {/* Yatan Tutar Yönetimi Dialog */}
