@@ -105,7 +105,7 @@ class QRCodeEndpointTester:
         print(f"\n🔍 Testing Temporary File Download for: {file_id}")
         
         try:
-            download_url = f"{self.api_url}/download-temp/{file_id}"
+            download_url = f"{self.base_url}/download-temp/{file_id}"
             print(f"   Download URL: {download_url}")
             
             response = requests.get(download_url, timeout=30)
