@@ -1164,7 +1164,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 android-landscape safe-area-android android-gpu">
       {/* User Edit Dialog */}
       <Dialog open={userEditDialogOpen} onOpenChange={setUserEditDialogOpen}>
         <DialogContent className="max-w-md">
