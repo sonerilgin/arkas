@@ -846,7 +846,7 @@ async def generate_pdf_download(request: dict):
         logger.error(f"PDF generation hatası: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Server PDF hatası: {str(e)}")
 
-@app.get("/download-temp/{file_id}")
+@api_router.get("/download-temp/{file_id}")
 async def download_temp_file(file_id: str):
     """Geçici dosya indirme endpoint'i - QR kod için"""
     try:
