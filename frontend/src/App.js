@@ -737,7 +737,7 @@ function App() {
 
       console.log('Server-side PDF oluşturma başlıyor...');
       
-      const pdfResponse = await axios.post(`${API}/generate-pdf`, requestData, {
+      const pdfResponse = await axios.post(`${API}/generate-pdf-download`, requestData, {
         responseType: 'blob',
         headers: {
           'Content-Type': 'application/json'
