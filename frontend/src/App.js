@@ -865,7 +865,76 @@ function App() {
   // Yedekleme fonksiyonları
   const exportBackup = async () => {
     try {
-      // Önce user interaction göstergesi
+      // Android için QR kod çözümü
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      
+      if (isAndroid) {
+        // Android için QR kod ile yedek paylaşımı
+        try {
+          toast({
+            title: "Android Yedek Hazırlanıyor...",
+            description: "QR kod oluşturuluyor"
+          });
+
+          const response = await axios.post(`${API}/generate-backup-download`, {}, {
+            responseType: 'blob',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          // Blob'ı base64'e çevir
+          const blob = new Blob([response.data], { type: 'application/json' });
+          const reader = new FileReader();
+          
+          reader.onload = async function() {
+            try {
+              // Yedek dosyasının indirme linkini oluştur
+              const downloadUrl = `${window.location.origin}/download-backup?data=${encodeURIComponent(reader.result)}`;
+              
+              // QR kod oluştur
+              const qrCodeDataUrl = await QRCode.toDataURL(downloadUrl, {
+                width: 300,
+                margin: 2,
+                color: {
+                  dark: '#000000',
+                  light: '#FFFFFF'
+                }
+              });
+              
+              setQrCodeData({
+                qrCode: qrCodeDataUrl,
+                downloadUrl: downloadUrl,
+                fileName: `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`,
+                fileType: 'Yedek Dosyası',
+                instruction: 'QR kodu telefonunuzun kamera uygulaması ile tarayın veya aşağıdaki linke dokunun'
+              });
+              
+              setQrCodeType('backup');
+              setQrCodeDialog(true);
+              
+              toast({
+                title: "Android Yedek (QR Kod)",
+                description: "Yedek dosyası için QR kod oluşturuldu. QR kodu tarayarak dosyayı indirin.",
+                duration: 8000
+              });
+              
+            } catch (qrError) {
+              console.error('QR kod oluşturma hatası:', qrError);
+              throw qrError;
+            }
+          };
+          
+          reader.readAsDataURL(blob);
+          return;
+          
+        } catch (androidError) {
+          console.error('Android QR kod hatası:', androidError);
+          // Normal server-side indirmeye geç
+        }
+      }
+
+      // Server-side yedek oluşturma
       toast({
         title: "Yedekleme Başlatılıyor...",
         description: "Server'dan yedek dosyası hazırlanıyor"
@@ -905,10 +974,10 @@ function App() {
       console.log('Server-side yedek indirme tamamlandı');
       
     } catch (error) {
-      console.error('Server-side yedek indirme hatası:', error);
+      console.error('Yedekleme hatası:', error);
       toast({
         title: "Yedekleme Hatası",
-        description: "Server'dan yedek oluşturulamadı. Lütfen tekrar deneyin.",
+        description: "Yedek oluşturulamadı. Lütfen tekrar deneyin.",
         variant: "destructive"
       });
     }
