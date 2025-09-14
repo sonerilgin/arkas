@@ -866,26 +866,67 @@ function App() {
 
       // Android-compatible PDF download using FileSaver.js
       try {
+        console.log('PDF blob oluşturma başlıyor...');
         const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
+        console.log('PDF blob oluşturuldu:', pdf);
         
-        // Use FileSaver.js for cross-browser compatibility, especially Android
+        // FileSaver.js ile Android uyumlu indirme
+        console.log('FileSaver.js saveAs çağrılıyor...');
         saveAs(pdf, fileName);
+        console.log('FileSaver.js saveAs başarılı');
         
         toast({
-          title: "PDF İndirme Başarılı",
+          title: "PDF İndirme Başarılı (FileSaver.js)",
           description: `${reportPeriod} raporu indirildi (${filteredData.length} kayıt)\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${fileName}`,
           duration: 6000
         });
       } catch (error) {
-        // Fallback: HTML2PDF'in kendi save metodunu kullan
-        console.warn('PDF blob oluşturulamadı, HTML2PDF save kullanılıyor:', error);
-        await html2pdf().set(opt).from(element).save();
+        console.error('FileSaver.js PDF indirme hatası:', error);
         
-        toast({
-          title: "PDF İndirme",
-          description: `${reportPeriod} raporu indirildi\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${fileName}`,
-          duration: 6000
-        });
+        // İkinci alternatif: Direct blob download
+        try {
+          console.log('Direct blob download deneniyor...');
+          const pdf = await html2pdf().set(opt).from(element).outputPdf('blob');
+          
+          // Manual blob download for Android
+          const url = URL.createObjectURL(pdf);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName;
+          link.style.display = 'none';
+          link.setAttribute('download', fileName);
+          
+          document.body.appendChild(link);
+          
+          // Android için zorla tıklama
+          setTimeout(() => {
+            link.click();
+            console.log('Manual blob download tamamlandı');
+            
+            setTimeout(() => {
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+            }, 100);
+          }, 100);
+          
+          toast({
+            title: "PDF İndirme (Manual Blob)",
+            description: `${reportPeriod} raporu indirildi\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${fileName}`,
+            duration: 6000
+          });
+        } catch (blobError) {
+          console.error('Manual blob download hatası:', blobError);
+          
+          // Son çare: HTML2PDF'in kendi save metodunu kullan
+          console.warn('Son çare: HTML2PDF save kullanılıyor');
+          await html2pdf().set(opt).from(element).save();
+          
+          toast({
+            title: "PDF İndirme (Fallback)",
+            description: `${reportPeriod} raporu indirildi\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${fileName}`,
+            duration: 6000
+          });
+        }
       }
       
       // Geçici elementi kaldır
