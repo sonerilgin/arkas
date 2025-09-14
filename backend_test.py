@@ -1163,7 +1163,10 @@ class ComprehensiveCrossPlatformAPITester:
             # 7. File Operations Support Tests
             test_results['file_operations'] = self.test_file_operations_support()
             
-            # 8. CORS & Security Tests
+            # 8. QR Code Endpoints Tests
+            test_results['qr_code_endpoints'] = self.test_qr_code_endpoints()
+            
+            # 9. CORS & Security Tests
             test_results['cors_security'] = self.test_cors_security_headers()
             
         except Exception as e:
