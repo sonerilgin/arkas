@@ -947,24 +947,48 @@ function App() {
       const dataStr = JSON.stringify(backupData, null, 2);
       const filename = `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`;
       
-      // Android için güçlü user interaction context
-      const dataBlob = new Blob([dataStr], { type: 'application/octet-stream' }); // Generic type for Android
+      // Capacitor native platform kontrolü
+      if (Capacitor.isNativePlatform()) {
+        try {
+          // Native Android/iOS için Filesystem API kullan
+          const result = await Filesystem.writeFile({
+            path: filename,
+            data: dataStr,
+            directory: Directory.Downloads,
+          });
+          
+          // Native paylaşım seçeneği sun
+          await Share.share({
+            title: 'Arkas Lojistik Yedek Dosyası',
+            text: 'Nakliye ve yatan tutar verilerinizin yedeği',
+            url: result.uri,
+            dialogTitle: 'Yedek dosyasını paylaş'
+          });
+          
+          toast({
+            title: "Yedekleme Başarılı (Native)",
+            description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı\n📁 İndirilenler klasöründe kaydedildi\n📄 ${filename}`,
+            duration: 6000
+          });
+          return;
+        } catch (nativeError) {
+          console.error('Native filesystem error:', nativeError);
+          // Web fallback'e geç
+        }
+      }
+      
+      // Web tarayıcı için standart indirme
+      const dataBlob = new Blob([dataStr], { type: 'application/octet-stream' });
       const url = URL.createObjectURL(dataBlob);
       
-      // Android için daha agresif yaklaşım
       const link = document.createElement('a');
       link.href = url;
       link.download = filename;
-      link.target = '_self'; // Same window to maintain user context
+      link.target = '_self';
       link.style.display = 'none';
       
-      // User interaction context'ini korumak için hemen ekle ve tıkla
       document.body.appendChild(link);
-      
-      // Direkt tıklama - timeout yok
       link.click();
-      
-      // Hemen temizle
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
