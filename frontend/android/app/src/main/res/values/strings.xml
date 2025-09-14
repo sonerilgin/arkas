@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Arkas Lojistik</string>
+    <string name="title_activity_main">Arkas Lojistik</string>
+    <string name="package_name">com.arkas.lojistik</string>
+    <string name="custom_url_scheme">com.arkas.lojistik</string>
+</resources>
