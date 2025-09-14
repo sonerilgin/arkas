@@ -1016,6 +1016,8 @@ async def generate_pdf_qr(request: dict):
                 os.unlink(html_path)
             raise HTTPException(status_code=500, detail=f"PDF oluşturulamadı: {str(pdf_error)}")
             
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"QR PDF generation hatası: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Server PDF QR hatası: {str(e)}")
