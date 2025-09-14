@@ -1047,6 +1047,15 @@ function App() {
           duration: 6000
         });
       }
+      
+    } catch (error) {
+      console.error('Backup error:', error);
+      toast({
+        title: "Yedekleme Hatası",
+        description: "Hata: " + error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   const importBackup = async (event) => {
