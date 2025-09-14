@@ -854,8 +854,11 @@ async def download_temp_file(file_id: str):
         
         # Geçici dosya yolunu kontrol et
         temp_path = f"/tmp/{file_id}"
+        logger.info(f"Download request for file: {file_id}, path: {temp_path}")
+        logger.info(f"File exists: {os.path.exists(temp_path)}")
         
         if not os.path.exists(temp_path):
+            logger.error(f"File not found: {temp_path}")
             raise HTTPException(status_code=404, detail="Dosya bulunamadı veya süresi dolmuş")
         
         # Dosya tipini belirle
