@@ -5,6 +5,8 @@
   "author": "Arkas Lojistik",
   "private": true,
   "dependencies": {
+    "@capacitor/filesystem": "^7.1.4",
+    "@capacitor/share": "^7.0.2",
     "@hookform/resolvers": "^5.2.1",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-alert-dialog": "^1.1.11",
