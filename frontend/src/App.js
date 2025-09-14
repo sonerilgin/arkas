@@ -733,61 +733,50 @@ function App() {
       const isAndroid = /Android/i.test(navigator.userAgent);
       
       if (isAndroid) {
-        // Android için direkt QR kod gösterimi
+        // Android için QR kod ile PDF paylaşımı - URL bazlı
         try {
-          const response = await axios.post(`${API}/generate-pdf-download`, {
+          toast({
+            title: "Android PDF Hazırlanıyor...",
+            description: "QR kod oluşturuluyor"
+          });
+
+          const response = await axios.post(`${API}/generate-pdf-qr`, {
             data: filteredData,
-            yatan_data: filteredYatulanData,
-            report_type: pdfReportType,
             period: pdfReportType === 'yearly' 
               ? `${selectedPdfYear}_Yillik`
               : `${monthNames[selectedPdfMonth]}_${selectedPdfYear}`
           });
-          
-          // Server'dan dönen PDF'i base64'e çevir
-          const blob = new Blob([response.data], { type: 'application/pdf' });
-          const reader = new FileReader();
-          
-          reader.onload = async function() {
-            try {
-              // PDF'in indirme linkini oluştur
-              const downloadUrl = `${window.location.origin}/download-pdf?data=${encodeURIComponent(reader.result)}`;
-              
-              // QR kod oluştur
-              const qrCodeDataUrl = await QRCode.toDataURL(downloadUrl, {
-                width: 300,
-                margin: 2,
-                color: {
-                  dark: '#000000',
-                  light: '#FFFFFF'
-                }
-              });
-              
-              setQrCodeData({
-                qrCode: qrCodeDataUrl,
-                downloadUrl: downloadUrl,
-                fileName: `Arkas_Lojistik_${pdfReportType === 'yearly' ? `${selectedPdfYear}_Yillik` : `${monthNames[selectedPdfMonth]}_${selectedPdfYear}`}_Raporu.pdf`,
-                fileType: 'PDF Raporu',
-                instruction: 'QR kodu telefonunuzun kamera uygulaması ile tarayın veya aşağıdaki linke dokunun'
-              });
-              
-              setQrCodeType('pdf');
-              setQrCodeDialog(true);
-              
-              toast({
-                title: "Android PDF (QR Kod)",
-                description: "PDF için QR kod oluşturuldu. QR kodu tarayarak dosyayı indirin.",
-                duration: 8000
-              });
-              
-            } catch (qrError) {
-              console.error('QR kod oluşturma hatası:', qrError);
-              throw qrError;
-            }
-          };
-          
-          reader.readAsDataURL(blob);
-          return;
+
+          if (response.data.success) {
+            // QR kod oluştur - sadece URL'i kullan
+            const qrCodeDataUrl = await QRCode.toDataURL(response.data.download_url, {
+              width: 300,
+              margin: 2,
+              color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+              }
+            });
+            
+            setQrCodeData({
+              qrCode: qrCodeDataUrl,
+              downloadUrl: response.data.download_url,
+              fileName: response.data.filename,
+              fileType: 'PDF Raporu',
+              instruction: 'QR kodu telefonunuzun kamera uygulaması ile tarayın veya aşağıdaki linke dokunun'
+            });
+            
+            setQrCodeType('pdf');
+            setQrCodeDialog(true);
+            
+            toast({
+              title: "Android PDF (QR Kod)",
+              description: "PDF için QR kod oluşturuldu. QR kodu tarayarak dosyayı indirin.",
+              duration: 8000
+            });
+            
+            return;
+          }
           
         } catch (androidError) {
           console.error('Android QR kod hatası:', androidError);
