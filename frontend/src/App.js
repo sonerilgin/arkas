@@ -858,64 +858,45 @@ function App() {
       const isAndroid = /Android/i.test(navigator.userAgent);
       
       if (isAndroid) {
-        // Android için QR kod ile yedek paylaşımı
+        // Android için QR kod ile yedek paylaşımı - URL bazlı
         try {
           toast({
             title: "Android Yedek Hazırlanıyor...",
             description: "QR kod oluşturuluyor"
           });
 
-          const response = await axios.post(`${API}/generate-backup-download`, {}, {
-            responseType: 'blob',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          });
+          const response = await axios.post(`${API}/generate-backup-qr`);
 
-          // Blob'ı base64'e çevir
-          const blob = new Blob([response.data], { type: 'application/json' });
-          const reader = new FileReader();
-          
-          reader.onload = async function() {
-            try {
-              // Yedek dosyasının indirme linkini oluştur
-              const downloadUrl = `${window.location.origin}/download-backup?data=${encodeURIComponent(reader.result)}`;
-              
-              // QR kod oluştur
-              const qrCodeDataUrl = await QRCode.toDataURL(downloadUrl, {
-                width: 300,
-                margin: 2,
-                color: {
-                  dark: '#000000',
-                  light: '#FFFFFF'
-                }
-              });
-              
-              setQrCodeData({
-                qrCode: qrCodeDataUrl,
-                downloadUrl: downloadUrl,
-                fileName: `Arkas_Yedek_${new Date().toISOString().split('T')[0]}.json`,
-                fileType: 'Yedek Dosyası',
-                instruction: 'QR kodu telefonunuzun kamera uygulaması ile tarayın veya aşağıdaki linke dokunun'
-              });
-              
-              setQrCodeType('backup');
-              setQrCodeDialog(true);
-              
-              toast({
-                title: "Android Yedek (QR Kod)",
-                description: "Yedek dosyası için QR kod oluşturuldu. QR kodu tarayarak dosyayı indirin.",
-                duration: 8000
-              });
-              
-            } catch (qrError) {
-              console.error('QR kod oluşturma hatası:', qrError);
-              throw qrError;
-            }
-          };
-          
-          reader.readAsDataURL(blob);
-          return;
+          if (response.data.success) {
+            // QR kod oluştur - sadece URL'i kullan
+            const qrCodeDataUrl = await QRCode.toDataURL(response.data.download_url, {
+              width: 300,
+              margin: 2,
+              color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+              }
+            });
+            
+            setQrCodeData({
+              qrCode: qrCodeDataUrl,
+              downloadUrl: response.data.download_url,
+              fileName: response.data.filename,
+              fileType: 'Yedek Dosyası',
+              instruction: 'QR kodu telefonunuzun kamera uygulaması ile tarayın veya aşağıdaki linke dokunun'
+            });
+            
+            setQrCodeType('backup');
+            setQrCodeDialog(true);
+            
+            toast({
+              title: "Android Yedek (QR Kod)",
+              description: "Yedek dosyası için QR kod oluşturuldu. QR kodu tarayarak dosyayı indirin.",
+              duration: 8000
+            });
+            
+            return;
+          }
           
         } catch (androidError) {
           console.error('Android QR kod hatası:', androidError);
