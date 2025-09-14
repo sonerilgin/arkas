@@ -1064,7 +1064,7 @@ async def generate_backup_qr():
             json.dump(backup_data, f, ensure_ascii=False, indent=2, default=str)
         
         # İndirme URL'ini döndür
-        download_url = f"{BACKEND_URL}/download-temp/{file_id}"
+        download_url = f"{BACKEND_URL}/api/download-temp/{file_id}"
         
         return {
             "success": True,
