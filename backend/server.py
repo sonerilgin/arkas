@@ -885,7 +885,7 @@ async def download_temp_file(file_id: str):
         logger.error(f"Geçici dosya indirme hatası: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Dosya indirme hatası: {str(e)}")
 
-@app.post("/api/generate-pdf-qr")
+@api_router.post("/generate-pdf-qr")
 async def generate_pdf_qr(request: dict):
     """Android QR kod için PDF oluşturma - geçici URL döndürür"""
     try:
