@@ -643,7 +643,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-@app.post("/api/generate-backup-download")
+@api_router.post("/generate-backup-download")
 async def generate_backup_download():
     """Android için server-side yedek oluşturma - düzeltilmiş"""
     try:
