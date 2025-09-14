@@ -776,7 +776,7 @@ async def generate_backup_download():
         from datetime import datetime
         
         # Tüm verileri al
-        nakliye_data = await db.nakliye.find().to_list(length=None)
+        nakliye_data = await db.nakliye_kayitlari.find().to_list(length=None)
         yatan_tutar_data = await db.yatan_tutar.find().to_list(length=None)
         
         # MongoDB ObjectId'leri string'e çevir
