@@ -1029,7 +1029,7 @@ async def generate_pdf_qr(request: dict):
         logger.error(f"QR PDF generation hatası: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Server PDF QR hatası: {str(e)}")
 
-@app.post("/api/generate-backup-qr")
+@api_router.post("/generate-backup-qr")
 async def generate_backup_qr():
     """Android QR kod için yedek oluşturma - geçici URL döndürür"""
     try:
