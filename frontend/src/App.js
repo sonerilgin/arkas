@@ -1680,7 +1680,7 @@ function App() {
                     </Button>
                   )}
                 </div>
-                <Button onClick={handleSearch} variant="outline" size="icon" className="flex-shrink-0">
+                <Button onClick={handleSearch} variant="outline" size="icon" className="flex-shrink-0 btn-android">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
