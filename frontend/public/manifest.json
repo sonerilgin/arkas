@@ -1,7 +1,7 @@
 {
   "short_name": "Arkas Lojistik",
   "name": "Arkas Lojistik - Nakliye Takip Sistemi",
-  "description": "Nakliye takip ve yönetim sistemi",
+  "description": "Nakliye takip ve yönetim sistemi - Android optimize edilmiş",
   "icons": [
     {
       "src": "logo192.png",
@@ -21,10 +21,30 @@
       "type": "image/x-icon"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#3b82f6",
+  "theme_color": "#1e40af",
   "background_color": "#ffffff",
   "orientation": "portrait-primary",
-  "categories": ["logistics", "business", "productivity"]
+  "categories": ["logistics", "business", "productivity"],
+  "scope": "/",
+  "lang": "tr",
+  "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "shortcuts": [
+    {
+      "name": "Yeni Kayıt",
+      "short_name": "Yeni",
+      "description": "Yeni nakliye kaydı ekle",
+      "url": "/?action=new",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Raporlar",
+      "short_name": "Rapor",
+      "description": "PDF raporları görüntüle",
+      "url": "/?action=reports",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    }
+  ]
 }
