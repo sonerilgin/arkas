@@ -698,7 +698,7 @@ async def generate_backup_download():
         logger.error(f"Backup download hatası: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Server yedek hatası: {str(e)}")
 
-@app.post("/api/generate-pdf-download") 
+@api_router.post("/generate-pdf-download") 
 async def generate_pdf_download(request: dict):
     """Android için server-side PDF oluşturma - basitleştirilmiş"""
     try:
