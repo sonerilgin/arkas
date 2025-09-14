@@ -833,6 +833,228 @@ class ComprehensiveCrossPlatformAPITester:
         
         return all_success
 
+    # ========== QR CODE ENDPOINTS TESTS ==========
+    
+    def test_qr_code_endpoints(self):
+        """Test QR code endpoints for Android download solution"""
+        print("\n" + "="*70)
+        print("📱 QR CODE ENDPOINTS TESTING (ANDROID SOLUTION)")
+        print("="*70)
+        
+        all_success = True
+        generated_file_ids = []
+        
+        # Test PDF QR code generation
+        print("\n📄 PDF QR Code Generation Test")
+        pdf_test_data = {
+            "data": [
+                {
+                    "sira_no": "QR001",
+                    "musteri": "QR Test Müşteri",
+                    "tarih": "2024-01-01",
+                    "toplam": 1000.50,
+                    "sistem": 950.25,
+                    "irsaliye_no": "QR-TEST-001"
+                },
+                {
+                    "sira_no": "QR002", 
+                    "musteri": "QR Test Müşteri 2",
+                    "tarih": "2024-01-02",
+                    "toplam": 2500.75,
+                    "sistem": 2400.00,
+                    "irsaliye_no": "QR-TEST-002"
+                }
+            ],
+            "period": "QR_Test_2024"
+        }
+        
+        success, response, response_time = self.run_test(
+            "Generate PDF QR Code",
+            "POST",
+            "generate-pdf-qr",
+            200,
+            data=pdf_test_data
+        )
+        
+        if success and isinstance(response, dict):
+            if all(key in response for key in ['success', 'download_url', 'file_id', 'filename']):
+                if response.get('success') == True:
+                    print(f"✅ PDF QR generation successful")
+                    print(f"   File ID: {response.get('file_id')}")
+                    print(f"   Download URL: {response.get('download_url')}")
+                    print(f"   Filename: {response.get('filename')}")
+                    generated_file_ids.append(response.get('file_id'))
+                    self.log_result('file_operations', 'PDF QR Generation', True, f"File ID: {response.get('file_id')}, Time: {response_time:.3f}s")
+                else:
+                    print(f"❌ PDF QR generation failed - success=false")
+                    self.log_result('file_operations', 'PDF QR Generation', False, "Response success=false")
+                    all_success = False
+            else:
+                print(f"❌ PDF QR generation failed - missing required fields")
+                print(f"   Response: {response}")
+                self.log_result('file_operations', 'PDF QR Generation', False, "Missing required response fields")
+                all_success = False
+        else:
+            print(f"❌ PDF QR generation failed")
+            self.log_result('file_operations', 'PDF QR Generation', False, "Request failed")
+            all_success = False
+        
+        # Test Backup QR code generation
+        print("\n💾 Backup QR Code Generation Test")
+        success, response, response_time = self.run_test(
+            "Generate Backup QR Code",
+            "POST", 
+            "generate-backup-qr",
+            200,
+            data={}
+        )
+        
+        if success and isinstance(response, dict):
+            if all(key in response for key in ['success', 'download_url', 'file_id', 'filename']):
+                if response.get('success') == True:
+                    print(f"✅ Backup QR generation successful")
+                    print(f"   File ID: {response.get('file_id')}")
+                    print(f"   Download URL: {response.get('download_url')}")
+                    print(f"   Filename: {response.get('filename')}")
+                    generated_file_ids.append(response.get('file_id'))
+                    self.log_result('file_operations', 'Backup QR Generation', True, f"File ID: {response.get('file_id')}, Time: {response_time:.3f}s")
+                else:
+                    print(f"❌ Backup QR generation failed - success=false")
+                    self.log_result('file_operations', 'Backup QR Generation', False, "Response success=false")
+                    all_success = False
+            else:
+                print(f"❌ Backup QR generation failed - missing required fields")
+                print(f"   Response: {response}")
+                self.log_result('file_operations', 'Backup QR Generation', False, "Missing required response fields")
+                all_success = False
+        else:
+            print(f"❌ Backup QR generation failed")
+            self.log_result('file_operations', 'Backup QR Generation', False, "Request failed")
+            all_success = False
+        
+        # Test temporary file downloads
+        print("\n⬇️ Temporary File Download Tests")
+        for file_id in generated_file_ids:
+            if file_id:
+                # Use the base URL without /api prefix for download endpoint
+                download_url = f"{self.base_url.replace('/api', '')}/download-temp/{file_id}"
+                print(f"\n🔍 Testing download for file: {file_id}")
+                print(f"   Download URL: {download_url}")
+                
+                try:
+                    response = requests.get(download_url, timeout=30)
+                    print(f"   Status Code: {response.status_code}")
+                    print(f"   Content-Type: {response.headers.get('Content-Type', 'Not set')}")
+                    print(f"   Content-Disposition: {response.headers.get('Content-Disposition', 'Not set')}")
+                    print(f"   Content-Length: {response.headers.get('Content-Length', 'Not set')}")
+                    
+                    if response.status_code == 200:
+                        content_length = len(response.content)
+                        print(f"✅ File download successful - {content_length} bytes")
+                        
+                        # Verify content type
+                        content_type = response.headers.get('Content-Type', '')
+                        if file_id.endswith('.pdf') and 'application/pdf' in content_type:
+                            print(f"✅ Correct PDF content type")
+                            self.log_result('file_operations', f'Download {file_id}', True, f"PDF download successful, {content_length} bytes")
+                        elif file_id.endswith('.json') and 'application/json' in content_type:
+                            print(f"✅ Correct JSON content type")
+                            self.log_result('file_operations', f'Download {file_id}', True, f"JSON download successful, {content_length} bytes")
+                        else:
+                            print(f"⚠️ Unexpected content type: {content_type}")
+                            self.log_result('file_operations', f'Download {file_id}', True, f"Download successful but unexpected content type: {content_type}")
+                    else:
+                        print(f"❌ File download failed - Status: {response.status_code}")
+                        try:
+                            error_detail = response.json()
+                            print(f"   Error: {error_detail}")
+                        except:
+                            print(f"   Error: {response.text}")
+                        self.log_result('file_operations', f'Download {file_id}', False, f"HTTP {response.status_code}")
+                        all_success = False
+                        
+                except requests.exceptions.Timeout:
+                    print(f"❌ File download timeout")
+                    self.log_result('file_operations', f'Download {file_id}', False, "Timeout")
+                    all_success = False
+                except Exception as e:
+                    print(f"❌ File download error: {str(e)}")
+                    self.log_result('file_operations', f'Download {file_id}', False, f"Error: {str(e)}")
+                    all_success = False
+        
+        # Test error cases
+        print("\n❌ QR Code Error Handling Tests")
+        
+        # Test PDF generation with empty data
+        success, response, _ = self.run_test(
+            "PDF QR with Empty Data",
+            "POST",
+            "generate-pdf-qr", 
+            400,  # Should return 400 for empty data
+            data={"data": [], "period": "Empty_Test"}
+        )
+        self.log_result('file_operations', 'PDF QR Empty Data Error', success, "Properly rejected empty data")
+        if not success:
+            all_success = False
+        
+        # Test invalid file ID download
+        fake_file_id = "nonexistent_file.pdf"
+        download_url = f"{self.base_url.replace('/api', '')}/download-temp/{fake_file_id}"
+        try:
+            response = requests.get(download_url, timeout=10)
+            if response.status_code == 404:
+                print(f"✅ Invalid file ID properly rejected with 404")
+                self.log_result('file_operations', 'Invalid File ID Error', True, "Properly returned 404")
+            else:
+                print(f"❌ Invalid file ID should return 404, got {response.status_code}")
+                self.log_result('file_operations', 'Invalid File ID Error', False, f"Got {response.status_code} instead of 404")
+                all_success = False
+        except Exception as e:
+            print(f"❌ Invalid file ID test error: {str(e)}")
+            self.log_result('file_operations', 'Invalid File ID Error', False, f"Error: {str(e)}")
+            all_success = False
+        
+        # Test wkhtmltopdf availability
+        print("\n🔧 wkhtmltopdf Availability Test")
+        try:
+            import subprocess
+            result = subprocess.run(['which', 'wkhtmltopdf'], capture_output=True, text=True, timeout=5)
+            if result.returncode == 0:
+                print(f"✅ wkhtmltopdf found at: {result.stdout.strip()}")
+                self.log_result('file_operations', 'wkhtmltopdf Available', True, f"Path: {result.stdout.strip()}")
+            else:
+                print(f"❌ wkhtmltopdf not found in PATH")
+                self.log_result('file_operations', 'wkhtmltopdf Available', False, "Not found in PATH")
+                all_success = False
+        except Exception as e:
+            print(f"❌ wkhtmltopdf check error: {str(e)}")
+            self.log_result('file_operations', 'wkhtmltopdf Available', False, f"Error: {str(e)}")
+            all_success = False
+        
+        # Test /tmp directory write permissions
+        print("\n📁 /tmp Directory Write Test")
+        try:
+            import tempfile
+            import os
+            with tempfile.NamedTemporaryFile(mode='w', dir='/tmp', delete=False) as temp_file:
+                temp_file.write("test")
+                temp_path = temp_file.name
+            
+            if os.path.exists(temp_path):
+                os.unlink(temp_path)
+                print(f"✅ /tmp directory writable")
+                self.log_result('file_operations', '/tmp Directory Writable', True, "Write permissions OK")
+            else:
+                print(f"❌ /tmp directory write test failed")
+                self.log_result('file_operations', '/tmp Directory Writable', False, "Write test failed")
+                all_success = False
+        except Exception as e:
+            print(f"❌ /tmp directory write error: {str(e)}")
+            self.log_result('file_operations', '/tmp Directory Writable', False, f"Error: {str(e)}")
+            all_success = False
+        
+        return all_success
+
     # ========== CORS AND SECURITY HEADERS TESTS ==========
     
     def test_cors_security_headers(self):
