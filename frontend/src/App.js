@@ -1052,11 +1052,95 @@ function App() {
         }
       }
       
-      // Web tarayıcı için FileSaver.js kullan
+      // Android için özelleştirilmiş yedek indirme
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      console.log('Android tespit edildi (yedek):', isAndroid);
+      
+      if (isAndroid) {
+        try {
+          console.log('Android yedek indirme başlıyor...');
+          
+          // Android için Base64 Data URL yaklaşımı
+          const base64Data = btoa(unescape(encodeURIComponent(dataStr)));
+          const dataUrl = `data:application/json;charset=utf-8;base64,${base64Data}`;
+          
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = filename;
+          link.style.display = 'none';
+          
+          // Android için DOM'a ekle
+          document.body.appendChild(link);
+          
+          // Hemen tıkla (user gesture context'i korumak için)
+          link.click();
+          
+          // Temizlik
+          setTimeout(() => {
+            try {
+              document.body.removeChild(link);
+            } catch (removeError) {
+              console.warn('Link remove hatası:', removeError);
+            }
+          }, 1000);
+          
+          toast({
+            title: "Yedekleme Başarılı (Android Data URL)",
+            description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı\n📁 İndirilenler klasöründe\n📄 ${filename}`,
+            duration: 6000
+          });
+          
+          console.log('Android Data URL yedek indirme tamamlandı');
+          return;
+          
+        } catch (androidBackupError) {
+          console.error('Android yedek indirme hatası:', androidBackupError);
+          
+          // Android için Web Share API dene
+          try {
+            console.log('Android Web Share API yedek deneniyor...');
+            
+            if (navigator.share && navigator.canShare) {
+              const dataBlob = new Blob([dataStr], { type: 'application/json' });
+              const file = new File([dataBlob], filename, { type: 'application/json' });
+              
+              await navigator.share({
+                title: 'Arkas Lojistik Yedek Dosyası',
+                text: 'Nakliye ve yatan tutar verilerinizin yedeği',
+                files: [file]
+              });
+              
+              toast({
+                title: "Yedek Paylaşıldı (Android)",
+                description: `Yedek dosyasını paylaşım menüsünden kaydedebilirsiniz\n📄 ${filename}`,
+                duration: 8000
+              });
+              return;
+            }
+          } catch (androidShareError) {
+            console.error('Android Web Share yedek hatası:', androidShareError);
+          }
+          
+          // Android için son çare: Clipboard
+          try {
+            await navigator.clipboard.writeText(dataStr);
+            toast({
+              title: "Android Yedek (Clipboard)",
+              description: "Yedek veriler panoya kopyalandı. Bir metin editöründe .json dosyası olarak kaydedin.",
+              duration: 10000
+            });
+            return;
+          } catch (clipboardError) {
+            console.error('Android clipboard hatası:', clipboardError);
+          }
+        }
+      }
+      
+      // Web tarayıcı için FileSaver.js kullan (non-Android)
       try {
         const dataBlob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
         
-        // FileSaver.js ile Android uyumlu indirme
+        // FileSaver.js ile indirme
         saveAs(dataBlob, filename);
         
         toast({
