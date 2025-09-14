@@ -1011,35 +1011,42 @@ function App() {
         }
       }
       
-      // Web tarayıcı için standart indirme
-      const dataBlob = new Blob([dataStr], { type: 'application/octet-stream' });
-      const url = URL.createObjectURL(dataBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      link.target = '_self';
-      link.style.display = 'none';
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Web tarayıcı için FileSaver.js kullan
+      try {
+        const dataBlob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+        
+        // FileSaver.js ile Android uyumlu indirme
+        saveAs(dataBlob, filename);
+        
+        toast({
+          title: "Yedekleme Başarılı (FileSaver.js)",
+          description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${filename}`,
+          duration: 6000
+        });
+      } catch (saveError) {
+        console.error('FileSaver.js yedek indirme hatası:', saveError);
+        
+        // Fallback: Manuel blob download
+        const dataBlob = new Blob([dataStr], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.target = '_self';
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
 
-      toast({
-        title: "Yedekleme Tamamlandı",
-        description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${filename}`,
-        duration: 6000
-      });
-      
-    } catch (error) {
-      console.error('Backup error:', error);
-      toast({
-        title: "Yedekleme Hatası",
-        description: "Hata: " + error.message,
-        variant: "destructive"
-      });
-    }
+        toast({
+          title: "Yedekleme Tamamlandı (Manual)",
+          description: `${response.data.length} nakliye + ${yatulanResponse.data.length} yatan tutar kaydı\n📁 Konum: İndirilenler klasöründe\n📄 Dosya: ${filename}`,
+          duration: 6000
+        });
+      }
   };
 
   const importBackup = async (event) => {
