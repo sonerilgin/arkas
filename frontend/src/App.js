@@ -801,7 +801,7 @@ function App() {
 
       console.log('Server-side yedek indirme başlıyor...');
       
-      const response = await axios.post(`${API}/generate-backup`, {}, {
+      const response = await axios.post(`${API}/generate-backup-download`, {}, {
         responseType: 'blob',
         headers: {
           'Content-Type': 'application/json'
