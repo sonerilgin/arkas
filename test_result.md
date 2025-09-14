@@ -234,6 +234,9 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "SIMPLIFIED DIRECT DOWNLOAD: Removed all complex mechanisms (Web Share API, PWA detection, Android-specific logic) per user request 'tıklanınca direk indirsin' (should download directly when clicked). Both exportBackup and exportToPDF functions now use simple, direct download approach: Blob creation -> URL.createObjectURL -> link.click() -> cleanup. No conditionals, no fallbacks, just straightforward file download for all platforms. This should work universally across all browsers and devices."
+      - working: false
+        agent: "testing"
+        comment: "❌ CRITICAL ANDROID DOWNLOAD ISSUE CONFIRMED: BACKUP DOWNLOAD WORKING (✅ Arkas_Yedek_2025-09-14.json successfully downloaded), but PDF DOWNLOAD COMPLETELY BROKEN on Android. PDF dialog opens correctly, 'PDF Raporu İndir' button clicks successfully, but NO download occurs. This confirms user reports of Android PDF download failure. The backup functionality works perfectly, but PDF export is non-functional on Android browsers. URGENT FIX NEEDED for PDF download mechanism."
 
   - task: "Dark/Light Theme Consistency"
     implemented: true
