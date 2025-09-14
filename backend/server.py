@@ -1069,6 +1069,17 @@ async def generate_backup_qr():
         logger.error(f"QR backup generation hatası: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Server yedek QR hatası: {str(e)}")
 
+# Include the router in the main app
+app.include_router(api_router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
