@@ -163,7 +163,7 @@ class QRCodeEndpointTester:
         print("\n   Testing invalid file ID download...")
         try:
             fake_file_id = "nonexistent_file.pdf"
-            response = requests.get(f"{self.download_url}/download-temp/{fake_file_id}", timeout=10)
+            response = requests.get(f"{self.api_url}/download-temp/{fake_file_id}", timeout=10)
             if response.status_code == 404:
                 print(f"✅ Invalid file ID properly rejected with 404")
             else:
