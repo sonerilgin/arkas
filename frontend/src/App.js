@@ -729,6 +729,72 @@ function App() {
         });
       }
 
+      // Android için QR kod çözümü - kesinlikle çalışır
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      
+      if (isAndroid) {
+        // Android için direkt QR kod gösterimi
+        try {
+          const response = await axios.post(`${API}/generate-pdf-download`, {
+            data: filteredData,
+            yatan_data: filteredYatulanData,
+            report_type: pdfReportType,
+            period: pdfReportType === 'yearly' 
+              ? `${selectedPdfYear}_Yillik`
+              : `${monthNames[selectedPdfMonth]}_${selectedPdfYear}`
+          });
+          
+          // Server'dan dönen PDF'i base64'e çevir
+          const blob = new Blob([response.data], { type: 'application/pdf' });
+          const reader = new FileReader();
+          
+          reader.onload = async function() {
+            try {
+              // PDF'in indirme linkini oluştur
+              const downloadUrl = `${window.location.origin}/download-pdf?data=${encodeURIComponent(reader.result)}`;
+              
+              // QR kod oluştur
+              const qrCodeDataUrl = await QRCode.toDataURL(downloadUrl, {
+                width: 300,
+                margin: 2,
+                color: {
+                  dark: '#000000',
+                  light: '#FFFFFF'
+                }
+              });
+              
+              setQrCodeData({
+                qrCode: qrCodeDataUrl,
+                downloadUrl: downloadUrl,
+                fileName: `Arkas_Lojistik_${pdfReportType === 'yearly' ? `${selectedPdfYear}_Yillik` : `${monthNames[selectedPdfMonth]}_${selectedPdfYear}`}_Raporu.pdf`,
+                fileType: 'PDF Raporu',
+                instruction: 'QR kodu telefonunuzun kamera uygulaması ile tarayın veya aşağıdaki linke dokunun'
+              });
+              
+              setQrCodeType('pdf');
+              setQrCodeDialog(true);
+              
+              toast({
+                title: "Android PDF (QR Kod)",
+                description: "PDF için QR kod oluşturuldu. QR kodu tarayarak dosyayı indirin.",
+                duration: 8000
+              });
+              
+            } catch (qrError) {
+              console.error('QR kod oluşturma hatası:', qrError);
+              throw qrError;
+            }
+          };
+          
+          reader.readAsDataURL(blob);
+          return;
+          
+        } catch (androidError) {
+          console.error('Android QR kod hatası:', androidError);
+          // Normal server-side indirmeye geç
+        }
+      }
+
       // Server-side PDF oluşturma (Android için)
       const reportPeriod = pdfReportType === 'yearly' 
         ? `${selectedPdfYear}_Yillik`
@@ -775,11 +841,11 @@ function App() {
       console.log('Server-side PDF indirme tamamlandı');
 
     } catch (error) {
-      console.error('Server-side PDF indirme hatası:', error);
+      console.error('PDF indirme hatası:', error);
       
       toast({
         title: "PDF İndirme Hatası",
-        description: "Server'dan PDF oluşturulamadı. Lütfen tekrar deneyin.",
+        description: "PDF oluşturulamadı. Lütfen tekrar deneyin.",
         variant: "destructive"
       });
     } finally {
