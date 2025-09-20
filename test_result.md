@@ -276,14 +276,13 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Yatan Tutar Multi-Delete Event Handlers"
     - "QR Code PDF Generation (Android)"
     - "QR Code Backup Generation (Android)" 
     - "Temporary File Download Endpoints"
-    - "Yatan Tutar Multi-Delete Event Handlers"
-    - "File Operations (PDF Export/Backup)"
   stuck_tasks:
-    - "File Operations (PDF Export/Backup)"
-  test_all: true
+    - "Yatan Tutar Multi-Delete Feature"
+  test_all: false
   test_priority: "high_first"
 
   - task: "Logo Loading and Frontend Loading Issues"
