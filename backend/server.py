@@ -940,6 +940,7 @@ async def generate_pdf_download(request: dict):
                 '--encoding', 'UTF-8',
                 '--print-media-type',
                 '--disable-smart-shrinking',
+                '--enable-local-file-access',
                 html_path,
                 pdf_path
             ]
@@ -1127,6 +1128,7 @@ async def generate_pdf_qr(request: dict):
                 '--encoding', 'UTF-8',
                 '--print-media-type',
                 '--disable-smart-shrinking',
+                '--enable-local-file-access',
                 html_path,
                 pdf_path
             ]
