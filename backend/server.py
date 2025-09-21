@@ -806,17 +806,112 @@ async def generate_pdf_download(request: dict):
         html_content += f"""
                 </tbody>
                 <tfoot>
-                    <tr style="font-weight: bold; background-color: #f9f9f9;">
-                        <td colspan="4" class="right">TOPLAM:</td>
-                        <td class="right">{total_amount:,.2f} ₺</td>
-                        <td class="right">-</td>
+                    <tr style="font-weight: bold; background-color: #dbeafe;">
+                        <td colspan="12" class="right"><strong>NAKLİYE TOPLAMI:</strong></td>
+                        <td class="right"><strong>{total_amount:,.2f} ₺</strong></td>
+                        <td class="right"><strong>{total_sistem:,.2f} ₺</strong></td>
                     </tr>
                 </tfoot>
             </table>
+        """
+        
+        # Yatan Tutar tablosu ekle
+        if yatan_data and len(yatan_data) > 0:
+            total_yatan = sum(float(item.get('tutar', 0)) for item in yatan_data)
             
-            <div style="margin-top: 30px; font-size: 10px; color: #666;">
-                <p>Toplam Kayıt: {len(data)} adet</p>
-                <p>Oluşturulma: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}</p>
+            html_content += f"""
+            <h3>💰 YATAN TUTAR KAYITLARI</h3>
+            <table class="yatan-table">
+                <thead>
+                    <tr>
+                        <th class="center">Yatan Tarih</th>
+                        <th class="center">Çalışma Başlangıç</th>
+                        <th class="center">Çalışma Bitiş</th>
+                        <th class="right">Yatan Tutar (₺)</th>
+                        <th>Açıklama</th>
+                    </tr>
+                </thead>
+                <tbody>
+            """
+            
+            for item in yatan_data:
+                tutar = float(item.get('tutar', 0))
+                
+                # Tarih formatları
+                yatan_tarih = item.get('yatan_tarih', '')
+                if yatan_tarih:
+                    try:
+                        yatan_tarih = datetime.fromisoformat(yatan_tarih.replace('T', ' ').replace('Z', '+00:00')).strftime('%d.%m.%Y')
+                    except:
+                        yatan_tarih = yatan_tarih[:10] if len(yatan_tarih) >= 10 else yatan_tarih
+                
+                baslangic_tarih = item.get('baslangic_tarih', '')
+                if baslangic_tarih:
+                    try:
+                        baslangic_tarih = datetime.fromisoformat(baslangic_tarih.replace('T', ' ').replace('Z', '+00:00')).strftime('%d.%m.%Y')
+                    except:
+                        baslangic_tarih = baslangic_tarih[:10] if len(baslangic_tarih) >= 10 else baslangic_tarih
+                
+                bitis_tarih = item.get('bitis_tarih', '')
+                if bitis_tarih:
+                    try:
+                        bitis_tarih = datetime.fromisoformat(bitis_tarih.replace('T', ' ').replace('Z', '+00:00')).strftime('%d.%m.%Y')
+                    except:
+                        bitis_tarih = bitis_tarih[:10] if len(bitis_tarih) >= 10 else bitis_tarih
+                
+                aciklama = item.get('aciklama', '') or '-'
+                
+                html_content += f"""
+                        <tr>
+                            <td class="center">{yatan_tarih}</td>
+                            <td class="center">{baslangic_tarih}</td>
+                            <td class="center">{bitis_tarih}</td>
+                            <td class="right"><strong>{tutar:,.2f}</strong></td>
+                            <td>{aciklama}</td>
+                        </tr>
+                """
+            
+            html_content += f"""
+                </tbody>
+                <tfoot>
+                    <tr style="font-weight: bold; background-color: #fdf4ff;">
+                        <td colspan="3" class="right"><strong>YATAN TUTAR TOPLAMI:</strong></td>
+                        <td class="right"><strong>{total_yatan:,.2f} ₺</strong></td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            """
+        
+        # Özet Bölümü
+        html_content += f"""
+            <div class="summary">
+                <h3>📊 DÖNEM ÖZETİ</h3>
+                <div style="display: flex; justify-content: space-between;">
+                    <div>
+                        <p><strong>Nakliye Kayıt Sayısı:</strong> {len(data)} adet</p>
+                        <p><strong>Nakliye Toplam Tutarı:</strong> {total_amount:,.2f} ₺</p>
+                        <p><strong>Sistem Toplam Tutarı:</strong> {total_sistem:,.2f} ₺</p>
+                    </div>"""
+        
+        if yatan_data and len(yatan_data) > 0:
+            total_yatan = sum(float(item.get('tutar', 0)) for item in yatan_data)
+            html_content += f"""
+                    <div>
+                        <p><strong>Yatan Tutar Kayıt Sayısı:</strong> {len(yatan_data)} adet</p>
+                        <p><strong>Toplam Yatan Tutar:</strong> {total_yatan:,.2f} ₺</p>
+                        <p><strong>Fark (Nakliye - Yatan):</strong> {(total_amount - total_yatan):,.2f} ₺</p>
+                    </div>"""
+        
+        html_content += f"""
+                </div>
+            </div>
+            
+            <div class="footer">
+                <p><strong>Rapor Detayları:</strong></p>
+                <p>• Oluşturulma Tarihi: {datetime.now().strftime('%d.%m.%Y %H:%M:%S')}</p>
+                <p>• Rapor Dönemi: {period}</p>
+                <p>• Sistem: Arkas Lojistik Nakliye Takip Sistemi</p>
             </div>
         </body>
         </html>
