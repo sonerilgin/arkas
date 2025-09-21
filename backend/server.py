@@ -759,19 +759,47 @@ async def generate_pdf_download(request: dict):
         """
         
         total_amount = 0
+        total_sistem = 0
         for item in data:
             toplam = float(item.get('toplam', 0))
             sistem = float(item.get('sistem', 0))
             total_amount += toplam
+            total_sistem += sistem
+            
+            # Tarih formatı
+            tarih_str = item.get('tarih', '')
+            if tarih_str:
+                try:
+                    tarih_obj = datetime.fromisoformat(tarih_str.replace('T', ' ').replace('Z', '+00:00'))
+                    tarih_formatted = tarih_obj.strftime('%d.%m.%Y')
+                except:
+                    tarih_formatted = tarih_str[:10] if len(tarih_str) >= 10 else tarih_str
+            else:
+                tarih_formatted = ''
+            
+            # Tür bilgileri
+            turler = []
+            if item.get('ithalat'): turler.append('İthalat')
+            if item.get('ihracat'): turler.append('İhracat')
+            if item.get('bos'): turler.append('Boş')
+            tur_str = ', '.join(turler) if turler else '-'
             
             html_content += f"""
                     <tr>
                         <td class="center">{item.get('sira_no', '')}</td>
+                        <td class="center">{item.get('kod', '') or '-'}</td>
                         <td>{item.get('musteri', '')}</td>
                         <td class="center">{item.get('irsaliye_no', '')}</td>
-                        <td class="center">{item.get('tarih', '')}</td>
-                        <td class="right">{toplam:,.2f}</td>
-                        <td class="right">{sistem:,.2f}</td>
+                        <td class="center">{tarih_formatted}</td>
+                        <td class="center">{tur_str}</td>
+                        <td class="right">{float(item.get('bos_tasima', 0)):,.2f}</td>
+                        <td class="right">{float(item.get('reefer', 0)):,.2f}</td>
+                        <td class="right">{float(item.get('bekleme', 0)):,.2f}</td>
+                        <td class="right">{float(item.get('geceleme', 0)):,.2f}</td>
+                        <td class="right">{float(item.get('pazar', 0)):,.2f}</td>
+                        <td class="right">{float(item.get('harcirah', 0)):,.2f}</td>
+                        <td class="right"><strong>{toplam:,.2f}</strong></td>
+                        <td class="right"><strong>{sistem:,.2f}</strong></td>
                     </tr>
             """
         
