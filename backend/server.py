@@ -702,7 +702,10 @@ async def generate_pdf_download(request: dict):
         if not data or len(data) == 0:
             raise HTTPException(status_code=400, detail="PDF için veri bulunamadı")
         
-        # Basit HTML tablosu oluştur
+        # Yatan tutar verilerini al
+        yatan_data = request.get('yatan_data', [])
+        
+        # Detaylı HTML tablosu oluştur - Landscape ve tüm bilgiler dahil
         html_content = f"""
         <!DOCTYPE html>
         <html>
@@ -710,29 +713,44 @@ async def generate_pdf_download(request: dict):
             <meta charset="utf-8">
             <title>Arkas Lojistik - {period} Raporu</title>
             <style>
-                body {{ font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }}
-                .header {{ text-align: center; margin-bottom: 30px; }}
-                table {{ border-collapse: collapse; width: 100%; }}
-                th, td {{ border: 1px solid #333; padding: 6px; text-align: left; }}
+                body {{ font-family: Arial, sans-serif; margin: 15px; font-size: 10px; }}
+                .header {{ text-align: center; margin-bottom: 20px; }}
+                .header h1 {{ margin: 5px 0; color: #1e2563; }}
+                .header h2 {{ margin: 5px 0; color: #3b82f6; }}
+                table {{ border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
+                th, td {{ border: 1px solid #333; padding: 4px; text-align: left; font-size: 9px; }}
                 th {{ background-color: #f0f0f0; font-weight: bold; }}
                 .right {{ text-align: right; }}
                 .center {{ text-align: center; }}
+                .nakliye-table th {{ background-color: #dbeafe; }}
+                .yatan-table th {{ background-color: #fdf4ff; }}
+                .summary {{ background-color: #f9fafb; padding: 10px; margin: 10px 0; border: 1px solid #d1d5db; }}
+                .footer {{ font-size: 8px; color: #666; margin-top: 20px; }}
             </style>
         </head>
         <body>
             <div class="header">
                 <h1>ARKAS LOJİSTİK</h1>
-                <h2>{period} RAPORU</h2>
+                <h2>{period} NAKLİYE VE YATAN TUTAR RAPORU</h2>
                 <p>Rapor Tarihi: {datetime.now().strftime('%d.%m.%Y %H:%M')}</p>
             </div>
             
-            <table>
+            <h3>📦 NAKLİYE KAYITLARI</h3>
+            <table class="nakliye-table">
                 <thead>
                     <tr>
                         <th class="center">Sıra No</th>
+                        <th class="center">Kod</th>
                         <th>Müşteri</th>
                         <th class="center">İrsaliye No</th>
                         <th class="center">Tarih</th>
+                        <th class="center">Tür</th>
+                        <th class="right">Boş Taşıma (₺)</th>
+                        <th class="right">Reefer (₺)</th>
+                        <th class="right">Bekleme (₺)</th>
+                        <th class="right">Geceleme (₺)</th>
+                        <th class="right">Pazar (₺)</th>
+                        <th class="right">Harcirah (₺)</th>
                         <th class="right">Toplam (₺)</th>
                         <th class="right">Sistem (₺)</th>
                     </tr>
