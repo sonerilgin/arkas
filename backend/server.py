@@ -932,7 +932,7 @@ async def generate_pdf_download(request: dict):
             cmd = [
                 'wkhtmltopdf',
                 '--page-size', 'A4',
-                '--orientation', 'Portrait',
+                '--orientation', 'Landscape',
                 '--margin-top', '15mm',
                 '--margin-right', '15mm', 
                 '--margin-bottom', '15mm',
@@ -1119,7 +1119,7 @@ async def generate_pdf_qr(request: dict):
             cmd = [
                 'wkhtmltopdf',
                 '--page-size', 'A4',
-                '--orientation', 'Portrait',
+                '--orientation', 'Landscape',
                 '--margin-top', '15mm',
                 '--margin-right', '15mm', 
                 '--margin-bottom', '15mm',
