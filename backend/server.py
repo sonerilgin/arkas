@@ -1147,7 +1147,6 @@ async def generate_pdf_qr(request: dict):
     try:
         from datetime import datetime
         import uuid
-        import tempfile
         import os
         
         # PDF verilerini al
