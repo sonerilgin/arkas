@@ -927,61 +927,174 @@ async def generate_pdf_download(request: dict):
         </html>
         """
         
-        # HTML dosyasını geçici dosyaya yaz 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as temp_html:
-            temp_html.write(html_content)
-            html_path = temp_html.name
-        
-        # PDF dosya adı
+        # ReportLab ile PDF oluştur
         pdf_filename = f"Arkas_Lojistik_{period}_Raporu.pdf"
         pdf_path = f"/tmp/{pdf_filename}"
         
-        try:
-            # wkhtmltopdf ile PDF oluştur
-            import subprocess
-            cmd = [
-                'wkhtmltopdf',
-                '--page-size', 'A4',
-                '--orientation', 'Landscape',
-                '--margin-top', '10mm',
-                '--margin-right', '10mm', 
-                '--margin-bottom', '10mm',
-                '--margin-left', '10mm',
-                '--encoding', 'UTF-8',
-                '--print-media-type',
-                '--disable-smart-shrinking',
-                '--enable-local-file-access',
-                html_path,
-                pdf_path
-            ]
+        # PDF oluşturma fonksiyonu
+        doc = SimpleDocTemplate(pdf_path, pagesize=landscape(A4))
+        elements = []
+        
+        # Stil tanımlamaları
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle(
+            'TitleStyle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            alignment=1,  # Center
+            spaceAfter=20
+        )
+        
+        # Başlık
+        title = Paragraph(f"ARKAS LOJİSTİK - {period} RAPORU", title_style)
+        elements.append(title)
+        elements.append(Spacer(1, 20))
+        
+        # Nakliye tablosu verilerini hazırla
+        nakliye_data = [['Sıra No', 'Kod', 'Müşteri', 'İrsaliye No', 'Tarih', 'Tür', 'Boş Taşıma', 'Reefer', 'Bekleme', 'Geceleme', 'Pazar', 'Harcirah', 'Toplam', 'Sistem']]
+        
+        total_amount = 0
+        total_sistem = 0
+        
+        for item in data:
+            toplam = float(item.get('toplam', 0))
+            sistem = float(item.get('sistem', 0))
+            total_amount += toplam
+            total_sistem += sistem
             
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
-            
-            # HTML dosyasını temizle
-            os.unlink(html_path)
-            
-            if result.returncode == 0 and os.path.exists(pdf_path):
-                return FileResponse(
-                    pdf_path,
-                    media_type='application/pdf',
-                    filename=pdf_filename,
-                    headers={
-                        "Content-Disposition": f"attachment; filename={pdf_filename}",
-                        "Cache-Control": "no-cache, no-store, must-revalidate",
-                        "Pragma": "no-cache", 
-                        "Expires": "0"
-                    }
-                )
+            # Tarih formatı
+            tarih_str = item.get('tarih', '')
+            if tarih_str:
+                try:
+                    tarih_obj = datetime.fromisoformat(tarih_str.replace('T', ' ').replace('Z', '+00:00'))
+                    tarih_formatted = tarih_obj.strftime('%d.%m.%Y')
+                except:
+                    tarih_formatted = tarih_str[:10] if len(tarih_str) >= 10 else tarih_str
             else:
-                raise Exception(f"wkhtmltopdf hatası: {result.stderr}")
+                tarih_formatted = ''
+            
+            # Tür bilgileri
+            turler = []
+            if item.get('ithalat'): turler.append('İthalat')
+            if item.get('ihracat'): turler.append('İhracat')
+            if item.get('bos'): turler.append('Boş')
+            tur_str = ', '.join(turler) if turler else '-'
+            
+            nakliye_data.append([
+                item.get('sira_no', ''),
+                item.get('kod', '') or '-',
+                item.get('musteri', ''),
+                item.get('irsaliye_no', ''),
+                tarih_formatted,
+                tur_str,
+                f"{float(item.get('bos_tasima', 0)):,.2f}",
+                f"{float(item.get('reefer', 0)):,.2f}",
+                f"{float(item.get('bekleme', 0)):,.2f}",
+                f"{float(item.get('geceleme', 0)):,.2f}",
+                f"{float(item.get('pazar', 0)):,.2f}",
+                f"{float(item.get('harcirah', 0)):,.2f}",
+                f"{toplam:,.2f}",
+                f"{sistem:,.2f}"
+            ])
+        
+        # Toplam satırı ekle
+        nakliye_data.append(['', '', '', '', '', '', '', '', '', '', '', 'TOPLAM:', f"{total_amount:,.2f}", f"{total_sistem:,.2f}"])
+        
+        # Nakliye tablosu oluştur
+        nakliye_table = Table(nakliye_data)
+        nakliye_table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, 0), (-1, 0), 8),
+            ('FONTSIZE', (0, 1), (-1, -1), 7),
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+            ('BACKGROUND', (0, 1), (-1, -2), colors.beige),
+            ('BACKGROUND', (0, -1), (-1, -1), colors.lightgrey),
+            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black)
+        ]))
+        
+        elements.append(nakliye_table)
+        
+        # Yatan tutar bölümü (eğer varsa)
+        if yatan_data and len(yatan_data) > 0:
+            elements.append(Spacer(1, 20))
+            yatan_title = Paragraph("YATAN TUTAR KAYITLARI", styles['Heading2'])
+            elements.append(yatan_title)
+            elements.append(Spacer(1, 10))
+            
+            yatan_table_data = [['Yatan Tarih', 'Çalışma Başlangıç', 'Çalışma Bitiş', 'Yatan Tutar', 'Açıklama']]
+            total_yatan = 0
+            
+            for item in yatan_data:
+                tutar = float(item.get('tutar', 0))
+                total_yatan += tutar
                 
-        except subprocess.TimeoutExpired:
-            os.unlink(html_path)
-            raise HTTPException(status_code=500, detail="PDF oluşturma zaman aşımı")
-        except Exception as pdf_error:
-            if os.path.exists(html_path):
-                os.unlink(html_path)
-            raise HTTPException(status_code=500, detail=f"PDF oluşturulamadı: {str(pdf_error)}")
+                # Tarih formatları
+                yatan_tarih = item.get('yatan_tarih', '')
+                if yatan_tarih:
+                    try:
+                        yatan_tarih = datetime.fromisoformat(yatan_tarih.replace('T', ' ').replace('Z', '+00:00')).strftime('%d.%m.%Y')
+                    except:
+                        yatan_tarih = yatan_tarih[:10] if len(yatan_tarih) >= 10 else yatan_tarih
+                
+                baslangic_tarih = item.get('baslangic_tarih', '')
+                if baslangic_tarih:
+                    try:
+                        baslangic_tarih = datetime.fromisoformat(baslangic_tarih.replace('T', ' ').replace('Z', '+00:00')).strftime('%d.%m.%Y')
+                    except:
+                        baslangic_tarih = baslangic_tarih[:10] if len(baslangic_tarih) >= 10 else baslangic_tarih
+                
+                bitis_tarih = item.get('bitis_tarih', '')
+                if bitis_tarih:
+                    try:
+                        bitis_tarih = datetime.fromisoformat(bitis_tarih.replace('T', ' ').replace('Z', '+00:00')).strftime('%d.%m.%Y')
+                    except:
+                        bitis_tarih = bitis_tarih[:10] if len(bitis_tarih) >= 10 else bitis_tarih
+                
+                yatan_table_data.append([
+                    yatan_tarih,
+                    baslangic_tarih,
+                    bitis_tarih,
+                    f"{tutar:,.2f}",
+                    item.get('aciklama', '') or '-'
+                ])
+            
+            yatan_table_data.append(['', '', 'TOPLAM:', f"{total_yatan:,.2f}", ''])
+            
+            yatan_table = Table(yatan_table_data)
+            yatan_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.lightcoral),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -2), colors.white),
+                ('BACKGROUND', (0, -1), (-1, -1), colors.lightgrey),
+                ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black)
+            ]))
+            
+            elements.append(yatan_table)
+        
+        # PDF'i oluştur
+        doc.build(elements)
+        
+        return FileResponse(
+            pdf_path,
+            media_type='application/pdf',
+            filename=pdf_filename,
+            headers={
+                "Content-Disposition": f"attachment; filename={pdf_filename}",
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache", 
+                "Expires": "0"
+            }
+        )
             
     except Exception as e:
         logger.error(f"PDF generation hatası: {str(e)}")
