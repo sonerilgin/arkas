@@ -13,6 +13,16 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 
+# PDF generation imports
+from reportlab.lib.pagesizes import A4, landscape
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from io import BytesIO
+
 # Authentication imports
 from auth_models import *
 from auth_utils import *
