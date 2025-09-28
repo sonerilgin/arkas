@@ -829,7 +829,7 @@ async def generate_pdf_download(request: dict):
         if yatan_data and len(yatan_data) > 0:
             total_yatan = sum(float(item.get('tutar', 0)) for item in yatan_data)
             
-            html_content += f"""
+            html_content += """
             <h3>💰 YATAN TUTAR KAYITLARI</h3>
             <table class="yatan-table">
                 <thead>
