@@ -1183,6 +1183,22 @@ async def generate_pdf_qr(request: dict):
         doc = SimpleDocTemplate(pdf_path, pagesize=landscape(A4))
         elements = []
         
+        # Türkçe font desteği için 
+        from reportlab.pdfbase.pdfmetrics import registerFont
+        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.lib.fonts import addMapping
+        
+        # Türkçe karakterler için DejaVu font'u kaydet
+        try:
+            registerFont(TTFont('DejaVuSans', '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'))
+            registerFont(TTFont('DejaVuSans-Bold', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'))
+            turkish_font = 'DejaVuSans'
+            turkish_font_bold = 'DejaVuSans-Bold'
+        except:
+            # Fallback to default fonts
+            turkish_font = 'Helvetica'
+            turkish_font_bold = 'Helvetica-Bold'
+        
         # Stil tanımlamaları
         styles = getSampleStyleSheet()
         title_style = ParagraphStyle(
@@ -1190,7 +1206,8 @@ async def generate_pdf_qr(request: dict):
             parent=styles['Heading1'],
             fontSize=16,
             alignment=1,  # Center
-            spaceAfter=20
+            spaceAfter=20,
+            fontName=turkish_font_bold
         )
         
         # Başlık
