@@ -1038,7 +1038,12 @@ async def generate_pdf_download(request: dict):
         # Yatan tutar bölümü (eğer varsa)
         if yatan_data and len(yatan_data) > 0:
             elements.append(Spacer(1, 20))
-            yatan_title = Paragraph("YATAN TUTAR KAYITLARI", styles['Heading2'])
+            yatan_title_style = ParagraphStyle(
+                'YatanTitleStyle',
+                parent=styles['Heading2'],
+                fontName=turkish_font_bold
+            )
+            yatan_title = Paragraph("YATAN TUTAR KAYITLARI", yatan_title_style)
             elements.append(yatan_title)
             elements.append(Spacer(1, 10))
             
